@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple SPA</title>
+  <style>
+    nav a {
+      margin: 0 10px;
+      cursor: pointer;
+      text-decoration: underline;
+      color: blue;
+    }
+    .view {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a onclick="navigate('home')">Home</a>
+    <a onclick="navigate('about')">About</a>
+    <a onclick="navigate('contact')">Contact</a>
+  </nav>
+
+  <div id="home" class="view active">
+    <h1>Home Page</h1>
+    <p>Welcome to the home page.</p>
+  </div>
+
+  <div id="about" class="view">
+    <h1>About Page</h1>
+    <p>This is a simple SPA demo.</p>
+  </div>
+
+  <div id="contact" class="view">
+    <h1>Contact Page</h1>
+    <p>Contact us at example@example.com</p>
+  </div>
+
+  <script>
+    function navigate(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
+
