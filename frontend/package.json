@@ -1,0 +1,8 @@
+{
+	"type": "module",
+	"scripts": {
+	"dev": "vite --config config/vite.config.ts",
+	"build": "vite build --config config/vite.config.ts",
+	"preview": "vite preview --config config/vite.config.ts"
+	}
+}

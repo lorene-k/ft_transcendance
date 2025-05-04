@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pong Game SPA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/src/styles.css" rel="stylesheet" />
+  </head>
+  <body class="font-sans m-0 p-0 leading-relaxed text-black">
+    <!-- Header -->
+    <header class="bg-white text-black text-center p-4">
+      <div class="logo mx-auto py-4">
+        <img
+          src="assets/logo.png"
+          alt="Pong Game"
+          class="max-w-[200px] h-auto mx-auto"
+        />
+      </div>
+      <nav>
+        <ul class="m-0 p-0">
+          <li class="inline m-0 mx-4 font-bold">
+            <a href="#play" class="text-black no-underline font-bold">Play</a>
+          </li>
+          <li class="inline m-0 mx-4 font-bold">
+            <a href="#profile" class="text-black no-underline font-bold">Profile</a>
+          </li>
+          <li class="inline m-0 mx-4 font-bold">
+            <a href="#settings" class="text-black no-underline font-bold">Settings</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Main SPA Content -->
+    <main id="app" class="py-8 px-4 text-center"></main>
+
+    <!-- Footer -->
+    <footer class="bg-white text-black text-center my-[50px] py-4">
+      <p>Logout</p>
+    </footer>
+
+    <!-- TypeScript entry point -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
