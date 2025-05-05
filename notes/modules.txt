@@ -1,0 +1,26 @@
+- Typescript
+- Single page application (back & front button)
+- Mozilla compatible at least
+- Run on Docker
+
+MODULES (7 major modules) :
+	MAJOR
+	x Back framework
+	x Standard user management	<<
+	x AI opponent				<<
+	x Remote authentication
+	? Live Chat (irc ?)
+	? Server-side pong
+	? Remote players (if server-side pong)
+
+	MINOR
+    x Backend database
+    x Front framework			<<
+    x Stats dashboard			<<
+    x Support on all devices	<<
+    x Browser compatibility		<<
+    x Multiple languages		<<
+	? Server-Side Rendering (SSR) Integration
+
+?? CYBER
+?? DEVOPS
