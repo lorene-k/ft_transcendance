@@ -44,6 +44,7 @@ With Tailwind CSS, make sure the page is responsive by using Tailwind's grid sys
 - handle errors & warnings
 - handle all modules
 - responsiveness (use @media queries, handle touch gestures, check hover + active states, hambburger menu)
+- in docker-compose : remove volumes in production
 
 
 # LINKS

@@ -1,0 +1,11 @@
+Dockerfile
+node_modules
+.env
+.swp
+.DS_Store
+.git
+.gitignore
+.dockerignore
+.vscode/
+../subject_inception.pdf
+../notes
