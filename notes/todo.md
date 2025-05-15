@@ -24,17 +24,17 @@ With Tailwind CSS, make sure the page is responsive by using Tailwind's grid sys
 
 ---
 # TODO
-- create docker (dockerfile + docker-compose)
+OK - create docker (dockerfile + docker-compose)
+OK - learn tailwind css
+OK - learn js
+OK - create basic SPA website
 - learn typescript
-- learn tailwind css
-- create basic SPA website
 - check backend
 - Use basic REST API : check
 - try : Backend starts and answers `/ping` ; Frontend displays a basic welcome page ; Frontend can call backend and display data
 - TEST : Backend: Reply to `/api/ping` with `{ message: "pong" }` // Frontend: Call `/api/ping` ; Display "pong" on the page
 
 ## TODO ADVANCED
-- setup Docker
 - local single/multi  game : Handles the paddle movement based on user input and renders the ball movement = render game, handle player input, create ai algo
 - ensure browser compatibillity (firefox & chrome)
 - handle back/forward buttons (frontend): Detect URL changes, Load/render appropriate content for that route, Use the History API (pushState, popstate) to manage navigation

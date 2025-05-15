@@ -7,62 +7,41 @@
     <link href="/src/styles.css" rel="stylesheet" />
   </head>
 
-  <body class="font-sans m-0 p-0 leading-relaxed text-black">
+  <body class="mx-auto max-w-sm w-full bg-white">
 
+    <header class="bg-white text-black text-2xl text-center p-4">
+      <div>
+        <img src="assets/logo2.png" alt="Pong wordmark"/>
+      </div>
+    </header>
 
+  <!-- <div class="Homepage w-full max-w-[1440px] h-[750px] relative  overflow-hidden mx-auto"> -->
 
-  <div data-layer="Homepage" class="Homepage" style="width: 1440px; height: 750px; position: relative; background: white; overflow: hidden">
-  <div data-layer="PONG wordmark" class="PongWordmark" style="left: 602px; top: 171px; position: absolute; text-align: center; color: black; font-size: 80px; font-family: Inter; font-weight: 900; line-height: 28px; word-wrap: break-word">PONG</div>
-  <div data-layer="Connection form" class="ConnectionForm" style="width: 274px; left: 583px; top: 270px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: center; gap: 19px; display: inline-flex">
-    <div data-layer="Frame 1" class="Frame1" style="align-self: stretch; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: flex">
-      <div data-layer="Login field" class="LoginField" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
-        <div data-layer="Log In" class="LogIn" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Email</div>
+  <div class="ConnectionForm" style="width: 274px; left: 583px; top: 270px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: center; gap: 19px; display: inline-flex">
+    <div class="Frame1" style="align-self: stretch; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: flex">
+      <div class="Emailfield" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
+        <div class="Email" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Email</div>
       </div>
-      <div data-layer="Password field" class="PasswordField" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
-        <div data-layer="Password" class="Password" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Password</div>
+      <div  class="PasswordField" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
+        <div class="Password" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Password</div>
       </div>
-      <div data-layer="Login button" class="LoginButton" style="align-self: stretch; height: 52px; padding-left: 50px; padding-right: 50px; padding-top: 30px; padding-bottom: 30px; background: black; border-radius: 50px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-        <div data-layer="Log In" class="LogIn" style="width: 250px; text-align: center; color: white; font-size: 20px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Log In</div>
+      <div class="LoginButton" style="align-self: stretch; height: 52px; padding-left: 50px; padding-right: 50px; padding-top: 30px; padding-bottom: 30px; background: black; border-radius: 50px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+        <div  class="LogIn" style="width: 250px; text-align: center; color: white; font-size: 20px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Log In</div>
       </div>
-      <div data-layer="Forgot password ?" class="ForgotPassword" style="align-self: stretch; text-align: center; color: black; font-size: 13px; font-family: Inter; font-weight: 700; line-height: 28px; word-wrap: break-word">Forgot password ?</div>
+      <div  class="ForgotPassword" style="align-self: stretch; text-align: center; color: black; font-size: 13px; font-family: Inter; font-weight: 700; line-height: 28px; word-wrap: break-word">Forgot password ?</div>
     </div>
-    <div data-layer="Line 1" class="Line1" style="align-self: stretch; height: 0px; outline: 1px #898989 solid; outline-offset: -0.50px"></div>
-    <div data-layer="New account button" class="NewAccountButton" style="width: 207px; height: 53px; padding: 30px; border-radius: 50px; outline: 3px black solid; outline-offset: -3px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-      <div data-layer="Create new account" class="CreateNewAccount" style="color: black; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Create new account</div>
+    <div class="Line1" style="align-self: stretch; height: 0px; outline: 1px #898989 solid; outline-offset: -0.50px"></div>
+    <div class="NewAccountButton" style="width: 207px; height: 53px; padding: 30px; border-radius: 50px; outline: 3px black solid; outline-offset: -3px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
+      <div class="CreateNewAccount" style="color: black; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Create new account</div>
     </div>
   </div>
 </div>
 
-<!-- 
-    <header class="bg-white text-black text-2xl text-center p-4">
-      <div class="logo mx-auto py-4">
-        <img
-          src="assets/logo.png"
-          alt="Pong Game"
-          class="max-w-[200px] h-auto mx-auto"
-        />
-      </div>
+    <!-- <main id="app" class="py-8 px-4 text-center"></main> -->
 
-      <nav>
-        <ul class="m-0 p-0">
-          <li class="inline m-0 mx-4 font-bold">
-            <a href="#play" class="text-black no-underline font-bold">Play</a>
-          </li>
-          <li class="inline m-0 mx-4 font-bold">
-            <a href="#profile" class="text-black no-underline font-bold">Profile</a>
-          </li>
-          <li class="inline m-0 mx-4 font-bold">
-            <a href="#settings" class="text-black no-underline font-bold">Settings</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
-
-    <main id="app" class="py-8 px-4 text-center"></main>
-
-    <footer class="bg-white text-black text-center my-[50px] py-4">
+    <footer class="bg-white text-black text-center my-[100px] py-4">
       <p>Logout</p>
-    </footer> -->
+    </footer>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
