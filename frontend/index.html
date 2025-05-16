@@ -10,36 +10,22 @@
   <body class="mx-auto max-w-sm w-full bg-white">
 
     <header class="bg-white text-black text-2xl text-center p-4">
-      <div>
+      <div id="logo">
         <img src="assets/logo2.png" alt="Pong wordmark"/>
       </div>
+
+      <nav id="navbar" class="hidden">
+        <ul class="flex space-x-4">
+          <li><a href="#" id="home" class="text-white">Play</a></li>
+          <li><a href="#" id="about" class="text-white">Chat</a></li>
+          <li><a href="#" id="contact" class="text-white">Account</a></li>
+        </ul>
+      </nav>
     </header>
 
-  <!-- <div class="Homepage w-full max-w-[1440px] h-[750px] relative  overflow-hidden mx-auto"> -->
+    <main id="app" class="py-8 px-4 text-center"></main>
 
-  <div class="ConnectionForm" style="width: 274px; left: 583px; top: 270px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: center; gap: 19px; display: inline-flex">
-    <div class="Frame1" style="align-self: stretch; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: flex">
-      <div class="Emailfield" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
-        <div class="Email" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Email</div>
-      </div>
-      <div  class="PasswordField" style="align-self: stretch; height: 53px; padding-left: 30px; padding-right: 30px; border-radius: 20px; outline: 1px #898989 solid; outline-offset: -1px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex">
-        <div class="Password" style="color: #9B9B9B; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Password</div>
-      </div>
-      <div class="LoginButton" style="align-self: stretch; height: 52px; padding-left: 50px; padding-right: 50px; padding-top: 30px; padding-bottom: 30px; background: black; border-radius: 50px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-        <div  class="LogIn" style="width: 250px; text-align: center; color: white; font-size: 20px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Log In</div>
-      </div>
-      <div  class="ForgotPassword" style="align-self: stretch; text-align: center; color: black; font-size: 13px; font-family: Inter; font-weight: 700; line-height: 28px; word-wrap: break-word">Forgot password ?</div>
-    </div>
-    <div class="Line1" style="align-self: stretch; height: 0px; outline: 1px #898989 solid; outline-offset: -0.50px"></div>
-    <div class="NewAccountButton" style="width: 207px; height: 53px; padding: 30px; border-radius: 50px; outline: 3px black solid; outline-offset: -3px; justify-content: center; align-items: center; gap: 10px; display: inline-flex">
-      <div class="CreateNewAccount" style="color: black; font-size: 15px; font-family: Inter; font-weight: 500; line-height: 28px; word-wrap: break-word">Create new account</div>
-    </div>
-  </div>
-</div>
-
-    <!-- <main id="app" class="py-8 px-4 text-center"></main> -->
-
-    <footer class="bg-white text-black text-center my-[100px] py-4">
+    <footer class="bg-white text-black text-center font-family: Arial p-4">
       <p>Logout</p>
     </footer>
 
