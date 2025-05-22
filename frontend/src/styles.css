@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.btn-primary {
+  @apply w-full bg-black text-white p-2 rounded-full cursor-pointer;
+}
+
+.field {
+  @apply w-full border border-gray-400 rounded p-2
+}
