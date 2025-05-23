@@ -38,6 +38,7 @@ export function renderLoginForm({ content, footer, onLoginSuccess }: {
     setContent(content, footer);
     const form = document.getElementById("login-form") as HTMLFormElement;
     form.addEventListener("submit", (e) => {
+      e.preventDefault();
       const username = (document.getElementById("username") as HTMLInputElement).value;
       const password = (document.getElementById("password") as HTMLInputElement).value;
       testLogin({ username, password, onLoginSuccess }); // ! TEST

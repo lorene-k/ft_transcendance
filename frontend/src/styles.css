@@ -5,5 +5,9 @@
 }
 
 .field {
-  @apply w-full border border-gray-400 rounded p-2
+  @apply w-full border border-gray-400 rounded p-2 w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600
+}
+
+.error-msg {
+  @apply text-red-600 mt-1 text-sm
 }

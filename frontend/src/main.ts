@@ -9,9 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSignedIn = localStorage.getItem("isSignedIn") === "true";
 
   function renderApp() {
-  //   if (isSignedIn) {
-  //     renderWelcomePage({ content, header, footer, onLogout: handleLogout });
-  //   } else {
+    if (isSignedIn) {
+      renderWelcomePage({ content, header, footer, onLogout: handleLogout });
+    } else {
       header.innerHTML = `
     <header class="max-w-sm mx-auto">
       <div id="logo">
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </header>
     `
       renderLoginForm({ content, footer, onLoginSuccess: handleLogin });
-  //   }
+    }
   }
 
   function handleLogin() {
@@ -29,11 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderApp();
   }
 
-  // function handleLogout() {
-  //   isSignedIn = false;
-  //   localStorage.removeItem("isSignedIn");
-  //   renderApp();
-  // }
+  function handleLogout() {
+    isSignedIn = false;
+    localStorage.removeItem("isSignedIn");
+    renderApp();
+  }
 
   renderApp();
 });
