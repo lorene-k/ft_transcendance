@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 .btn-primary {
-  @apply w-full bg-black text-white p-2 rounded-full cursor-pointer;
+  @apply w-full bg-black hover:bg-blue-600 transition transform active:scale-90 duration-150 text-white p-2 rounded-full cursor-pointer;
+}
+
+.btn-secondary {
+  @apply w-full bg-white text-black p-2 rounded-full border-2 border-black cursor-pointer hover:bg-blue-600 hover:border-0 hover:text-white
 }
 
 .field {
@@ -9,5 +13,5 @@
 }
 
 .error-msg {
-  @apply text-red-600 mt-1 text-sm
+  @apply text-red-600 mt-1 text-xs
 }

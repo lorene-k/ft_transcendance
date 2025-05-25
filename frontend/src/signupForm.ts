@@ -1,3 +1,5 @@
+import { handleLogoClick } from "./welcomePage";
+
 function setContent(content: HTMLElement) {
   content.innerHTML = `
     <div class="max-w-sm mx-auto bg-white p-10 rounded">
@@ -5,22 +7,22 @@ function setContent(content: HTMLElement) {
       <form id="signup-form" action="/" class="space-y-4">
         <div>
           <label for="username" class="block mb-1">Username</label>
-          <input id="username" class="field" type="text" required>
+          <input id="username" autocomplete="off" class="field" type="text">
           <div class="error-msg"></div>
         </div>
         <div>
           <label for="email" class="block mb-1">Email</label>
-          <input id="email" class="field" type="text" required>
+          <input id="email" autocomplete="email" class="field" type="text" >
           <div class="error-msg"></div>
         </div>
         <div>
           <label class="block mb-1">Password</label>
-          <input id="password" for="password" class="field" type="password" required>
+          <input id="password" autocomplete="off" for="password" class="field" type="password">
           <div class="error-msg"></div>
         </div>
         <div>
           <label class="block mb-1">Confirm password</label>
-          <input id="password2" for="password2" class="field" type="password" required>
+          <input id="password2" autocomplete="off" for="password2" class="field" type="password">
           <div class="error-msg"></div>
         </div>
         <button class="btn-primary" type="submit">Sign Up</button>
@@ -100,8 +102,8 @@ function validateInputs(content: HTMLElement): boolean {
   ].every(Boolean);
 }
 
-export function renderSignupForm({ content, onSignupSuccess }: {
-  content: HTMLElement; onSignupSuccess: () => void; }) {
+export function renderSignupForm({ content, header, onSignupSuccess }: {
+  content: HTMLElement; header: HTMLElement; onSignupSuccess: () => void; }) {
   setContent(content);
   const form = document.getElementById("signup-form") as HTMLFormElement;
   form.addEventListener("submit", (e) => {
@@ -109,4 +111,5 @@ export function renderSignupForm({ content, onSignupSuccess }: {
     if (validateInputs(content))
       onSignupSuccess();
   });
+  handleLogoClick();
 }

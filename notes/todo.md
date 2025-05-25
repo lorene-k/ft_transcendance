@@ -1,26 +1,7 @@
-# STEPS
-1. **HTML Structure (index.html)**
-- Start by creating the basic HTML layout for your app. You'll have a game area, a tournament section, and a user authentication section.
-
-2. **Styling with Tailwind CSS**
-- use responsive classes
-- ex : class="sm:flex sm:flex-row sm:justify-between"
-
-3. **Pong Game Logic (app.ts)**
-- Start with the core of the game, such as setting up the canvas, rendering paddles, and ball movement
-
-4. **User Registration and Authentication**
-- To handle the registration and login, you'll need forms where users can input their data (aliases, avatars)
-- You’ll then send this data to the backend for processing and session management
-
-5. **Matchmaking and Tournament System**
-- Implement the matchmaking and tournament system. This could include:
-    - A queue system to match players together
-    - Displaying tournament brackets
-    - Managing player turns and organizing rounds
-
-6. **Mobile Responsiveness**
-With Tailwind CSS, make sure the page is responsive by using Tailwind's grid system, and utility classes for sm:, md:, and lg: breakpoints.
+# SEARCH
+- plugins
+- Rest API
+- ESM & CJS
 
 ---
 # TODO
@@ -28,7 +9,7 @@ OK - create docker (dockerfile + docker-compose)
 OK - learn tailwind css
 OK - learn js
 OK - create basic SPA website
-- learn typescript
+OK - learn typescript
 - check backend
 - Use basic REST API : check
 - try : Backend starts and answers `/ping` ; Frontend displays a basic welcome page ; Frontend can call backend and display data
