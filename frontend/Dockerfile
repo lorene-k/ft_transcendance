@@ -5,8 +5,7 @@ WORKDIR	/app
 COPY	package.json ./
 COPY	package-lock.json ./
 
-RUN	npm install
-RUN	npm install tailwindcss @tailwindcss/vite
+RUN     npm install
 
 COPY	assets/ ./assets/
 COPY    config/ ./config/

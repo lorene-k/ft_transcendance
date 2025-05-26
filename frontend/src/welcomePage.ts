@@ -28,7 +28,7 @@ function setContent({ content, footer } : {
     `;
     footer.innerHTML = `
       <div class="w-full text-center bg-white py-2">
-          <button id="logout" class="font-bold rounded text-black hover:text-blue-600 cursor-pointer">Logout</button>
+          <button id="logout" class="font-bold rounded text-black hover:text-blue-600 cursor-pointer mb-5">Logout</button>
       </div>
     `;
 }
