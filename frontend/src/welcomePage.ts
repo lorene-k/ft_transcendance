@@ -1,36 +1,17 @@
 import { renderApp } from "./app.ts";
+import navBar from "./views/navbar.html?raw"
+import footerHtml from "./views/footer.html?raw"
+import testHtml from "./views/test.html?raw"
 
 function setHeader(header: HTMLElement) {
   header.classList.add("shadow-lg", "bg-white");
-  header.innerHTML = `
-    <nav class="flex items-center justify-between p-5 max-w mx-20">
-      <div id="logo">
-        <img src="assets/logo.png" alt="Pong wordmark" class="w-20 cursor-pointer" />
-      </div>
-      <ul class="flex space-x-4 ">
-        <li><a href="#" id="home" class="text-black hover:text-blue-600">Play</a></li>
-        <li><a href="#" id="about" class="text-black hover:text-blue-600">Chat</a></li>
-        <li><a href="#" id="contact" class="text-black hover:text-blue-600">Account</a></li>
-      </ul>
-    </nav>
-    `;
+  header.innerHTML = navBar;
 }
 
 function setContent({ content, footer } : {
   content: HTMLElement; footer: HTMLElement}) {
-    content.innerHTML = `
-    <div class="max-w-sm mx-auto mt-10 rounded">
-      <h1 class="text-blue-600 font-extrabold text-2xl animate-pulse">Welcome !</h1>
-      <p class="mb-10" >You are now signed in.</p>
-      <button id="test-btn" class="btn-primary">Test backend</button>
-      <p id='msg' class="text-center font-bold my-5 mt-20 text-3xl text-cyan-700 animate-bounce" ></p>
-    </div>
-    `;
-    footer.innerHTML = `
-      <div class="w-full text-center bg-white py-2">
-          <button id="logout" class="font-bold rounded text-black hover:text-blue-600 cursor-pointer mb-5">Logout</button>
-      </div>
-    `;
+    content.innerHTML = testHtml;
+    footer.innerHTML = footerHtml;
 }
 
 export const handleLogoClick = () => {
@@ -39,10 +20,10 @@ export const handleLogoClick = () => {
   logoBtn?.addEventListener("click", renderApp);
 };
 
-async function fetchMsg() {
+async function fetchMsg() {  // ! TEST
   try {
     const response = await fetch(('http://localhost:8080/'));
-    // const text = await response.text(); // ! TEST
+    // const text = await response.text();
     // console.log(text);
     const data = await response.json();
     const messageDiv = document.getElementById('msg');

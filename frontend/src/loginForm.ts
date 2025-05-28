@@ -1,30 +1,12 @@
 import { renderSignupForm } from "./signupForm.ts";
+import loginFormHtml from "./views/login.html?raw"
 
 function setContent({ content, header, footer}: {
   content: HTMLElement; header: HTMLElement; footer: HTMLElement}){
   header.classList.remove("shadow-lg", "bg-white");
   header.innerHTML = `<img id="logo" class="max-w-sm mx-auto" src="assets/logo.png" alt="Pong wordmark">`
-  content.innerHTML = `
-      <div class="max-w-sm mx-auto bg-white p-10 rounded">
-        <form id="login-form" action="/" class="space-y-4">
-          <div>
-            <label class="block mb-1" for="username">Username</label>
-            <input id="username" autocomplete="username" class="field" type="text" required>
-          </div>
-          <div>
-            <label class="block mb-1" for="password">Password</label>
-            <input id="password" autocomplete="off" class="field" type="password" required >
-          </div>
-          <button id="login-button" class="btn-primary" type="submit">Log In</button>
-          <p class="text-center text-xs font-bold">Forgot password ?</p>
-          <div id="line1" class="outline-1 outline-gray-400 my-6" ></div>
-          <div class="max-w-sm mx-auto bg-white p-6 my-8">
-              <button id="signup-button" class="btn-secondary" type="button">Sign up</button>
-          </div>
-          </form>
-      </div>
-    `;
-    footer.innerHTML = ``;
+  content.innerHTML = loginFormHtml;
+  footer.innerHTML = ``;
 }
 
 function testLogin({ username, password, onLoginSuccess }: { // ! TEST
