@@ -1,3 +1,4 @@
+import './styles.css';
 import { renderLoginForm } from "./loginForm.ts";
 import { renderWelcomePage } from "./welcomePage.ts";
 

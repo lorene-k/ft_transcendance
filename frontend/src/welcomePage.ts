@@ -5,7 +5,7 @@ function setHeader(header: HTMLElement) {
   header.innerHTML = `
     <nav class="flex items-center justify-between p-5 max-w mx-20">
       <div id="logo">
-        <img src="assets/logo2.png" alt="Pong wordmark" class="w-20 cursor-pointer" />
+        <img src="assets/logo.png" alt="Pong wordmark" class="w-20 cursor-pointer" />
       </div>
       <ul class="flex space-x-4 ">
         <li><a href="#" id="home" class="text-black hover:text-blue-600">Play</a></li>
