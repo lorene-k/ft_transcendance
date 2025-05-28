@@ -3,11 +3,6 @@ import { renderSignupForm } from "./signupForm.ts";
 function setContent({ content, header, footer}: {
   content: HTMLElement; header: HTMLElement; footer: HTMLElement}){
   header.classList.remove("shadow-lg", "bg-white");
-  header.innerHTML = `
-    <div id="logo" class="max-w-sm mx-auto">
-      <img src="assets/logo2.png" alt="Pong wordmark">
-    </div>
-  `
   content.innerHTML = `
       <div class="max-w-sm mx-auto bg-white p-10 rounded">
         <form id="login-form" action="/" class="space-y-4">

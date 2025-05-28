@@ -1,4 +1,4 @@
-import { renderApp } from "./main.ts";
+import { renderApp } from "./app.ts";
 
 function setHeader(header: HTMLElement) {
   header.classList.add("shadow-lg", "bg-white");

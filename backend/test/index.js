@@ -5,3 +5,5 @@ logger.on('message', (data) => console.log('Called Listener', data));
 
 logger.log('Hi');
 logger.log('Hello');
+
+// ! TEST - REMOVE

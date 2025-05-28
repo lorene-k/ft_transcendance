@@ -5,3 +5,5 @@ module.exports = async function (fastify, opts) {
     return { message: 'BACKEND WORKING' }
   })
 }
+
+// ! TEST - REMOVE

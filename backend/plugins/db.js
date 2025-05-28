@@ -25,3 +25,5 @@ module.exports = fp(async function (fastify, opts) {
     throw err;
   }
 })
+
+// ! TEST - REMOVE

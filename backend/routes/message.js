@@ -15,3 +15,5 @@ module.exports = async function (fastify, opts) {
     return { status: 'Message saved' }
   })
 }
+
+// ! TEST - REMOVE
