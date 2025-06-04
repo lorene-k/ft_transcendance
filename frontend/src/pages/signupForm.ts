@@ -1,9 +1,9 @@
 import { handleLogoClick } from "./welcomePage";
-import signupFormHtml from "./views/signup.html?raw"
+import signupFormHtml from "../views/signup.html?raw"
 
 function setError(element, msg): boolean {
   const inputControl = element.parentElement;
-  const errorDisplay = inputControl.querySelector('.error-msg');
+  const errorDisplay = inputControl.querySelector('.input-error-msg');
 
   errorDisplay.innerText = msg;
   element.classList.add('ring-2', 'ring-red-500');
@@ -13,7 +13,7 @@ function setError(element, msg): boolean {
 
 function setSuccess(element): boolean {
   const inputControl = element.parentElement;
-  const errorDisplay = inputControl.querySelector('.error-msg');
+  const errorDisplay = inputControl.querySelector('.input-error-msg');
 
   errorDisplay.innerText = '';
   element.classList.add('border-green-300');

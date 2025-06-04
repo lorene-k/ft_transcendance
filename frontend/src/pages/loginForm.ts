@@ -1,9 +1,9 @@
 import { renderSignupForm } from "./signupForm.ts";
-import loginFormHtml from "./views/login.html?raw"
+import loginFormHtml from "../views/login.html?raw"
 
 function setContent({ content, header, footer}: {
   content: HTMLElement; header: HTMLElement; footer: HTMLElement}){
-  header.classList.remove("shadow-lg", "bg-white");
+  header.classList.remove("shadow-lg");
   header.innerHTML = `<img id="logo" class="max-w-sm mx-auto" src="assets/logo.png" alt="Pong wordmark">`
   content.innerHTML = loginFormHtml;
   footer.innerHTML = ``;

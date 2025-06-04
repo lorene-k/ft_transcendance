@@ -1,6 +1,6 @@
-import './styles.css';
-import { renderLoginForm } from "./loginForm.ts";
-import { renderWelcomePage } from "./welcomePage.ts";
+
+import { renderLoginForm } from "./pages/loginForm.ts";
+import { renderWelcomePage } from "./pages/welcomePage.ts";
 
 function handleLogin() {;
   localStorage.setItem("isSignedIn", "true");

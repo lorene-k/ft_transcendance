@@ -1,10 +1,10 @@
-import { renderApp } from "./app.ts";
-import navBar from "./views/navbar.html?raw"
-import footerHtml from "./views/footer.html?raw"
-import testHtml from "./views/test.html?raw"
+import { renderApp } from "../app.ts";
+import navBar from "../views/navbar.html?raw"
+import footerHtml from "../views/footer.html?raw"
+import testHtml from "../views/test.html?raw"
 
 function setHeader(header: HTMLElement) {
-  header.classList.add("shadow-lg", "bg-white");
+  header.classList.add("shadow-lg");
   header.innerHTML = navBar;
 }
 
@@ -23,7 +23,7 @@ export const handleLogoClick = () => {
 async function fetchMsg() {  // ! TEST
   try {
     const response = await fetch(('http://localhost:8080/'));
-    // const text = await response.text();
+    // const text = await response.text(); // TEST
     // console.log(text);
     const data = await response.json();
     const messageDiv = document.getElementById('msg');

@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@import "./theme.css";
+@import "./basics.css";
+@import "./theme.css";
+@import "./errors.css";
+
+@layer basics, state;

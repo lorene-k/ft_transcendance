@@ -1,32 +1,37 @@
+## TODO
+### 0. FRONTEND (global)
+- Figma : Play, Stats, Account
+- Html + CSS
+- .ts
+- Connect to back
+- Think about chat layout
+
+### 1. CSS
+- Change font (curr == nunito)
+- error styling w/ CSS ?
+> Check [Styling based on sibling state](https://tailwindcss.com/docs/hover-focus-and-other-states?email=ccc%40aaa.com&password=Boscoxx)
+- add [Floating labels](https://www.youtube.com/watch?v=nJzKi6oIvBA)
+- @layer
+- @keyframes (animations)
+- transitions
+- (Check Dark mode)
+- (Check responsive design)
+- clean @layers ?
+
+### 2. TS
+- creuser js
+- reorganize files
+- appeler une fonction qui prend view en param et faire le truc en fonction de la view
+
+### 3. BACKEND
+- creuser node.js
+- creuser fastify
+- check SQL
+
 # SEARCH
 - plugins
 - Rest API
 - ESM & CJS
-
----
-# TODO
-OK - create docker (dockerfile + docker-compose)
-OK - learn tailwind css
-OK - learn js
-OK - create basic SPA website
-OK - learn typescript
-- check backend
-- Use basic REST API : check
-- try : Backend starts and answers `/ping` ; Frontend displays a basic welcome page ; Frontend can call backend and display data
-- TEST : Backend: Reply to `/api/ping` with `{ message: "pong" }` // Frontend: Call `/api/ping` ; Display "pong" on the page
-
-## TODO ADVANCED
-- local single/multi  game : Handles the paddle movement based on user input and renders the ball movement = render game, handle player input, create ai algo
-- ensure browser compatibillity (firefox & chrome)
-- handle back/forward buttons (frontend): Detect URL changes, Load/render appropriate content for that route, Use the History API (pushState, popstate) to manage navigation
-    1. Change the URL (with pushState) when the user navigates inside the app.
-    2. Listen to changes (with popstate) when the user clicks Back or Forward.
-    3. Update the view based on the current URL.
-- handle errors & warnings
-- handle all modules
-- responsiveness (use @media queries, handle touch gestures, check hover + active states, hambburger menu)
-- in docker-compose : remove volumes in production
-
 
 # LINKS
 - [The Net Ninja (YouTube)](https://www.youtube.com/@NetNinja)
