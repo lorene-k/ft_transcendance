@@ -8,11 +8,11 @@
   }
 
   .btn-primary {
-    @apply w-full bg-white my-3 font-bold hover:bg-ice transition transform active:scale-90 duration-150 text-black p-2 rounded-full cursor-pointer;
+    @apply w-full bg-white my-3 font-bold hover:bg-ice transition transform active:scale-95 hover:scale-110 duration-150 text-black p-2 rounded-full cursor-pointer;
   }
 
   .btn-secondary {
-    @apply w-full text-white p-2 font-semibold rounded-full border-2 border-white cursor-pointer hover:bg-ice hover:border-ice transition transform active:scale-90 duration-150 hover:text-black
+    @apply w-full text-white p-2 font-semibold rounded-full border-2 border-white cursor-pointer hover:bg-ice hover:border-ice transition transform active:scale-95 hover:scale-110 duration-150 hover:text-black
   }
 
   .label-style {

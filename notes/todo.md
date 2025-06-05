@@ -1,4 +1,13 @@
 ## TODO
+- setup plugins : fastify-jwt & fastify-auth
+- learn sql
+- setup sqlite db
+- setup fastify api
+- connect frontend to backend
+- restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
+- typescript fastify tuto
+- setup backend in .ts
+
 ### 0. FRONTEND (global)
 - Figma : Play, Stats, Account
 - Html + CSS
@@ -21,7 +30,6 @@
 ### 2. TS
 - creuser js
 - reorganize files
-- appeler une fonction qui prend view en param et faire le truc en fonction de la view
 
 ### 3. BACKEND
 - creuser node.js
