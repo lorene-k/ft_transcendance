@@ -1,4 +1,4 @@
-import { renderSignupForm } from "./signupForm.ts";
+import { renderSignupForm, setSuccess, setError } from "./signupForm.ts";
 import loginFormHtml from "../views/login.html?raw"
 
 function setContent({ content, header, footer}: {
@@ -9,13 +9,13 @@ function setContent({ content, header, footer}: {
   footer.innerHTML = ``;
 }
 
-function testLogin({ username, password, onLoginSuccess }: { // ! TEST
-    username: string, password: string, onLoginSuccess: () => void; }) {
-    if (username === "test" && password === "test") {
+function testLogin({ onLoginSuccess }: { onLoginSuccess: () => void; }) { // ! TEST
+    const username = (document.getElementById("username") as HTMLInputElement);
+    const password = (document.getElementById("password") as HTMLInputElement);
+    username.value !== "test" ? setError(username, "Invalid username") : setSuccess(username);
+  password.value !== "test" ? setError(password, "Invalid password") : setSuccess(password);
+    if (username.value === "test" && password.value === "test")
       onLoginSuccess();
-    } else {
-      alert("Invalid credentials");
-    }
 }
 
 export function renderLoginForm({ header, content, footer, onLoginSuccess }: {
@@ -26,9 +26,7 @@ export function renderLoginForm({ header, content, footer, onLoginSuccess }: {
     const form = document.getElementById("login-form") as HTMLFormElement;
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const username = (document.getElementById("username") as HTMLInputElement).value;
-      const password = (document.getElementById("password") as HTMLInputElement).value;
-      testLogin({ username, password, onLoginSuccess }); // ! TEST
+      testLogin({ onLoginSuccess }); // ! TEST
     });
 
     const signupBtn = document.getElementById("signup-button");

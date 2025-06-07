@@ -1,7 +1,7 @@
 import { handleLogoClick } from "./welcomePage";
 import signupFormHtml from "../views/signup.html?raw"
 
-function setError(element, msg): boolean {
+export function setError(element, msg): boolean {
   const inputControl = element.parentElement;
   const errorDisplay = inputControl.querySelector('.input-error-msg');
 
@@ -11,7 +11,7 @@ function setError(element, msg): boolean {
   return (false);
 }
 
-function setSuccess(element): boolean {
+export function setSuccess(element): boolean {
   const inputControl = element.parentElement;
   const errorDisplay = inputControl.querySelector('.input-error-msg');
 

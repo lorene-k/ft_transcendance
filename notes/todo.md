@@ -1,12 +1,21 @@
 ## TODO
-- setup plugins : fastify-jwt & fastify-auth
+?? Play without logging in ? 
+- implement back & forward buttons (pop/push history)
+- restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
+> - back/forth : history.pushState({}, '', '/about');
+> - update url :
+```bash
+> window.addEventListener('popstate', () => {
+>   // Update your view based on location.pathname
+> });
+```
+
 - learn sql
+- learn typescript for fastify + setup backend in .ts
 - setup sqlite db
 - setup fastify api
+- setup plugins : fastify-jwt & fastify-auth
 - connect frontend to backend
-- restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
-- typescript fastify tuto
-- setup backend in .ts
 
 ### 0. FRONTEND (global)
 - Figma : Play, Stats, Account
