@@ -1,6 +1,7 @@
 import { handleLogoClick } from "../components/layout.ts";
 import { setContent } from "../components/layout.ts";
 import { setFormSuccess, setFormError } from "../components/error.ts";
+import { handleLogin } from "../app.ts";
 
 function isValidUsername(username) {
   const usernameValue = username.value.trim();
@@ -39,7 +40,7 @@ function isValidPassword2(password, password2) {
     return (setFormSuccess(password2));
 }
 
-function validateInputs(content: HTMLElement): boolean {
+function validateInputs(): boolean {
   const username = document.getElementById('username');
   const email = document.getElementById('email');
   const password = document.getElementById('password');
@@ -53,14 +54,13 @@ function validateInputs(content: HTMLElement): boolean {
   ].every(Boolean);
 }
 
-export async function renderSignupForm({ header, content, footer, onSignupSuccess }: {
-  content: HTMLElement; header: HTMLElement; footer: HTMLElement; onSignupSuccess: () => void; }) {
-  await setContent({ content, header, footer, view: "signup.html" });
+export async function renderSignupForm() {
+  await setContent("signup.html", true);
   const form = document.getElementById("signup-form") as HTMLFormElement;
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (validateInputs(content))
-      onSignupSuccess();
+    if (validateInputs())
+      handleLogin();
   });
   handleLogoClick();
 }

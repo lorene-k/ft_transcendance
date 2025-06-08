@@ -1,5 +1,6 @@
 import { handleLogoClick } from "../components/layout.ts";
 import { setContent } from "../components/layout.ts";
+import { handleLogout } from "../app.ts";
 
 async function fetchMsg() {  // ! TEST
   try {
@@ -19,20 +20,16 @@ function testBackend() {
   const btn = document.getElementById('test-btn');
   btn?.addEventListener("click", () => {
     btn.classList.add('animate-ping');
-    setTimeout(() => {
-      btn.style.opacity = '0';
-      btn.style.pointerEvents = "none";
-    }, 1000);
+    setTimeout(() => { btn.style.opacity = '0'; btn.style.pointerEvents = "none"; }, 1000);
     fetchMsg();
   });
 }
 
-export async function renderWelcomePage({ content, header, footer, onLogout }: {
-    content: HTMLElement; header: HTMLElement; footer: HTMLElement; onLogout: () => void; }) {
-    await setContent({ content, header, footer, view: "test.html" });
+export async function renderWelcomePage() {
+    await setContent("test.html", true);
     handleLogoClick();
     testBackend();
     document.getElementById("logout")?.addEventListener("click", () => {
-      onLogout();
+      handleLogout();
     });
   }

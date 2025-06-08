@@ -6,8 +6,8 @@ export const handleLogoClick = () => {
     logoBtn?.addEventListener("click", renderApp);
   };
 
-async function setHeader({ header, view }: {
-    header: HTMLElement; view: string; }) {
+async function setHeader(view: string) {
+    const header = document.getElementById("header") as HTMLElement;
     if (view === "login.html" || view === "signup.html") {
         header.classList.remove("shadow-lg");
         header.innerHTML = `<img id="logo" class="max-w-sm mx-auto" src="assets/logo.png" alt="Pong wordmark">`;
@@ -23,8 +23,8 @@ async function setHeader({ header, view }: {
     }
 }
 
-async function setFooter({ footer, view }: {
-    footer: HTMLElement; view: string; }) {
+async function setFooter(view: string) {
+    const footer = document.getElementById("footer") as HTMLElement;
     if (view === "login.html" || view === "signup.html")
         footer.innerHTML = ``;
     else {
@@ -38,16 +38,20 @@ async function setFooter({ footer, view }: {
     }
 }
 
-export async function setContent({ content, header, footer, view }: {
-    content: HTMLElement; header: HTMLElement; footer: HTMLElement; view: string; }) {
-    setHeader({ header, view });
-    setFooter({ footer, view });
+export async function setContent(view: string, push = true) {
+    setHeader(view);
+    setFooter(view);
+    const content = document.getElementById("content") as HTMLElement;
     try {
-      const response = await fetch(view);
-      const html = await response.text();
-      content.innerHTML = html;
+        const response = await fetch(view);
+        const html = await response.text();
+        content.innerHTML = html;
+        if (push) {
+            const url = view.replace(/\.html$/, "");
+            history.pushState({ view }, "", `/${url}`);
+        }
     } catch (e) {
-      content.innerHTML = "<p>Failed to load login form.</p>";
-      console.error("Failed to fetch login.html:", e);
+        content.innerHTML = "<p>Failed to load login form.</p>";
+        console.error("Failed to fetch login.html:", e);
     }
 }

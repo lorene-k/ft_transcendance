@@ -1,7 +1,7 @@
 ## TODO
 ?? Play without logging in ? 
+OK - restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
 - implement back & forward buttons (pop/push history)
-- restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
 > - back/forth : history.pushState({}, '', '/about');
 > - update url :
 ```bash

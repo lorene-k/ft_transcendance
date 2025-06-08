@@ -1,29 +1,28 @@
 
 import { renderLoginForm } from "./routes/loginForm.ts";
 import { renderWelcomePage } from "./routes/welcomePage.ts";
+import { setContent } from "./components/layout.ts";
 
-function handleLogin() {;
+export function handleLogin() {;
   localStorage.setItem("isSignedIn", "true");
   renderApp();
 }
 
-function handleLogout() {
+export function handleLogout() {
   localStorage.removeItem("isSignedIn");
   renderApp();
 }
 
 export function renderApp() {
-  const content = document.getElementById("content") as HTMLElement;
-  const header = document.getElementById("header") as HTMLElement;
-  const footer = document.getElementById("footer") as HTMLElement;
-
   let isSignedIn = localStorage.getItem("isSignedIn") === "true";
-
-  if (isSignedIn)
-    renderWelcomePage({ content, header, footer, onLogout: handleLogout });
-  else
-    renderLoginForm({ header, content, footer, onLoginSuccess: handleLogin });
+  isSignedIn ? renderWelcomePage() : renderLoginForm();
 }
+
+window.addEventListener("popstate", (event) => {
+  const view = event.state?.view;
+  if (view)
+    setContent(view, false);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   renderApp();
