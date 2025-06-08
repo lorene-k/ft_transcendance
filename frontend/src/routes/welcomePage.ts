@@ -1,24 +1,5 @@
-import { renderApp } from "../app.ts";
-import navBar from "../views/navbar.html?raw"
-import footerHtml from "../views/footer.html?raw"
-import testHtml from "../views/test.html?raw"
-
-function setHeader(header: HTMLElement) {
-  header.classList.add("shadow-lg");
-  header.innerHTML = navBar;
-}
-
-function setContent({ content, footer } : {
-  content: HTMLElement; footer: HTMLElement}) {
-    content.innerHTML = testHtml;
-    footer.innerHTML = footerHtml;
-}
-
-export const handleLogoClick = () => {
-  const logoBtn = document.getElementById("logo");
-  logoBtn?.classList.add("cursor-pointer");
-  logoBtn?.addEventListener("click", renderApp);
-};
+import { handleLogoClick } from "../components/layout.ts";
+import { setContent } from "../components/layout.ts";
 
 async function fetchMsg() {  // ! TEST
   try {
@@ -46,10 +27,9 @@ function testBackend() {
   });
 }
 
-export function renderWelcomePage({ content, header, footer, onLogout }: {
+export async function renderWelcomePage({ content, header, footer, onLogout }: {
     content: HTMLElement; header: HTMLElement; footer: HTMLElement; onLogout: () => void; }) {
-    setHeader(header);
-    setContent({content, footer});
+    await setContent({ content, header, footer, view: "test.html" });
     handleLogoClick();
     testBackend();
     document.getElementById("logout")?.addEventListener("click", () => {
