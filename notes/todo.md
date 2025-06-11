@@ -1,8 +1,10 @@
 ## TODO
+
 !!! REPLACED welocme page by PLAY PAGE
 ?? Play without logging in ??
 OK - restructure front : 1 function that loads views (setContent)
 OK - implement back & forward buttons (pop/push history)
+
 - add a show password option (checkbox - login only)
 - setup 3 pages : play ; account ; h
 - learn sql
@@ -13,6 +15,7 @@ OK - implement back & forward buttons (pop/push history)
 - connect frontend to backend
 
 ### 0. FRONTEND (global)
+
 - Figma : Play, Stats, Account
 - Html + CSS
 - .ts
@@ -20,21 +23,26 @@ OK - implement back & forward buttons (pop/push history)
 - Think about chat layout
 
 > #### PAGES (content)
->- Login
+>
+> - Login
 >   - Forgot Password
->- Signup
->- Play
->- Account
->   - Profile
->   - Settings
->   - Game stats
->   - User stats
->- Chat ?  
+> - Signup
+> - Play
+>   - Mode selection (1 player, 2 players, tournament)
+>   - Game
+> - Account
+>   - Profile (avatar, info)
+>   - Friends (add, pending, status)
+>   - User stats (wins & losses)
+>   - Match history (1v1 games, dates, and relevant details)
+>   - (Game stats dashboard)
+> - Chat ?
 
 ### 1. CSS
+
 - Change font (curr == nunito)
 - error styling w/ CSS ?
-> Check [Styling based on sibling state](https://tailwindcss.com/docs/hover-focus-and-other-states?email=ccc%40aaa.com&password=Boscoxx)
+  > Check [Styling based on sibling state](https://tailwindcss.com/docs/hover-focus-and-other-states?email=ccc%40aaa.com&password=Boscoxx)
 - add [Floating labels](https://www.youtube.com/watch?v=nJzKi6oIvBA)
 - @layer
 - @keyframes (animations)
@@ -44,20 +52,24 @@ OK - implement back & forward buttons (pop/push history)
 - clean @layers ?
 
 ### 2. TS
+
 - creuser js
 - reorganize files
 
 ### 3. BACKEND
+
 - creuser node.js
 - creuser fastify
 - check SQL
 
 # SEARCH
+
 - plugins
 - Rest API
 - ESM & CJS
 
 # LINKS
+
 - [The Net Ninja (YouTube)](https://www.youtube.com/@NetNinja)
 - [freeCodeCamp](https://www.freecodecamp.org/)
 - [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web)
@@ -65,9 +77,10 @@ OK - implement back & forward buttons (pop/push history)
 - [TypeScript in 5 Minutes](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
 - [Tailwind CSS Utility Classes](https://tailwindcss.com/docs/styling-with-utility-classes)
 
-
 # BASICS
+
 ### 1. Frontend (Typescript + TailwindCSS)
+
 - **Frontend role**: Build everything the user sees (pages, forms, buttons).
 - **Components**: Break your page into reusable pieces ("Navbar", "LoginForm", etc.).
 - **Frontend-to-backend communication**: Using `fetch()`.
@@ -75,6 +88,7 @@ OK - implement back & forward buttons (pop/push history)
 - **State management**: How to store and update data on the page (example: login status).
 
 ### 2. Frontend Setup
+
 - [ ] Install Vite (`npm create vite@latest frontend/`)
 - [ ] Choose Typescript template
 - [ ] Install TailwindCSS in `frontend/`
@@ -82,7 +96,7 @@ OK - implement back & forward buttons (pop/push history)
 - [ ] Display the result
 
 ### 3. Development flow
-   - Backend runs on `localhost:3000`
-   - Frontend runs on `localhost:5173`
-   - Frontend calls backend APIs correctly
 
+- Backend runs on `localhost:3000`
+- Frontend runs on `localhost:5173`
+- Frontend calls backend APIs correctly
