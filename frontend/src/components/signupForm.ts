@@ -1,6 +1,6 @@
-import { handleLogoClick } from "../components/layout.ts";
-import { setContent } from "../components/layout.ts";
-import { setFormSuccess, setFormError } from "../components/error.ts";
+import { handleLogoClick } from "../utils/layout.ts";
+import { setContent } from "../utils/layout.ts";
+import { setFormSuccess, setFormError } from "../utils/error.ts";
 import { handleLogin } from "../app.ts";
 
 function isValidUsername(username) {
@@ -54,6 +54,7 @@ function validateInputs(): boolean {
   ].every(Boolean);
 }
 
+// Frontend input validation - replace handleLogin() by API call
 export async function renderSignupForm() {
   await setContent("signup.html", true);
   const form = document.getElementById("signup-form") as HTMLFormElement;

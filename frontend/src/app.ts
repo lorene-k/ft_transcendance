@@ -1,15 +1,15 @@
+import { renderLoginForm } from "./components/loginForm.ts";
+import { renderPlayMenu } from "./components/playMenu.ts";
+import { setContent } from "./utils/layout.ts";
 
-import { renderLoginForm } from "./routes/loginForm.ts";
-import { renderPlayMenu } from "./routes/playMenu.ts";
-import { setContent } from "./components/layout.ts";
-
-export function handleLogin() {;
+export function handleLogin() { // add API call
   localStorage.setItem("isSignedIn", "true");
   renderApp();
 }
 
-export function handleLogout() {
+export function handleLogout() { // add API call
   localStorage.removeItem("isSignedIn");
+  setContent("login.html", false); // ! CHANGE THIS (backwards arrow leads back to play menu)
   renderApp();
 }
 
@@ -20,8 +20,7 @@ export function renderApp() {
 
 window.addEventListener("popstate", (event) => {
   const view = event.state?.view;
-  if (view)
-    setContent(view, false);
+  if (view) setContent(view, false);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
