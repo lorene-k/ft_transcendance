@@ -1,15 +1,10 @@
 ## TODO
-?? Play without logging in ? 
-OK - restructure front : appeler une fonction qui prend view en param et faire le truc en fonction de la view
-- implement back & forward buttons (pop/push history)
-> - back/forth : history.pushState({}, '', '/about');
-> - update url :
-```bash
-> window.addEventListener('popstate', () => {
->   // Update your view based on location.pathname
-> });
-```
-
+!!! REPLACED welocme page by PLAY PAGE
+?? Play without logging in ??
+OK - restructure front : 1 function that loads views (setContent)
+OK - implement back & forward buttons (pop/push history)
+- add a show password option (checkbox - login only)
+- setup 3 pages : play ; account ; h
 - learn sql
 - learn typescript for fastify + setup backend in .ts
 - setup sqlite db
@@ -23,6 +18,18 @@ OK - restructure front : appeler une fonction qui prend view en param et faire l
 - .ts
 - Connect to back
 - Think about chat layout
+
+> #### PAGES (content)
+>- Login
+>   - Forgot Password
+>- Signup
+>- Play
+>- Account
+>   - Profile
+>   - Settings
+>   - Game stats
+>   - User stats
+>- Chat ?  
 
 ### 1. CSS
 - Change font (curr == nunito)

@@ -25,8 +25,8 @@ function testBackend() {
   });
 }
 
-export async function renderWelcomePage() {
-    await setContent("test.html", true);
+export async function renderPlayMenu() {
+    await setContent("play.html", true);
     handleLogoClick();
     testBackend();
     document.getElementById("logout")?.addEventListener("click", () => {

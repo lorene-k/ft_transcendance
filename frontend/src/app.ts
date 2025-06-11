@@ -1,6 +1,6 @@
 
 import { renderLoginForm } from "./routes/loginForm.ts";
-import { renderWelcomePage } from "./routes/welcomePage.ts";
+import { renderPlayMenu } from "./routes/playMenu.ts";
 import { setContent } from "./components/layout.ts";
 
 export function handleLogin() {;
@@ -15,7 +15,7 @@ export function handleLogout() {
 
 export function renderApp() {
   let isSignedIn = localStorage.getItem("isSignedIn") === "true";
-  isSignedIn ? renderWelcomePage() : renderLoginForm();
+  isSignedIn ? renderPlayMenu() : renderLoginForm();
 }
 
 window.addEventListener("popstate", (event) => {
