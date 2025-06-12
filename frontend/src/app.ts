@@ -7,12 +7,6 @@ export function handleLogin() { // add API call
   renderApp();
 }
 
-export function handleLogout() { // add API call
-  localStorage.removeItem("isSignedIn");
-  setContent("login.html", false); // ! CHANGE THIS (backwards arrow leads back to play menu)
-  renderApp();
-}
-
 export function renderApp() {
   let isSignedIn = localStorage.getItem("isSignedIn") === "true";
   isSignedIn ? renderPlayMenu() : renderLoginForm();

@@ -1,4 +1,3 @@
-import { handleLogoClick } from "../utils/layout.ts";
 import { setContent } from "../utils/layout.ts";
 import { handleLogout } from "../app.ts";
 
@@ -27,17 +26,40 @@ import { handleLogout } from "../app.ts";
 //   });
 // }
 
-export async function renderPlayMenu() {
-  await setContent("play.html", true);
-  handleLogoClick();
-  document.getElementById("logout")?.addEventListener("click", () => {
-    handleLogout();
-  });
+
+async function renderGameWindow() {
+  await setContent("game.html", false);
+}
+
+async function renderTournamentMenu() {
+  await setContent("tournament.html", false);
+}
+
+function selectMode() {
   const buttons = document.querySelectorAll(".btn-selection");
+  let mode;
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       buttons.forEach((b) => b.classList.remove("selected"));
       btn.classList.add("selected");
+      const selectedBtn = document.querySelector(".btn-selection.selected") as HTMLButtonElement;
+      if (selectedBtn) {
+        mode = selectedBtn.dataset.mode;
+        console.log("Selected mode:", mode); // ! TEST
+      }
+    });
+    const playBtn = document.getElementById("play-btn");
+    playBtn?.addEventListener("click", () => {
+      if (!mode) return;
+      if (mode === "Tournament") renderTournamentMenu();
+      else renderGameWindow(); // ! SEND TO BACKEND & LOAD APPROPRIATE GAME MODE
     });
   });
+}
+
+export async function renderPlayMenu() {
+  await setContent("play.html", true);
+  const playLink = document.getElementById("play-link");
+  if (playLink) playLink.classList.add("current-page");
+  selectMode();
 }

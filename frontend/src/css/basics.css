@@ -39,8 +39,12 @@
     @apply text-ice mb-8 text-center text-xl font-extrabold;
   }
 
-  .basic-text {
+  .link-text {
     @apply hover:text-ice mb-5 cursor-pointer rounded font-bold text-white;
+  }
+
+  .link-text.current-page {
+    @apply text-ice;
   }
 
   .small-text {

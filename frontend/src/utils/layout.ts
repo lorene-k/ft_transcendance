@@ -1,15 +1,38 @@
 import { renderApp } from "../app.ts";
+import { renderPlayMenu } from "../components/playMenu.ts";
+import { renderAccount } from "../components/account.ts";
+import { renderChat } from "../components/chat.ts";
 
 export const handleLogoClick = () => {
   const logoBtn = document.getElementById("logo");
-  // logoBtn?.removeEventListener("click", renderApp);
-  // if (logoBtn && view === "login.html")
-  //   logoBtn.classList.remove("cursor-pointer");
-  // else if (logoBtn && view !== "login.html") {
-  logoBtn?.classList.add("cursor-pointer");
-  logoBtn?.addEventListener("click", renderApp);
-  // }
+  if (logoBtn) {
+    logoBtn.classList.add("cursor-pointer");
+    logoBtn.addEventListener("click", renderApp);
+  }
 };
+
+function handleNavbarClick() {
+  const playLink = document.getElementById("play-link");
+  const accountLink = document.getElementById("account-link");
+  const chatLink = document.getElementById("chat-link");
+  if (playLink) {
+    playLink.removeEventListener("click", renderPlayMenu);
+    playLink.addEventListener("click", renderPlayMenu);
+  }
+  if (accountLink) {
+    accountLink.removeEventListener("click", renderAccount);
+    accountLink.addEventListener("click", renderAccount);
+  }
+  if (chatLink) {
+    chatLink.removeEventListener("click", renderChat);
+    chatLink.addEventListener("click", renderChat);
+  }
+}
+
+function handleLogout() { // add API call
+  localStorage.removeItem("isSignedIn");
+  renderApp();
+}
 
 async function setHeader(view: string) {
   const header = document.getElementById("header") as HTMLElement;
@@ -22,6 +45,8 @@ async function setHeader(view: string) {
       const headerResponse = await fetch("header.html");
       const headerHtml = await headerResponse.text();
       header.innerHTML = headerHtml;
+      handleLogoClick();
+      handleNavbarClick();
     } catch (e) {
       console.error("Failed to fetch header.html");
     }
@@ -36,6 +61,8 @@ async function setFooter(view: string) {
       const footerResponse = await fetch("footer.html");
       const footerHtml = await footerResponse.text();
       footer.innerHTML = footerHtml;
+      const logoutBtn = document.getElementById("logout");
+      if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
     } catch (e) {
       console.error("Failed to fetch footer.html");
     }
