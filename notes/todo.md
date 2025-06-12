@@ -1,10 +1,10 @@
 ## TODO
 
-!!! REPLACED welocme page by PLAY PAGE
-?? Play without logging in ??
-OK - restructure front : 1 function that loads views (setContent)
-OK - implement back & forward buttons (pop/push history)
+!!! FIX
+- bakcward button : xxx/play# // xxx/play
+- Bakcward after logout
 
+?? Play without logging in ??
 - add a show password option (checkbox - login only)
 - setup 3 pages : play ; account ; h
 - learn sql
