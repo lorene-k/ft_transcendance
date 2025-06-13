@@ -1,5 +1,5 @@
 import { setContent } from "../utils/layout.ts";
-import { handleLogout } from "../app.ts";
+import { handleClickListeners } from "../utils/handlers.ts";
 
 // async function fetchMsg() { // ! TEST
 //   try {
@@ -26,13 +26,35 @@ import { handleLogout } from "../app.ts";
 //   });
 // }
 
-
-async function renderGameWindow() {
-  await setContent("game.html", false);
+export async function renderGameWindow(push = true) {
+  await setContent("game.html", push);
 }
 
-async function renderTournamentMenu() {
-  await setContent("tournament.html", false);
+function addPlayers() {
+  const addPlayerBtn = document.getElementById("add-player-btn");
+  const nameInput = document.getElementById("tournament-player-name");
+  let playerCount = 1;
+  if (addPlayerBtn) {
+    addPlayerBtn.addEventListener("click", () => {
+      playerCount++;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = `Player ${playerCount}`;
+      input.classList.add("field-white");
+      if (nameInput) nameInput.appendChild(input);
+      if (playerCount > 3) {
+        addPlayerBtn.classList.add("hidden");
+        return;
+      }
+    });
+  }
+}
+
+export async function renderTournamentMenu(push = true) { // ! CHANGE
+  await setContent("tournament.html", push);
+  addPlayers();
+  // collectPlayerNames();
+  handleClickListeners("start-tournament-btn", renderGameWindow);
 }
 
 function selectMode() {
@@ -48,8 +70,7 @@ function selectMode() {
         console.log("Selected mode:", mode); // ! TEST
       }
     });
-    const playBtn = document.getElementById("play-btn");
-    playBtn?.addEventListener("click", () => {
+    handleClickListeners("play-btn", () => {
       if (!mode) return;
       if (mode === "Tournament") renderTournamentMenu();
       else renderGameWindow(); // ! SEND TO BACKEND & LOAD APPROPRIATE GAME MODE
@@ -57,8 +78,8 @@ function selectMode() {
   });
 }
 
-export async function renderPlayMenu() {
-  await setContent("play.html", true);
+export async function renderPlayMenu(push = true) {
+  await setContent("play.html", push);
   const playLink = document.getElementById("play-link");
   if (playLink) playLink.classList.add("current-page");
   selectMode();

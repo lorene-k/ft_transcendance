@@ -1,38 +1,4 @@
-import { renderApp } from "../app.ts";
-import { renderPlayMenu } from "../components/playMenu.ts";
-import { renderAccount } from "../components/account.ts";
-import { renderChat } from "../components/chat.ts";
-
-export const handleLogoClick = () => {
-  const logoBtn = document.getElementById("logo");
-  if (logoBtn) {
-    logoBtn.classList.add("cursor-pointer");
-    logoBtn.addEventListener("click", renderApp);
-  }
-};
-
-function handleNavbarClick() {
-  const playLink = document.getElementById("play-link");
-  const accountLink = document.getElementById("account-link");
-  const chatLink = document.getElementById("chat-link");
-  if (playLink) {
-    playLink.removeEventListener("click", renderPlayMenu);
-    playLink.addEventListener("click", renderPlayMenu);
-  }
-  if (accountLink) {
-    accountLink.removeEventListener("click", renderAccount);
-    accountLink.addEventListener("click", renderAccount);
-  }
-  if (chatLink) {
-    chatLink.removeEventListener("click", renderChat);
-    chatLink.addEventListener("click", renderChat);
-  }
-}
-
-function handleLogout() { // add API call
-  localStorage.removeItem("isSignedIn");
-  renderApp();
-}
+import { handleLogoClick, handleNavbarClick, handleLogout } from "./handlers.ts";
 
 async function setHeader(view: string) {
   const header = document.getElementById("header") as HTMLElement;
@@ -70,6 +36,9 @@ async function setFooter(view: string) {
 }
 
 export async function setContent(view: string, push = true) {
+  const url = `/${view.replace(/\.html$/, "")}`;
+  if (push && window.location.pathname === url)
+    push = false;
   setHeader(view);
   setFooter(view);
   const content = document.getElementById("content") as HTMLElement;
@@ -82,7 +51,7 @@ export async function setContent(view: string, push = true) {
       history.pushState({ view }, "", `/${url}`);
     }
   } catch (e) {
-    content.innerHTML = "<p>Failed to load login form.</p>";
-    console.error("Failed to fetch login.html:", e);
+    content.innerHTML = "<p>Failed to load html.</p>";
+    console.error("Failed to fetch html:", e);
   }
 }

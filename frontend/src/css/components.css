@@ -1,0 +1,29 @@
+@layer components {
+  .navbar-style {
+    @apply mx-3 flex items-center justify-between p-6 sm:mx-8 md:mx-12 lg:mx-16 xl:mx-20;
+  }
+
+  .form-style {
+    @apply mx-auto max-w-sm rounded bg-white/10 p-10 shadow-xl;
+  }
+
+  .centered-content {
+    @apply flex min-h-160 items-center justify-center;
+  }
+
+  .label-style {
+    @apply text-white;
+  }
+
+  .field-gray {
+    @apply w-full rounded border border-gray-400 p-2 px-3 py-2 text-white placeholder-gray-400 placeholder:text-xs focus:ring-2 focus:ring-indigo-600 focus:outline-none;
+  }
+
+  .field-white {
+    @apply w-full rounded-full border-2 border-white p-3 text-white focus:outline-none;
+  }
+
+  .line-1 {
+    @apply my-6 outline-1 outline-gray-400;
+  }
+}

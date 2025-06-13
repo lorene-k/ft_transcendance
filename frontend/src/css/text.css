@@ -1,0 +1,21 @@
+@layer components {
+  .title {
+    @apply text-ice mb-8 text-center text-xl font-extrabold;
+  }
+
+  .link-text {
+    @apply hover:text-ice mb-5 cursor-pointer rounded font-bold text-white;
+  }
+
+  .link-text.current-page {
+    @apply text-ice;
+  }
+
+  .small-text {
+    @apply hover:text-ice my-3 cursor-pointer text-center text-xs font-bold text-white;
+  }
+
+  .input-error-msg {
+    @apply mt-1 text-xs text-red-500;
+  }
+}

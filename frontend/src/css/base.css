@@ -1,0 +1,5 @@
+@layer base {
+  body {
+    @apply font-nunito min-h-screen flex flex-col h-14 bg-linear-to-t from-black to-ultraviolet;
+  }
+}

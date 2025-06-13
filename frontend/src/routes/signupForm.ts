@@ -1,4 +1,4 @@
-import { handleLogoClick } from "../utils/layout.ts";
+import { handleLogoClick } from "../utils/handlers.ts";
 import { setContent } from "../utils/layout.ts";
 import { setFormSuccess, setFormError } from "../utils/error.ts";
 import { handleLogin } from "../app.ts";

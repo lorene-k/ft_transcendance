@@ -1,0 +1,21 @@
+@layer components {
+  .btn-primary {
+    @apply hover:bg-ice btn-base my-3 w-full bg-white p-3 font-bold text-black;
+  }
+
+  .btn-secondary {
+    @apply hover:bg-ice hover:border-ice btn-base w-full border-2 border-white p-3 font-semibold text-white hover:text-black;
+  }
+
+  .btn-selection {
+    @apply hover:bg-ice hover:border-ice btn-base w-full border-2 border-white p-3 font-semibold text-white hover:text-black;
+  }
+
+  .btn-selection.selected {
+    @apply bg-ice border-ice text-black;
+  }
+
+  .btn-add {
+    @apply btn-base mx-auto flex h-9 w-9 items-center justify-center border-2 border-white text-xl font-semibold text-white;
+  }
+}

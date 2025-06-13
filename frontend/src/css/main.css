@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 @import "./theme.css";
-@import "./basics.css";
-@import "./theme.css";
-@import "./errors.css";
+@import "./base.css";
+@import "./buttons.css";
+@import "./components.css";
+@import "./text.css";
+@import "./utilities.css";
 
-@layer basics, state;
+@layer base, components, utilities;

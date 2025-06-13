@@ -1,18 +1,12 @@
 ## TODO
-
-!!! FIX
-- bakcward button : xxx/play# // xxx/play
-- Bakcward after logout
+!!! PRIO
+- HTTPS + nginx
+- Backend account & game stats
 
 ?? Play without logging in ??
 - add a show password option (checkbox - login only)
-- setup 3 pages : play ; account ; h
 - learn sql
 - learn typescript for fastify + setup backend in .ts
-- setup sqlite db
-- setup fastify api
-- setup plugins : fastify-jwt & fastify-auth
-- connect frontend to backend
 
 ### 0. FRONTEND (global)
 
