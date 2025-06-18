@@ -7,7 +7,7 @@ COPY	package-lock.json ./
 
 RUN     npm install
 
-COPY	assets/ ./assets/
+COPY    public/ ./public/
 COPY    config/ ./config/
 COPY	src/ ./src/
 COPY    index.html ./

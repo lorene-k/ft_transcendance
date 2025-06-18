@@ -8,7 +8,7 @@
   }
 
   .btn-selection {
-    @apply hover:bg-ice hover:border-ice btn-base w-full border-2 border-white p-3 font-semibold text-white hover:text-black;
+    @apply btn-base w-full border-2 border-white p-3 font-semibold text-white;
   }
 
   .btn-selection.selected {

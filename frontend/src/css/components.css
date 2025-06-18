@@ -26,4 +26,8 @@
   .line-1 {
     @apply my-6 outline-1 outline-gray-400;
   }
+
+  .center-frame {
+    @apply flex min-h-100 w-[600px] items-center justify-center rounded-lg border-2 border-white;
+  }
 }

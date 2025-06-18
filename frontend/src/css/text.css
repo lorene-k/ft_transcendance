@@ -4,11 +4,11 @@
   }
 
   .link-text {
-    @apply hover:text-ice mb-5 cursor-pointer rounded font-bold text-white;
+    @apply mx-3 mb-5 transition cursor-pointer rounded-full border-2 border-transparent px-4 py-2 font-bold text-white hover:border-white active:border-white;
   }
 
   .link-text.current-page {
-    @apply text-ice;
+    @apply border-white;
   }
 
   .small-text {
