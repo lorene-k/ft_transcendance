@@ -15,7 +15,8 @@ sleep 1
 node --watch src/app.js
 node_pid=$!
 
-trap "kill $tsc_pid $tailwind_pid $node_pid" EXIT
+# Kill all background tasks on exit
+trap "kill $tsc_pid $tailwind_pid $node_pid EXIT"
 
 wait
 
