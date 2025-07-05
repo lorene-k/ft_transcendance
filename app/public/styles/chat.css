@@ -26,4 +26,12 @@
   .button-style {
     @apply rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 hover:cursor-pointer;
   }
+
+  .chat-time {
+    @apply text-sm font-normal text-gray-500;
+  }
+
+  .chat-bubble-header {
+    @apply flex flex-row items-center space-x-2 ;
+  }
 }

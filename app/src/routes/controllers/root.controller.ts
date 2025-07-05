@@ -92,9 +92,7 @@ export function getChat(fastify: FastifyInstance) {
         if (!request.session.authenticated) {
             return reply.redirect("/");
         }
-
-        const html = fs.readFileSync("./public/chat.html").toString();
-
+        const html = fs.readFileSync("./public/chat/chat.html").toString();
         return reply
             .header("Content-Type", "text/html")
             .send(await navbar(fastify, request, html));

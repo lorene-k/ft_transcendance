@@ -7,7 +7,6 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --color-blue-400: oklch(70.7% 0.165 254.624);
     --color-blue-500: oklch(62.3% 0.214 259.815);
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-blue-700: oklch(48.8% 0.243 264.376);
@@ -229,9 +228,6 @@
   .mx-auto {
     margin-inline: auto;
   }
-  .mt-5 {
-    margin-top: calc(var(--spacing) * 5);
-  }
   .mt-8 {
     margin-top: calc(var(--spacing) * 8);
   }
@@ -241,9 +237,6 @@
   .mr-6 {
     margin-right: calc(var(--spacing) * 6);
   }
-  .mb-2 {
-    margin-bottom: calc(var(--spacing) * 2);
-  }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
@@ -252,6 +245,9 @@
   }
   .mb-10 {
     margin-bottom: calc(var(--spacing) * 10);
+  }
+  .ml-5 {
+    margin-left: calc(var(--spacing) * 5);
   }
   .ml-6 {
     margin-left: calc(var(--spacing) * 6);
@@ -265,23 +261,11 @@
   .hidden {
     display: none;
   }
-  .h-1\/8 {
-    height: calc(1/8 * 100%);
-  }
   .h-5 {
     height: calc(var(--spacing) * 5);
   }
-  .h-6\/8 {
-    height: calc(6/8 * 100%);
-  }
-  .h-7\/8 {
-    height: calc(7/8 * 100%);
-  }
   .h-12 {
     height: calc(var(--spacing) * 12);
-  }
-  .h-\[10\%\] {
-    height: 10%;
   }
   .h-\[80vh\] {
     height: 80vh;
@@ -330,6 +314,12 @@
   }
   .flex-grow {
     flex-grow: 1;
+  }
+  .basis-\[10\%\] {
+    flex-basis: 10%;
+  }
+  .basis-\[90\%\] {
+    flex-basis: 90%;
   }
   .transform {
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
@@ -399,6 +389,9 @@
   }
   .overflow-auto {
     overflow: auto;
+  }
+  .overflow-hidden {
+    overflow: hidden;
   }
   .overflow-x-auto {
     overflow-x: auto;
@@ -608,13 +601,6 @@
       display: flex;
     }
   }
-  .rtl\:space-x-reverse {
-    &:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
-      :where(& > :not(:last-child)) {
-        --tw-space-x-reverse: 1;
-      }
-    }
-  }
 }
 @layer components {
   .centered-content-chat {
@@ -682,6 +668,23 @@
       @media (hover: hover) {
         background-color: var(--color-blue-700);
       }
+    }
+  }
+  .chat-time {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-gray-500);
+  }
+  .chat-bubble-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    :where(& > :not(:last-child)) {
+      --tw-space-x-reverse: 0;
+      margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
+      margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
     }
   }
 }

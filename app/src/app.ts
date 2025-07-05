@@ -3,6 +3,7 @@ import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
 import root from "./routes/root.js";
 import dbPlugin from "./plugins/dbplugin.js";
+import chatPlugin from "./plugins/chatplugin.js";
 import formbody from "@fastify/formbody";
 import fastifySession from "@fastify/session";
 import fastifyCookie from "@fastify/cookie";
@@ -21,7 +22,6 @@ const server = fastify({
 let db = server.register(dbPlugin);
 server.register(formbody);
 server.register(fastifyCookie);
-server.register(fastifySocketIO.default, {});
 await db; // db needed for session
 server.register(fastifySession, {
     cookieName: "sessionId",
@@ -30,6 +30,10 @@ server.register(fastifySession, {
     cookie: { maxAge: 1800000, secure: "auto" },
     store: new Store.SessionStore(server.database, server.log),
 });
+server.decorate("sessionStore", new Store.SessionStore(server.database, server.log));
+server.register(fastifySocketIO.default, {});
+let chat = server.register(chatPlugin);
+await chat;
 server.register(fastifyStatic, {
     root: path.join(__dirname, "..", "public"),
     prefix: "/",
@@ -37,7 +41,7 @@ server.register(fastifyStatic, {
 
 // --------------------------
 
-//all user endpoint here
+//all user endpoints here
 server.register(root.routes);
 
 //all api routes (and hooks ?) here

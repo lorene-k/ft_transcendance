@@ -6,6 +6,7 @@ declare module "fastify" {
     interface FastifyInstance {
         database: Database;
         io: Socket;
+        sessionStore: SessionStore;
     }
 
     interface Session {

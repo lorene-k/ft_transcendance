@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transcendance</title>
+    <link href="./styles/compiled.css" rel="stylesheet" />
+    <style>
+      /* Optional: smooth fade in/out for form */
+      #myForm {
+        transition: opacity 2s ease;
+      }
+
+      #myForm.hidden {
+        opacity: 1;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-100">
+    <!-- Navigation -->
+    <div class="flex flex-col gap-2 bg-gray-100 p-2 max-w-6xl mx-auto mt-8 h-[80vh]">
+      <!-- Tournaments -->
+      <div class="flex flex-row gap-4 shadow-sm basis-[10%]">
+        <div class="flex bg-white h-full w-full rounded-xl title-style px-3 items-center">Tournaments</div>
+      </div>
+
+      <div class="flex flex-grow flex-row gap-4 bg-gray-100 overflow-hidden">
+        <!-- Left chat history -->
+          <div class="chat-card text-sm font-bold w-1/4 flex flex-col">
+            <div class="flex items-center gap-8 basis-[10%] title-style h-12">All chats</div>
+            <div class="box-style basis-[90%] flex-grow gap-4 overflow-auto"></div>
+          </div>
+      
+        <!-- Right chat area -->
+        <div class="chat-card w-3/4 flex flex-col">
+          <!-- Header -->
+          <div class="flex items-center gap-8 basis-[10%]">
+            <img class="h-12 w-12 rounded-xl" src="./assets/default-icon.png" />
+            <div class="title-style">Jane Doe</div>
+          </div>
+      
+          <!-- Conversation box -->
+          <div id="conversation" class="box-style flex-grow overflow-auto gap-4">
+             <!-- TEST Chat bubble - left -->
+             <div id="left-bubble" class="flex flex-col items-start w-fit">
+              <div class="flex flex-row items-center space-x-2">
+              <img class="w-5 h-5 rounded-xl" src="./assets/default-icon.png" alt="Jane default icon">
+                 <span class="text-sm font-semibold text-gray-900">Jane Doe</span>
+                 <span class="text-sm font-normal text-gray-500">11:46</span>
+              </div>
+              <div class="flex flex-col items-center gap-3 w-full leading-1.5 p-2 m-1 ml-6 mr-6 bg-gray-100 rounded-xl rounded-tl-none">
+                 <p id="received-content" class="text-sm font-normal text-gray-900">Hey ! This is a test.</p>
+              </div>
+            </div>
+            <!-- TEST Chat bubble - right -->
+            <div id="right-bubble"  class="flex justify-end w-full">
+              <div class="flex flex-col items-end w-fit">
+                <div class="flex flex-row items-center space-x-2">
+                  <span class="text-sm font-semibold text-gray-900">John Doe</span>
+                  <span class="text-sm font-normal text-gray-500">11:47</span>
+                  <img class="w-5 h-5 rounded-xl" src="./assets/default-icon-man.png" alt="Jane default icon" />
+                </div>
+                <div class="flex flex-col items-center gap-3 w-full leading-1.5 p-2 m-1 ml-6 mr-6 bg-gray-100 rounded-xl rounded-tr-none text-right">
+                  <p id="sent-content" class="text-sm font-normal text-gray-900">That's awesome. I think our users will really appreciate the improvements.</p>
+                </div>
+              </div>
+            </div> 
+          </div>
+      
+          <!-- Input section -->
+          <div class="basis-[10%] flex flex-row gap-2">
+            <textarea rows="1" class="box-style w-4/5" placeholder="Type message"></textarea>
+            <button class="button-style w-1/5">Send</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script type="module" src="script/chat.js"></script>
+  </body>
+</html>
