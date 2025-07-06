@@ -18,9 +18,9 @@ const server = fastify({
 // PLUGINS (register plugins first or problems)
 let db = server.register(dbPlugin);
 server.register(formbody);
-server.register(fastifyCookie);
+await server.register(fastifyCookie);
 await db; // db needed for session
-server.register(fastifySession, {
+await server.register(fastifySession, {
     cookieName: "sessionId",
     //TODO: secret should be in .ENV file
     secret: "2c8c3c1549e14bfc7f124ed4a8dbbb94",
@@ -28,9 +28,8 @@ server.register(fastifySession, {
     store: new Store.SessionStore(server.database, server.log),
 });
 server.decorate("sessionStore", new Store.SessionStore(server.database, server.log));
-server.register(fastifySocketIO.default, {});
-let chat = server.register(chatPlugin);
-await chat;
+await server.register(fastifySocketIO.default, { connectionStateRecovery: {} });
+await server.register(chatPlugin);
 server.register(fastifyStatic, {
     root: path.join(__dirname, "..", "public"),
     prefix: "/",

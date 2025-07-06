@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { getRoot, getGame, getAccount, getChat } from "./controllers/root.controller.js";
 import { check_user } from "./controllers/api.controller.js";
 import { register, login, logout } from "./controllers/auth.controller.js";
+// import { getMessages, postMessage } from "./controllers/chat.controller.js";
 
 /**
  * A plugin that provide encapsulated routes
@@ -37,6 +38,9 @@ async function auth(fastify: FastifyInstance, options: FastifyPluginOptions) {
 async function api(fastify: FastifyInstance, options: FastifyPluginOptions) {
     // api/user-check
     fastify.post("/api/check-username", check_user(fastify));
+    // ! chat api
+    // fastify.get('/api/messages', getMessages(fastify));
+    // fastify.post('/api/messages', postMessage(fastify));
 }
 
 export default { routes, api, auth };

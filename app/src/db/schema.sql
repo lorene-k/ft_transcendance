@@ -42,3 +42,34 @@ CREATE TABLE IF NOT EXISTS session (
     session TEXT NOT NULL,
     expires DATETIME NOT NULL
 );
+
+-- ------------------------------
+-- Table: message history
+-- ------------------------------
+-- CREATE TABLE IF NOT EXISTS message (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     sender_id INTEGER NOT NULL,
+--     receiver_id INTEGER NOT NULL,
+--     content TEXT NOT NULL,
+--     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE NO ACTION,
+--     FOREIGN KEY (receiver_id) REFERENCES user(id) ON DELETE NO ACTION
+-- );
+
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_offset TEXT UNIQUE,
+    content TEXT
+);
+
+-- ------------------------------
+-- Table: blocked users
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS block (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    blocker_id INTEGER NOT NULL,
+    blocked_id INTEGER NOT NULL,
+    UNIQUE (blocker_id, blocked_id),
+    FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
+);

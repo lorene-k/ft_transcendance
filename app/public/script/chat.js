@@ -1,18 +1,14 @@
-let lastSenderId = ""; // Track if the last message was sent by the same user
-let lastMessageTime = 0;
+let lastSenderId = "";
+let lastMessageTime = 0; // ?? lastKnownServerOffset 
+let counter = 0;
 const socket = io('http://localhost:8080', {
-    transports: ['websocket']
+    transports: ['websocket'],
+    auth: {
+        serverOffset: 0
+    },
+    ackTimeout: 10000,
+    retries: 3
 });
-function sendMessage(e) {
-    e.preventDefault();
-    console.log("Sending message");
-    const input = document.querySelector('textarea');
-    if (input && input.value) {
-        socket.emit("message", input.value);
-        input.value = "";
-    }
-    input?.focus();
-}
 async function loadBubbleTemplate(templatePath) {
     try {
         const res = await fetch(templatePath);
@@ -53,19 +49,25 @@ async function addChatBubble(message, isSent, senderId) {
     conversation.appendChild(bubble);
     conversation.scrollTop = conversation.scrollHeight;
 }
-document.querySelector('button')?.addEventListener('click', sendMessage);
+document.querySelector('button')?.addEventListener('click', (e) => {
+    console.log("Sending message...");
+    e.preventDefault();
+    const input = document.querySelector('textarea');
+    if (input && input.value) {
+        // compute unique offset (ensure client delivery after state recovery/temp disconnection)
+        const clientOffset = `${socket.id}-${counter++}`; // ! adds loading time ?
+        socket.emit("message", input.value, clientOffset);
+        input.value = "";
+    }
+    input?.focus();
+});
 // Listen for messages
-socket.on("message", async ({ senderId, msg }) => {
+socket.on("message", async ({ senderId, msg, serverOffset }) => {
     console.log(`Received message from ${senderId}: ${msg}`);
     const isSent = senderId === socket.id;
+    socket.auth.serverOffset = serverOffset;
     await addChatBubble(msg, isSent, senderId);
 });
 export {};
-/*You should pass sender info from your server to know if the message is sent by the current user or received.
-
-The timestamps are generated locally for now (new Date().toLocaleTimeString(...)) — you can customize or pass a timestamp from your server.
-
-The CSS classes you use match your HTML snippet to get the right style and alignment.
-
-To avoid duplicate IDs in bubbles, I removed the id="received-content" and id="sent-content" inside generated bubbles (because IDs must be unique).*/
-//! dont forget to disconnect
+// ! Disconnect
+// ! Announce next tournament (io.emit)
