@@ -35,20 +35,20 @@ function handleConnection(fastify : FastifyInstance, socket : any, io : any) {
   });
 }
 
-// async function handleRecovery(socket : any, fastify : FastifyInstance) {
-//   if (!socket.recovered) {
-//     try {
-//       await fastify.database.each('SELECT id, content FROM messages WHERE id > ?', // ! change this when changing db table
-//         [socket.handshake.auth.serverOffset || 0],
-//         (_err: Error | null, row: { id: number; content: string }) => {
-//           socket.emit('message', { senderId: 'server', msg: row.content, serverOffset: row.id });
-//         }
-//       )
-//     } catch (e) {
-//       console.error("Failed to recover messages: ", e);
-//     }
-//   }
-// }
+async function handleRecovery(socket : any, fastify : FastifyInstance) {
+  if (!socket.recovered) {
+    try {
+      await fastify.database.each('SELECT id, content FROM messages WHERE id > ?', // ! change this when changing db table
+        [socket.handshake.auth.serverOffset || 0],
+        (_err: Error | null, row: { id: number; content: string }) => {
+          socket.emit('message', { senderId: 'server', msg: row.content, serverOffset: row.id });
+        }
+      )
+    } catch (e) {
+      console.error("Failed to recover messages: ", e);
+    }
+  }
+}
 
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const io = fastify.io;
@@ -58,7 +58,7 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
   io.on("connection", (socket) => {
     handleConnection(fastify, socket, io);
     // userSockets.set(socket.session.user.id, socket.id); // ! 1 tab = 1 session (if multiple tabs : Map<userId, Set<socket.id>>)
-    // handleRecovery(socket, fastify);
+    handleRecovery(socket, fastify);
   });
 };
 

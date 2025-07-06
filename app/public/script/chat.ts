@@ -1,15 +1,15 @@
 declare const io: any;
 let lastSenderId = "";
-let lastMessageTime: number = 0; // ?? lastKnownServerOffset 
+let lastMessageTime: number = 0;
 let counter = 0;
-
+const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 const socket = io('http://localhost:8080', {
     transports: ['websocket'],
     auth: {
-        serverOffset: 0
+        serverOffset: lastOffset
       },
-    ackTimeout: 10000,
-    retries: 3
+    // ackTimeout: 10000, // Use emit with ack to guarantee msg delivery
+    // retries: 3
 });
 
 async function loadBubbleTemplate(templatePath : string) {
@@ -68,6 +68,7 @@ socket.on("message", async ({ senderId, msg, serverOffset } :
     { senderId: string; msg: string, serverOffset: string }) => {
     console.log(`Received message from ${senderId}: ${msg}`);
     const isSent = senderId === socket.id;
+    localStorage.setItem("serverOffset", serverOffset);
     socket.auth.serverOffset = serverOffset;
     await addChatBubble(msg, isSent, senderId);
 });
