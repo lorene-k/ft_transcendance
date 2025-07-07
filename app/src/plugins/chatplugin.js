@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { parse } from "cookie";
-// *********************** Handle session */
+// ********************************************************** Handle session */
 function setupSocketAuth(io, fastify) {
     io.use((socket, next) => {
         const cookies = parse(socket.handshake.headers.cookie || "");
@@ -20,10 +20,10 @@ function setupSocketAuth(io, fastify) {
         });
     });
 }
-// *********************** Handle messages & db interaction */
+// **************************************** Handle messages & db interaction */
 function handleConnection(fastify, socket, io) {
     console.log(`User connected:`, socket.id);
-    socket.on("message", async (msg) => {
+    socket.on("message", async ({ target, msg }) => {
         let res;
         try {
             res = await fastify.database.run('INSERT INTO messages (content) VALUES (?)', msg);
@@ -31,60 +31,16 @@ function handleConnection(fastify, socket, io) {
         catch (e) {
             console.error("Failed to insert message in database: ", e); // TODO handle DB & failure
         }
-        const data = { senderId: socket.id, msg, serverOffset: res.lastId };
-        io.emit("message", data);
+        const data = {
+            senderId: socket.id,
+            msg,
+            serverOffset: res.lastID
+        };
+        io.to(target).emit("message", data);
+        socket.emit("message", data); // send to sender
     });
 }
-/*
-! HANDLE DMs
-socket.on("private-message", ({ toUserId, message }) => {
-    const targetSocketId = userSockets.get(toUserId);
-    if (targetSocketId) {
-      io.to(targetSocketId).emit("private-message", {
-        from: userId,
-        message,
-      });
-    }
-  });
-
-! HANDLE DISCONNECT
-socket.on("disconnect", () => {
-    userSockets.delete(userId);
-  });
-*/
-/*
-! DMs with username
-socket.on("private-message", async ({ toUsername, message }) => {
-  // Find the socket of the target user by username
-  const toSocketEntry = [...socketUsers.entries()].find(
-    ([, user]) => user.username === toUsername
-  );
-
-  if (!toSocketEntry) return;
-
-  const [toSocketId, toUser] = toSocketEntry;
-
-  // Save message to DB
-  await fastify.database.run(
-    `INSERT INTO messages (senderId, receiverId, content) VALUES (?, ?, ?)`,
-    [socket.userId, toUser.userId, message]
-  );
-
-  // Send to recipient
-  io.to(toSocketId).emit("private-message", {
-    fromUsername: socket.username,
-    message,
-  });
-
-  // Optionally, send to sender too
-  socket.emit("private-message", {
-    fromUsername: socket.username,
-    message,
-    toUsername,
-  });
-});
-*/
-// *********************** Handle message recovery */
+// ************************************************* Handle message recovery */
 async function handleRecovery(socket, fastify) {
     if (!socket.recovered) {
         try {
@@ -98,7 +54,7 @@ async function handleRecovery(socket, fastify) {
         }
     }
 }
-// *********************** Get active users */
+// ******************************************************** Get active users */
 function listUsers(socket, io) {
     const users = [];
     for (let [id, socket] of io.of("/").sockets) {
@@ -116,7 +72,7 @@ function notifyUsers(socket) {
         username: socket.username,
     });
 }
-// ******************************************* */
+// ************************************************************************* */
 // Attach username to socket
 async function getUsername(fastify, userId) {
     const row = await fastify.database.fetch_one(`SELECT username FROM user WHERE id = ?`, [userId]);
@@ -130,8 +86,9 @@ const chatPlugin = async (fastify) => {
     setupSocketAuth(io, fastify);
     io.on("connection", async (socket) => {
         socket.username = await getUsername(fastify, socket.session.userId);
-        handleConnection(fastify, socket, io);
+        socket.join(socket.session.userId);
         // userSockets.set(socket.session.user.id, socket.id); // 1 tab = 1 session (if multiple tabs : Map<userId, Set<socket.id>>)
+        handleConnection(fastify, socket, io);
         handleRecovery(socket, fastify);
         listUsers(socket, io);
         notifyUsers(socket);

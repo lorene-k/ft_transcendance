@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyPluginAsync, Session } from "fastify";
 import { parse } from "cookie";
 import { Socket } from "socket.io";
 
-// *********************** Handle session */
+// ********************************************************** Handle session */
 function setupSocketAuth(io : any, fastify : FastifyInstance) {
   io.use((socket: Socket, next: Function) => {
     const cookies = parse(socket.handshake.headers.cookie || "");
@@ -23,73 +23,27 @@ function setupSocketAuth(io : any, fastify : FastifyInstance) {
   });
 }
 
-// *********************** Handle messages & db interaction */
+// **************************************** Handle messages & db interaction */
 function handleConnection(fastify: FastifyInstance, socket: any, io: any) {
   console.log(`User connected:`, socket.id);
-  socket.on("message", async (msg: string) => {
+  socket.on("message", async ({ target, msg } : { target: string, msg: string }) => {
     let res;
     try {
       res = await fastify.database.run('INSERT INTO messages (content) VALUES (?)', msg);
     } catch (e) {
       console.error("Failed to insert message in database: ", e);       // TODO handle DB & failure
     }
-    const data = { senderId: socket.id, msg, serverOffset: res.lastId };
-    io.emit("message", data);
+    const data = {
+      senderId: socket.id,
+      msg,
+      serverOffset: res.lastID
+    };
+    io.to(target).emit("message", data);
+    socket.emit("message", data); // send to sender
   });
 }
 
-/*
-! HANDLE DMs
-socket.on("private-message", ({ toUserId, message }) => {
-    const targetSocketId = userSockets.get(toUserId);
-    if (targetSocketId) {
-      io.to(targetSocketId).emit("private-message", {
-        from: userId,
-        message,
-      });
-    }
-  });
-
-! HANDLE DISCONNECT
-socket.on("disconnect", () => {
-    userSockets.delete(userId);
-  });
-*/
-
-/*
-! DMs with username
-socket.on("private-message", async ({ toUsername, message }) => {
-  // Find the socket of the target user by username
-  const toSocketEntry = [...socketUsers.entries()].find(
-    ([, user]) => user.username === toUsername
-  );
-
-  if (!toSocketEntry) return;
-
-  const [toSocketId, toUser] = toSocketEntry;
-
-  // Save message to DB
-  await fastify.database.run(
-    `INSERT INTO messages (senderId, receiverId, content) VALUES (?, ?, ?)`,
-    [socket.userId, toUser.userId, message]
-  );
-
-  // Send to recipient
-  io.to(toSocketId).emit("private-message", {
-    fromUsername: socket.username,
-    message,
-  });
-
-  // Optionally, send to sender too
-  socket.emit("private-message", {
-    fromUsername: socket.username,
-    message,
-    toUsername,
-  });
-});
-*/
-
-// *********************** Handle message recovery */
+// ************************************************* Handle message recovery */
 async function handleRecovery(socket : any, fastify : FastifyInstance) {
   if (!socket.recovered) {
     try {
@@ -105,7 +59,7 @@ async function handleRecovery(socket : any, fastify : FastifyInstance) {
   }
 }
 
-// *********************** Get active users */
+// ******************************************************** Get active users */
 function listUsers(socket: Socket, io: any) {
   const users = [];
   for (let [id, socket] of io.of("/").sockets) {
@@ -125,7 +79,7 @@ function notifyUsers(socket: Socket) {
   });
 }
 
-// ******************************************* */
+// ************************************************************************* */
 // Attach username to socket
 async function getUsername(fastify: FastifyInstance, userId: number) { // ! Maybe query DB each time in case of change ?
   const row = await fastify.database.fetch_one(
@@ -143,8 +97,9 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
   
   io.on("connection", async (socket) => {
     socket.username = await getUsername(fastify, socket.session.userId!);
-    handleConnection(fastify, socket, io);
+    socket.join(socket.session.userId);
     // userSockets.set(socket.session.user.id, socket.id); // 1 tab = 1 session (if multiple tabs : Map<userId, Set<socket.id>>)
+    handleConnection(fastify, socket, io);
     handleRecovery(socket, fastify);
     listUsers(socket, io);
     notifyUsers(socket);

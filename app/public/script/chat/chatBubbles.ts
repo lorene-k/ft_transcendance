@@ -22,7 +22,7 @@ function updateBubbleHeader(bubble: Element, senderId: string) {
   lastSenderId = senderId;
   lastMessageTime = Date.now();
   if (timeElem) timeElem.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (isSameSender && isRecent && headerElem) headerElem.remove();
+  if (isSameSender && isRecent && headerElem) headerElem.remove();    // ! CHANGE IS SAME SENDER
 }
 
 export default async function addChatBubble(message : string, isSent : boolean, senderId : string) {
@@ -32,7 +32,7 @@ export default async function addChatBubble(message : string, isSent : boolean, 
   updateBubbleHeader(bubble, senderId);
   const textElem = bubble?.querySelector("p");
   if (textElem) textElem.textContent = message;
-  const conversation = document.getElementById("conversation");
+  const conversation = document.getElementById("conversation-box");
   if (!conversation) return;
   conversation.appendChild(bubble);
   conversation.scrollTop = conversation.scrollHeight;

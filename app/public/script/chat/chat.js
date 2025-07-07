@@ -1,5 +1,6 @@
 import addChatBubble from "./chatBubbles.js";
 let users = [];
+let targetId = null;
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 const socket = io('http://localhost:8080', {
@@ -11,7 +12,7 @@ const socket = io('http://localhost:8080', {
     // ackTimeout: 10000, // Use emit with ack to guarantee msg delivery
     // retries: 3
 });
-// *********************** Handle DMs */
+// ************************************************************** Handle DMs */
 function openNewChat(user) {
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
@@ -23,8 +24,7 @@ function openNewChat(user) {
     // Load profile picture
 }
 // ! ADD socket.on("load_dm", ...) to fetch messages between the two users
-// *********************** List active users */
-let selectedUser = null; // DM target username or userID
+// ******************************************************* List active users */
 // Add user to active users list
 function addActiveUser(userList, user) {
     const li = document.createElement("li");
@@ -33,8 +33,8 @@ function addActiveUser(userList, user) {
         return;
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
-        selectedUser = user.userID;
-        console.log("DM target set to:", selectedUser); // ! DEBUG
+        targetId = user.userID;
+        console.log("DM target set to:", targetId); // ! DEBUG
         openNewChat(user);
     });
     userList.appendChild(li);
@@ -72,47 +72,33 @@ socket.on("user connected", (user) => {
     displayConnectedUsers();
 });
 // ! Add "user disconnected" to update list
-// *********************** Send/Receive messages */
+// *************************************************** Send/Receive messages */
 // Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
-    console.log("Sending message...");
+    console.log(`Sending message to ${targetId}`); // ! DEBUB - get current username
     e.preventDefault();
     const input = document.querySelector('textarea');
-    if (input && input.value) {
+    if (!input)
+        return;
+    const msg = input.value;
+    if (input.value) {
         // compute unique offset (ensure client delivery after state recovery/temp disconnection)
         const clientOffset = `${socket.id}-${counter++}`; // ! adds loading time ?
-        socket.emit("message", input.value, clientOffset);
+        socket.emit("message", { target: targetId, msg }, clientOffset);
         input.value = "";
     }
-    input?.focus();
+    input.focus();
 });
 // Listen for messages
 socket.on("message", async ({ senderId, msg, serverOffset }) => {
-    console.log(`Received message from ${senderId}: ${msg}`);
-    const isSent = senderId === socket.id;
+    console.log(`Received message from ${senderId}: ${msg}`); // ! DEBUG
+    const isSent = senderId === socket.id; // ! current userId
     localStorage.setItem("serverOffset", serverOffset);
     socket.auth.serverOffset = serverOffset;
-    await addChatBubble(msg, isSent, senderId);
+    await addChatBubble(msg, isSent, socket.id);
 });
-// ! Disconnect
-// ! Announce next tournament (io.emit)
+// TODO - handle DMs >>> get current username/socket.id
+// TODO - persistent messages
+// TODO Disconnect
+// Announce next tournament (io.emit)
 // server side : io.to(session.socketId).emit("event", data);
-/*
-! Send DM
-socket.emit("private-message", { toUserId: 42, message: "Hey!" });
-! Receive DM
-socket.on("private-message", ({ from, message }) => {
-  console.log(`DM from ${from}: ${message}`);
-});
-*/
-/*
-! SEND TO TARGET
-socket.emit("private-message", {
-  toUsername: "alice",
-  message: "Hey Alice!"
-});
-! RECEIVE DM
-socket.on("private-message", ({ fromUsername, message, toUsername }) => {
-  console.log(`DM from ${fromUsername}: ${message}`);
-});
-*/ 

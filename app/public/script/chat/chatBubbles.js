@@ -23,7 +23,7 @@ function updateBubbleHeader(bubble, senderId) {
     if (timeElem)
         timeElem.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     if (isSameSender && isRecent && headerElem)
-        headerElem.remove();
+        headerElem.remove(); // ! CHANGE IS SAME SENDER
 }
 export default async function addChatBubble(message, isSent, senderId) {
     const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
@@ -34,7 +34,7 @@ export default async function addChatBubble(message, isSent, senderId) {
     const textElem = bubble?.querySelector("p");
     if (textElem)
         textElem.textContent = message;
-    const conversation = document.getElementById("conversation");
+    const conversation = document.getElementById("conversation-box");
     if (!conversation)
         return;
     conversation.appendChild(bubble);
