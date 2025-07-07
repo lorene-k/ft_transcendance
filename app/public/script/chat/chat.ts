@@ -1,8 +1,16 @@
-declare const io: any;
-let lastSenderId = "";
-let lastMessageTime: number = 0;
+import addChatBubble from "./chatBubbles.js";
+
+interface User {
+  userID: string;
+  username: string;
+  self?: boolean;
+  // Include any other properties you expect on a user
+}
+let users: User[] = [];
+
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
+declare const io: any;
 const socket = io('http://localhost:8080', {
     withCredentials: true,
     transports: ['websocket'],
@@ -13,43 +21,45 @@ const socket = io('http://localhost:8080', {
     // retries: 3
 });
 
-async function loadBubbleTemplate(templatePath : string) {
-    try {
-    const res = await fetch(templatePath);
-    const html = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    return (doc.body.firstElementChild);
-    } catch (e) {
-        console.error("Failed to fetch html:", e);
-        // conversation.innerHTML = "<p>Failed to load message.</p>"; //add in msg bubble
-    }
+/*********************** List active users */
+// Display connected users
+function displayConnectedUsers() {
+  console.log("Users: ", users); // ! DEBUG
+  const userList = document.getElementById("user-list");
+  if (!userList) return;
+  userList.innerHTML = "";
+  users.forEach((user) => {
+    const li = document.createElement("li");
+    li.textContent = user.username;
+    if (!user.self) userList.appendChild(li);
+    console.log('User connected:', user.username, user.self ? '(self)' : '');
+  });
 }
 
-function updateBubbleHeader(bubble: Element, senderId: string) {
-  const timeElem = bubble?.querySelector(".chat-time");
-  const headerElem = bubble?.querySelector(".chat-bubble-header");
-  const isSameSender = senderId === lastSenderId;
-  const isRecent = Date.now() - lastMessageTime < (60_000);
-  lastSenderId = senderId;
-  lastMessageTime = Date.now();
-  if (timeElem) timeElem.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (isSameSender && isRecent && headerElem) headerElem.remove();
-}
+// Get connected users
+socket.on("users", (newUsers: User[]) => {
+  newUsers.forEach((user) => {
+    user.self = user.userID === socket.id;
+  });
+  newUsers = newUsers.sort((a, b) => {
+    if (a.self) return -1;
+    if (b.self) return 1;
+    if (a.username < b.username) return -1;
+    return a.username > b.username ? 1 : 0;
+  });
+  users = newUsers;
+  displayConnectedUsers();
+});
 
-async function addChatBubble(message : string, isSent : boolean, senderId : string) {
-  const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
-  const bubble = await loadBubbleTemplate(templatePath);
-  if (!bubble) return;
-  updateBubbleHeader(bubble, senderId);
-  const textElem = bubble?.querySelector("p");
-  if (textElem) textElem.textContent = message;
-  const conversation = document.getElementById("conversation");
-  if (!conversation) return;
-  conversation.appendChild(bubble);
-  conversation.scrollTop = conversation.scrollHeight;
-}
+// Add user to list
+socket.on("user connected", (user: User) => {
+  users.push(user);
+  displayConnectedUsers();
+});
 
+// ! Add "user disconnected" to update list
+
+/*********************** Send/Receive messages */
 // Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
     console.log("Sending message...");
@@ -63,7 +73,6 @@ document.querySelector('button')?.addEventListener('click', (e) => {
     }
     input?.focus();
 });
-
 
 // Listen for messages
 socket.on("message", async ({ senderId, msg, serverOffset } :
@@ -82,7 +91,6 @@ socket.on("message", async ({ senderId, msg, serverOffset } :
 /*
 ! Send DM
 socket.emit("private-message", { toUserId: 42, message: "Hey!" });
-
 ! Receive DM
 socket.on("private-message", ({ from, message }) => {
   console.log(`DM from ${from}: ${message}`);
@@ -95,7 +103,6 @@ socket.emit("private-message", {
   toUsername: "alice",
   message: "Hey Alice!"
 });
-
 ! RECEIVE DM 
 socket.on("private-message", ({ fromUsername, message, toUsername }) => {
   console.log(`DM from ${fromUsername}: ${message}`);

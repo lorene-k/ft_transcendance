@@ -3,15 +3,6 @@ import { FastifyInstance, FastifyPluginAsync, Session } from "fastify";
 import { parse } from "cookie";
 import { Socket } from "socket.io";
 
-async function getUsername(fastify: FastifyInstance, userId: number) { // ! Maybe query DB each time in case of change ?
-  const row = await fastify.database.fetch_one(
-    `SELECT username FROM user WHERE id = ?`,
-    [userId]
-  );
-  if (!row) return ("Unknown user");
-  return (row.username);
-}
-
 // Verify session before connection & link session to socket
 function setupSocketAuth(io : any, fastify : FastifyInstance) {
   io.use((socket: Socket, next: Function) => {
@@ -21,9 +12,9 @@ function setupSocketAuth(io : any, fastify : FastifyInstance) {
     const sessionId = signedSessionId.split(".")[0];
   
     fastify.sessionStore.get(sessionId!, (err: Error | null, session: Session) => {
-      const username = getUsername(fastify, session.userId!);
-      if (err || !session || !session.authenticated) return (next(new Error("Unauthorized connection")));
-      socket.session = session;                   // ! Extend socket type in interface ?
+      if (err || !session || !session.authenticated)
+        return (next(new Error("Unauthorized connection")));
+      socket.session = session;
       fastify.sessionStore.set(sessionId!, session, (e : Error | null) => {
         if (e) return (next(new Error("No session Id found")));
         next();
@@ -114,33 +105,54 @@ async function handleRecovery(socket : any, fastify : FastifyInstance) {
   }
 }
 
+/*********************** Get active users */
+function listUsers(socket: Socket, io: any) {
+  const users = [];
+  for (let [id, socket] of io.of("/").sockets) {
+    users.push({
+      userID: id,
+      username: socket.username,
+    });
+  }
+  socket.emit("users", users);
+}
+
+// New connection - notify existing users
+function notifyUsers(socket: Socket) {
+   socket.broadcast.emit("User connected", {
+    userID: socket.id,
+    username: socket.username,
+  });
+}
+
+/******************************************* */
+// Attach username to socket
+async function getUsername(fastify: FastifyInstance, userId: number) { // ! Maybe query DB each time in case of change ?
+  const row = await fastify.database.fetch_one(
+    `SELECT username FROM user WHERE id = ?`,
+    [userId]
+  );
+  if (!row) return ("Unknown user");
+  return (row.username);
+}
+
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const io = fastify.io;
-  // const userSockets = new Map<number, string>();       // ! Attach user ID to socket for later use
+  // const userSockets = new Map<number, string>();       // Attach user ID to socket for later use
   setupSocketAuth(io, fastify);
   
   io.on("connection", async (socket) => {
     socket.username = await getUsername(fastify, socket.session.userId!);
     handleConnection(fastify, socket, io);
-    // userSockets.set(socket.session.user.id, socket.id); // ! 1 tab = 1 session (if multiple tabs : Map<userId, Set<socket.id>>)
+    // userSockets.set(socket.session.user.id, socket.id); // 1 tab = 1 session (if multiple tabs : Map<userId, Set<socket.id>>)
     handleRecovery(socket, fastify);
+    listUsers(socket, io);
+    notifyUsers(socket);
+    // ! handle disconnect + call on logout + session expiration
   });
 };
 
 export default fp(chatPlugin);
-
-/*
-interface Session {
-  user?: { id: number; username: string };
-  authenticated?: boolean;
-  socketId?: string;
-}
-
-interface Socket {
-  session?: MySession;
-  userId?: number;
-}
-*/
 
 // SERVER-SIDE
 // io.emit(event, data) – Broadcast to all clients
@@ -150,9 +162,17 @@ interface Socket {
 // socket.broadcast.emit(event, data) – Send to everyone except sender
 
 /*
-Handle DMs
-1. Identify each user (via session, username, or user ID).
-2. Map user IDs to socket IDs.
-3. Send messages to specific socket IDs.
+If multiple sockets per userId :
+if (!userSockets.has(userId)) {
+    userSockets.set(userId, new Set());
+  }
+  userSockets.get(userId).add(socket);
 
+  In this case, disconnect handler : 
+    socket.on("disconnect", () => {
+    userSockets.get(userId).delete(socket);
+    if (userSockets.get(userId).size === 0) {
+      userSockets.delete(userId);
+    }
+  });
 */
