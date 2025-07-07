@@ -4,6 +4,7 @@ let lastMessageTime: number = 0;
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 const socket = io('http://localhost:8080', {
+    withCredentials: true,
     transports: ['websocket'],
     auth: {
         serverOffset: lastOffset
@@ -49,6 +50,7 @@ async function addChatBubble(message : string, isSent : boolean, senderId : stri
   conversation.scrollTop = conversation.scrollHeight;
 }
 
+// Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
     console.log("Sending message...");
     e.preventDefault();
@@ -75,3 +77,27 @@ socket.on("message", async ({ senderId, msg, serverOffset } :
 
 // ! Disconnect
 // ! Announce next tournament (io.emit)
+// server side : io.to(session.socketId).emit("event", data);
+
+/*
+! Send DM
+socket.emit("private-message", { toUserId: 42, message: "Hey!" });
+
+! Receive DM
+socket.on("private-message", ({ from, message }) => {
+  console.log(`DM from ${from}: ${message}`);
+});
+*/
+
+/*
+! SEND TO TARGET
+socket.emit("private-message", {
+  toUsername: "alice",
+  message: "Hey Alice!"
+});
+
+! RECEIVE DM 
+socket.on("private-message", ({ fromUsername, message, toUsername }) => {
+  console.log(`DM from ${fromUsername}: ${message}`);
+});
+*/

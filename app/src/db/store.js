@@ -11,6 +11,8 @@ class SessionStore extends EventEmitter {
     set(sessionId, session, callback) {
         this.logger.info("set required for %s", sessionId);
         try {
+            if (typeof session.cookie.expires === 'string')
+                session.cookie.expires = new Date(session.cookie.expires);
             this.setSession.run(sessionId, session.cookie.expires?.toISOString(), JSON.stringify(session));
             callback(null);
         }

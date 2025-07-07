@@ -14,3 +14,10 @@ declare module "fastify" {
         userId?: number;
     }
 }
+
+declare module "socket.io" {
+    interface Socket {
+        session: Session;
+        username?: string;
+    }
+}

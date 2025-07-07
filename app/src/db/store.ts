@@ -23,6 +23,7 @@ class SessionStore extends EventEmitter {
     set(sessionId: string, session: Session, callback: (err: Error | null, session?: Session) => void) {
         this.logger.info("set required for %s", sessionId)
         try {
+            if (typeof session.cookie.expires === 'string') session.cookie.expires = new Date(session.cookie.expires);
             this.setSession.run(
                 sessionId,
                 session.cookie.expires?.toISOString(),
@@ -48,7 +49,6 @@ class SessionStore extends EventEmitter {
             expires: string;
             session: string;
         }
-
         this.logger.info("get required for %s", sessionId)
         try {
             this.getSession.get(sessionId, (err: any, row: SessionRow | undefined) => {

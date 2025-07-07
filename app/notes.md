@@ -1,6 +1,7 @@
 NEXT STEPS :
-- handle sessions
+OK - handle sessions
 - communication between 2 users
+- handle new chat
 - msg history
 
 - Map userId to socket ID	: Track who's connected
