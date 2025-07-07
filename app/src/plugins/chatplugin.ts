@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyPluginAsync, Session } from "fastify";
 import { parse } from "cookie";
 import { Socket } from "socket.io";
 
-// Verify session before connection & link session to socket
+// *********************** Handle session */
 function setupSocketAuth(io : any, fastify : FastifyInstance) {
   io.use((socket: Socket, next: Function) => {
     const cookies = parse(socket.handshake.headers.cookie || "");
@@ -23,7 +23,7 @@ function setupSocketAuth(io : any, fastify : FastifyInstance) {
   });
 }
 
-// Handle messages & db interaction
+// *********************** Handle messages & db interaction */
 function handleConnection(fastify: FastifyInstance, socket: any, io: any) {
   console.log(`User connected:`, socket.id);
   socket.on("message", async (msg: string) => {
@@ -31,7 +31,7 @@ function handleConnection(fastify: FastifyInstance, socket: any, io: any) {
     try {
       res = await fastify.database.run('INSERT INTO messages (content) VALUES (?)', msg);
     } catch (e) {
-      console.error("Failed to insert message in database: ", e);       // TODO handle failure
+      console.error("Failed to insert message in database: ", e);       // TODO handle DB & failure
     }
     const data = { senderId: socket.id, msg, serverOffset: res.lastId };
     io.emit("message", data);
@@ -89,7 +89,7 @@ socket.on("private-message", async ({ toUsername, message }) => {
 });
 */
 
-// Handle message recovery after disconnection
+// *********************** Handle message recovery */
 async function handleRecovery(socket : any, fastify : FastifyInstance) {
   if (!socket.recovered) {
     try {
@@ -105,7 +105,7 @@ async function handleRecovery(socket : any, fastify : FastifyInstance) {
   }
 }
 
-/*********************** Get active users */
+// *********************** Get active users */
 function listUsers(socket: Socket, io: any) {
   const users = [];
   for (let [id, socket] of io.of("/").sockets) {
@@ -125,7 +125,7 @@ function notifyUsers(socket: Socket) {
   });
 }
 
-/******************************************* */
+// ******************************************* */
 // Attach username to socket
 async function getUsername(fastify: FastifyInstance, userId: number) { // ! Maybe query DB each time in case of change ?
   const row = await fastify.database.fetch_one(

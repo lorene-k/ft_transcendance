@@ -1,7 +1,8 @@
 NEXT STEPS :
 OK - handle sessions
 - communication between 2 users
-- handle new chat
+- handle new chat window
+- add persistent userId
 - msg history
 
 - Map userId to socket ID	: Track who's connected

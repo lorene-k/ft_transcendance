@@ -21,20 +21,45 @@ const socket = io('http://localhost:8080', {
     // retries: 3
 });
 
-/*********************** List active users */
+// *********************** Handle DMs */
+function openNewChat(user: User) {
+  const chatBox = document.getElementById("conversation-box");
+  const recipientName = document.getElementById("recipient-name");
+  if (!chatBox || !recipientName) return;
+  chatBox.innerHTML = "";
+  recipientName.textContent = user.username;
+  // socket.emit("load_dm", { userId: user.userID });
+  // Load profile picture
+}
+// ! ADD socket.on("load_dm", ...) to fetch messages between the two users
+
+// *********************** List active users */
+let selectedUser: string | null = null; // DM target username or userID
+
+// Add user to active users list
+function addActiveUser(userList: HTMLElement, user: User) {
+  const li = document.createElement("li");
+  li.textContent = user.username;
+  if (user.self) return;
+  li.style.cursor = "pointer";
+  li.addEventListener("click", () => {
+    selectedUser = user.userID;
+    console.log("DM target set to:", selectedUser); // ! DEBUG
+    openNewChat(user);
+  });
+  userList.appendChild(li);
+}
+
 // Display connected users
 function displayConnectedUsers() {
-  console.log("Users: ", users); // ! DEBUG
   const userList = document.getElementById("user-list");
   if (!userList) return;
   userList.innerHTML = "";
   users.forEach((user) => {
-    const li = document.createElement("li");
-    li.textContent = user.username;
-    if (!user.self) userList.appendChild(li);
-    console.log('User connected:', user.username, user.self ? '(self)' : '');
+    addActiveUser(userList, user);
   });
 }
+
 
 // Get connected users
 socket.on("users", (newUsers: User[]) => {
@@ -59,7 +84,7 @@ socket.on("user connected", (user: User) => {
 
 // ! Add "user disconnected" to update list
 
-/*********************** Send/Receive messages */
+// *********************** Send/Receive messages */
 // Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
     console.log("Sending message...");

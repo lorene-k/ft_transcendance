@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { parse } from "cookie";
-// Verify session before connection & link session to socket
+// *********************** Handle session */
 function setupSocketAuth(io, fastify) {
     io.use((socket, next) => {
         const cookies = parse(socket.handshake.headers.cookie || "");
@@ -20,7 +20,7 @@ function setupSocketAuth(io, fastify) {
         });
     });
 }
-// Handle messages & db interaction
+// *********************** Handle messages & db interaction */
 function handleConnection(fastify, socket, io) {
     console.log(`User connected:`, socket.id);
     socket.on("message", async (msg) => {
@@ -29,7 +29,7 @@ function handleConnection(fastify, socket, io) {
             res = await fastify.database.run('INSERT INTO messages (content) VALUES (?)', msg);
         }
         catch (e) {
-            console.error("Failed to insert message in database: ", e); // TODO handle failure
+            console.error("Failed to insert message in database: ", e); // TODO handle DB & failure
         }
         const data = { senderId: socket.id, msg, serverOffset: res.lastId };
         io.emit("message", data);
@@ -84,7 +84,7 @@ socket.on("private-message", async ({ toUsername, message }) => {
   });
 });
 */
-// Handle message recovery after disconnection
+// *********************** Handle message recovery */
 async function handleRecovery(socket, fastify) {
     if (!socket.recovered) {
         try {
@@ -98,7 +98,7 @@ async function handleRecovery(socket, fastify) {
         }
     }
 }
-/*********************** Get active users */
+// *********************** Get active users */
 function listUsers(socket, io) {
     const users = [];
     for (let [id, socket] of io.of("/").sockets) {
@@ -116,7 +116,7 @@ function notifyUsers(socket) {
         username: socket.username,
     });
 }
-/******************************************* */
+// ******************************************* */
 // Attach username to socket
 async function getUsername(fastify, userId) {
     const row = await fastify.database.fetch_one(`SELECT username FROM user WHERE id = ?`, [userId]);
