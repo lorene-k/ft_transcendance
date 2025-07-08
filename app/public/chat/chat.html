@@ -28,9 +28,9 @@
 
       <div class="flex flex-grow flex-row gap-4 bg-gray-100 overflow-hidden">
         <!-- Left chat history -->
-          <div class="chat-card text-sm font-bold w-1/4 flex flex-col">
+          <div class="chat-card w-1/4 flex flex-col">
             <div class="flex items-center gap-8 basis-[10%] title-style h-12">All chats</div>
-            <div class="box-style basis-[90%] flex-grow gap-4 overflow-auto"></div>
+            <div id="all-messages" class="border-2 rounded-xl border-blue-600 basis-[90%] flex-grow overflow-auto"></div>
           </div>
       
         <!-- Middle chat area -->
@@ -41,33 +41,8 @@
             <div id="recipient-name" class="title-style"></div>
           </div>
       
-          <!-- Conversation box -->
-          <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4">
-             <!-- TEST Chat bubble - left -->
-             <div id="left-bubble" class="flex flex-col items-start w-fit">
-              <div class="flex flex-row items-center space-x-2">
-              <img class="w-5 h-5 rounded-xl" src="./assets/default-icon.png" alt="Jane default icon">
-                 <span class="text-sm font-semibold text-gray-900">Jane Doe</span>
-                 <span class="text-sm font-normal text-gray-500">11:46</span>
-              </div>
-              <div class="flex flex-col items-center gap-3 w-full leading-1.5 p-2 m-1 ml-6 mr-6 bg-gray-100 rounded-xl rounded-tl-none">
-                 <p id="received-content" class="text-sm font-normal text-gray-900">Hey ! This is a test.</p>
-              </div>
-            </div>
-            <!-- TEST Chat bubble - right -->
-            <div id="right-bubble"  class="flex justify-end w-full">
-              <div class="flex flex-col items-end w-fit">
-                <div class="flex flex-row items-center space-x-2">
-                  <span class="text-sm font-semibold text-gray-900">John Doe</span>
-                  <span class="text-sm font-normal text-gray-500">11:47</span>
-                  <img class="w-5 h-5 rounded-xl" src="./assets/default-icon-man.png" alt="Jane default icon" />
-                </div>
-                <div class="flex flex-col items-center gap-3 w-full leading-1.5 p-2 m-1 ml-6 mr-6 bg-gray-100 rounded-xl rounded-tr-none text-right">
-                  <p id="sent-content" class="text-sm font-normal text-gray-900">That's awesome. I think our users will really appreciate the improvements.</p>
-                </div>
-              </div>
-            </div> 
-          </div>
+          <!-- Conversation window -->
+          <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4"></div>
       
           <!-- Input section -->
           <div class="basis-[10%] flex flex-row gap-2">

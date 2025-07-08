@@ -23,7 +23,7 @@ function setupSocketAuth(io : any, fastify : FastifyInstance) {
   });
 }
 
-// **************************************** Handle messages & db interaction */
+// **************************************** Handle messages & db interaction */ ! 
 function handleConnection(fastify: FastifyInstance, socket: any, io: any) {
   console.log(`User connected:`, socket.id);
   socket.on("message", async ({ target, msg } : { target: string, msg: string }) => {
@@ -42,6 +42,10 @@ function handleConnection(fastify: FastifyInstance, socket: any, io: any) {
     socket.emit("message", data); // send to sender
   });
 }
+
+// ! Use ordering to prevent conversation duplicates (normalize user order before inserting into DB)
+// ! const user1_id = Math.min(userA, userB);
+// ! const user2_id = Math.max(userA, userB);
 
 // ************************************************* Handle message recovery */
 async function handleRecovery(socket : any, fastify : FastifyInstance) {

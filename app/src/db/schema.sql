@@ -5,8 +5,8 @@ PRAGMA foreign_keys = ON;
 -- ------------------------------
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
-    username TEXT NOT NULL,
-    email TEXT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT UNIQUE,
     password TEXT,
     created_at DATE NOT NULL,
     last_login_at DATETIME,
@@ -44,32 +44,52 @@ CREATE TABLE IF NOT EXISTS session (
 );
 
 -- ------------------------------
--- Table: message history
+-- Table: conversations
 -- ------------------------------
--- CREATE TABLE IF NOT EXISTS message (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     sender_id INTEGER NOT NULL,
---     receiver_id INTEGER NOT NULL,
---     content TEXT NOT NULL,
---     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE NO ACTION,
---     FOREIGN KEY (receiver_id) REFERENCES user(id) ON DELETE NO ACTION
--- );
+CREATE TABLE IF NOT EXISTS conversations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user1_id INTEGER NOT NULL,
+    user2_id INTEGER NOT NULL,
+    UNIQUE(user1_id, user2_id),
+    FOREIGN KEY (user1_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES user(id) ON DELETE CASCADE
+);
 
+-- ------------------------------
+-- Table: messages
+-- ------------------------------
 CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL,
+    sender_id INTEGER NOT NULL,
+    sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     client_offset TEXT UNIQUE,
-    content TEXT
+    content TEXT,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- ------------------------------
--- Table: blocked users
--- ------------------------------
-CREATE TABLE IF NOT EXISTS block (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    blocker_id INTEGER NOT NULL,
-    blocked_id INTEGER NOT NULL,
-    UNIQUE (blocker_id, blocked_id),
-    FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
-);
+-- -- ------------------------------
+-- -- Table: blocked users
+-- -- ------------------------------
+-- CREATE TABLE IF NOT EXISTS blocked (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     blocker_id INTEGER NOT NULL,
+--     blocked_id INTEGER NOT NULL,
+--     UNIQUE(blocker_id, blocked_id),
+--     FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
+--     FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
+-- );
+
+-- -- ------------------------------
+-- -- Table: friends
+-- -- ------------------------------
+-- CREATE TABLE IF NOT EXISTS friends (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     user_id INTEGER NOT NULL,
+--     friend_id INTEGER NOT NULL,
+--     request_status TEXT NOT NULL CHECK (request_status IN ('pending', 'accepted')),
+--     UNIQUE(user_id, friend_id),
+--     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+--     FOREIGN KEY (friend_id) REFERENCES user(id) ON DELETE CASCADE
+-- );

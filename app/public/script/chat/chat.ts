@@ -1,4 +1,4 @@
-import addChatBubble from "./chatBubbles.js";
+import { addChatBubble, loadTemplate }from "./chatBubbles.js";
 
 interface User {
   userID: string;
@@ -8,6 +8,7 @@ interface User {
 }
 let users: User[] = [];
 let targetId: string | null = null;
+let currentUsername = "";
 
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
@@ -22,12 +23,34 @@ const socket = io('http://localhost:8080', {
     // retries: 3
 });
 
-// ************************************************************** Handle DMs */
+// **************************************************** Handle Convo history */
+async function updateConvPreview(userId: string, username: string) {
+  const allMessages = document.getElementById("all-messages");
+  if (!allMessages) return;
+  const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
+  if (displayed) {
+    displayed.classList.add("transition-all", "duration-300");
+    allMessages.prepend(displayed);
+  } else {
+    const card = await loadTemplate("/chat/conversation.html", "conversation");
+    if (!card) return;
+    card.setAttribute("data-user-id", userId);
+    const name = card.querySelector("p");
+    if (name) name.textContent = username; // ! Change to targetName ?
+    card.addEventListener("click", () => {
+      targetId = userId;
+      openNewChat({ userID: userId, username, self: false });
+    });
+    allMessages.prepend(card);
+  }
+}
+
+// ************************************************************** Handle DMs */   LOAD CONVO HISTORY HERE
 function openNewChat(user: User) {
   const chatBox = document.getElementById("conversation-box");
   const recipientName = document.getElementById("recipient-name");
   if (!chatBox || !recipientName) return;
-  chatBox.innerHTML = "";
+   // ! loadMsgHistoy
   recipientName.textContent = user.username;
   // socket.emit("load_dm", { userId: user.userID });
   // Load profile picture
@@ -38,12 +61,12 @@ function openNewChat(user: User) {
 // Add user to active users list
 function addActiveUser(userList: HTMLElement, user: User) {
   const li = document.createElement("li");
-  li.textContent = user.username;
+  li.textContent = user.username;   // ! If target username needed, get here
   if (user.self) return;
   li.style.cursor = "pointer";
   li.addEventListener("click", () => {
     targetId = user.userID;
-    console.log("DM target set to:", targetId); // ! DEBUG
+    console.log("Target set to:", targetId); // ! DEBUG
     openNewChat(user);
   });
   userList.appendChild(li);
@@ -62,7 +85,10 @@ function displayConnectedUsers() {
 // Get connected users
 socket.on("users", (newUsers: User[]) => {
   newUsers.forEach((user) => {
-    user.self = user.userID === socket.id;
+    if (user.userID === socket.id) {
+      user.self = true ;
+      currentUsername = socket.auth.username = user.username; // ! Remove user.username ?
+    }
   });
   newUsers = newUsers.sort((a, b) => {
     if (a.self) return -1;
@@ -85,14 +111,14 @@ socket.on("user connected", (user: User) => {
 // *************************************************** Send/Receive messages */
 // Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
-    console.log(`Sending message to ${targetId}`); // ! DEBUB - get current username
+    console.log(`Sending message to ${targetId} from ${currentUsername}`); // ! DEBUB - get current username
     e.preventDefault();
     const input = document.querySelector('textarea');
     if (!input) return ;
     const msg = input.value;
     if (input.value) {
         // compute unique offset (ensure client delivery after state recovery/temp disconnection)
-        const clientOffset = `${socket.id}-${counter++}`; // ! adds loading time ?
+        const clientOffset = `${socket.id}-${counter++}`;
         socket.emit("message", { target: targetId, msg }, clientOffset);
         input.value = "";
     }
@@ -102,16 +128,21 @@ document.querySelector('button')?.addEventListener('click', (e) => {
 // Listen for messages
 socket.on("message", async ({ senderId, msg, serverOffset } :
     { senderId: string; msg: string, serverOffset: string }) => {
-    console.log(`Received message from ${senderId}: ${msg}`); // ! DEBUG
-    const isSent = senderId === socket.id; // ! current userId
+    console.log(`Received message from ${senderId}: ${msg}`);     // ! DEBUG
+    const isSent = senderId === socket.id;
     localStorage.setItem("serverOffset", serverOffset);
     socket.auth.serverOffset = serverOffset;
+    updateConvPreview(senderId, socket.auth.username);
     await addChatBubble(msg, isSent, socket.id);
 });
 
-// TODO - fix DMs >>> only working one-way
-// TODO - fix chatBubbles (disappearing header/isSameSender)
 // TODO - persistent messages
 // TODO Disconnect
-// Announce next tournament (io.emit)
-// server side : io.to(session.socketId).emit("event", data);
+// TODO - handle blocked users
+// TODO - Announce next tournament (io.emit)
+// TODO - check msg recovery handling
+// >> server side : io.to(session.socketId).emit("event", data);
+
+// TODO "Also explain how i can retreive messages from a specific conversation when i click on it"
+
+// ! call this from frontend to get conversation : GET /api/chat/conversation?userA=1&userB=2
