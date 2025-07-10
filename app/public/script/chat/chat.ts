@@ -1,19 +1,18 @@
 import { addChatBubble, loadTemplate }from "./chatBubbles.js";
+import { openChat } from "./chatHistory.js";
 
-interface User {
+export interface User {
   userID: string;
   username: string;
   self?: boolean;
-  // Include any other properties you expect on a user
 }
+export let targetId: string | null = null;
 let users: User[] = [];
-let targetId: string | null = null;
-let currentUsername = "";
 
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 declare const io: any;
-const socket = io('http://localhost:8080', {
+export const socket = io('http://localhost:8080', {
     withCredentials: true,
     transports: ['websocket'],
     auth: {
@@ -23,8 +22,8 @@ const socket = io('http://localhost:8080', {
     // retries: 3
 });
 
-// **************************************************** Handle Convo history */
-async function updateConvPreview(userId: string, username: string) {
+// ********************************************* Update conversation preview */
+async function updateConvPreview(userId: string, targetName: string) {
   const allMessages = document.getElementById("all-messages");
   if (!allMessages) return;
   const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
@@ -36,26 +35,14 @@ async function updateConvPreview(userId: string, username: string) {
     if (!card) return;
     card.setAttribute("data-user-id", userId);
     const name = card.querySelector("p");
-    if (name) name.textContent = username; // ! Change to targetName ?
+    if (name) name.textContent = targetName;
     card.addEventListener("click", () => {
       targetId = userId;
-      openNewChat({ userID: userId, username, self: false });
+      openChat({ userID: userId, username: targetName, self: false });
     });
     allMessages.prepend(card);
   }
 }
-
-// ************************************************************** Handle DMs */   LOAD CONVO HISTORY HERE
-function openNewChat(user: User) {
-  const chatBox = document.getElementById("conversation-box");
-  const recipientName = document.getElementById("recipient-name");
-  if (!chatBox || !recipientName) return;
-   // ! loadMsgHistoy
-  recipientName.textContent = user.username;
-  // socket.emit("load_dm", { userId: user.userID });
-  // Load profile picture
-}
-// ! ADD socket.on("load_dm", ...) to fetch messages between the two users
 
 // ******************************************************* List active users */
 // Add user to active users list
@@ -67,7 +54,7 @@ function addActiveUser(userList: HTMLElement, user: User) {
   li.addEventListener("click", () => {
     targetId = user.userID;
     console.log("Target set to:", targetId); // ! DEBUG
-    openNewChat(user);
+    openChat(user);
   });
   userList.appendChild(li);
 }
@@ -87,7 +74,7 @@ socket.on("users", (newUsers: User[]) => {
   newUsers.forEach((user) => {
     if (user.userID === socket.id) {
       user.self = true ;
-      currentUsername = socket.auth.username = user.username; // ! Remove user.username ?
+      socket.auth.username = user.username;
     }
   });
   newUsers = newUsers.sort((a, b) => {
@@ -111,7 +98,7 @@ socket.on("user connected", (user: User) => {
 // *************************************************** Send/Receive messages */
 // Send message
 document.querySelector('button')?.addEventListener('click', (e) => {
-    console.log(`Sending message to ${targetId} from ${currentUsername}`); // ! DEBUB - get current username
+    console.log(`Sending message to ${targetId} from ${socket.auth.username}`); // ! DEBUB - get current username
     e.preventDefault();
     const input = document.querySelector('textarea');
     if (!input) return ;
@@ -119,30 +106,38 @@ document.querySelector('button')?.addEventListener('click', (e) => {
     if (input.value) {
         // compute unique offset (ensure client delivery after state recovery/temp disconnection)
         const clientOffset = `${socket.id}-${counter++}`;
-        socket.emit("message", { target: targetId, msg }, clientOffset);
+        socket.emit("message", { targetId: targetId, msg, clientOffset });
         input.value = "";
     }
     input.focus();
 });
 
 // Listen for messages
-socket.on("message", async ({ senderId, msg, serverOffset } :
-    { senderId: string; msg: string, serverOffset: string }) => {
+socket.on("message", async ({ senderId, senderUsername, msg, serverOffset } :
+    { senderId: string; senderUsername: string, msg: string, serverOffset: string }) => {
     console.log(`Received message from ${senderId}: ${msg}`);     // ! DEBUG
     const isSent = senderId === socket.id;
-    localStorage.setItem("serverOffset", serverOffset);
+    localStorage.setItem("serverOffset", serverOffset);       // ! Necessary ??
     socket.auth.serverOffset = serverOffset;
-    updateConvPreview(senderId, socket.auth.username);
+    
+    // Update conversation preview
+    if (isSent) {
+      const targetUser = users.find(u => u.userID === targetId);
+      if (targetUser) updateConvPreview(targetId!, targetUser.username!);
+    } else updateConvPreview(targetId!, senderUsername!);
+      console.log(`TEST : targetId = ${targetId}, senderId = ${senderId}, senderUsername = ${senderUsername}`); // ! DEBUG")
     await addChatBubble(msg, isSent, socket.id);
 });
 
-// TODO - persistent messages
-// TODO Disconnect
+// ? add last_seen in conv to send missed messages in case of disconnect ?
+// TODO - check msg recovery handling
+// TODO - Disconnect
+// TODO - check what happens if same user connected in different tabs (don't create new socket)
+// >> check if session.userId exists in map, assign socket.id to it (change map to hold socket.id ARRAY)
+
 // TODO - handle blocked users
 // TODO - Announce next tournament (io.emit)
-// TODO - check msg recovery handling
 // >> server side : io.to(session.socketId).emit("event", data);
 
-// TODO "Also explain how i can retreive messages from a specific conversation when i click on it"
-
-// ! call this from frontend to get conversation : GET /api/chat/conversation?userA=1&userB=2
+// TODO - create landing page for new chat, otherwise display last conversation
+// TODO - friends (search bar w/ db fetch)
