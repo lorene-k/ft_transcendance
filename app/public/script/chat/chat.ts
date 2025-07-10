@@ -125,11 +125,12 @@ socket.on("message", async ({ senderId, senderUsername, msg, serverOffset } :
       const targetUser = users.find(u => u.userID === targetId);
       if (targetUser) updateConvPreview(targetId!, targetUser.username!);
     } else updateConvPreview(targetId!, senderUsername!);
-      console.log(`TEST : targetId = ${targetId}, senderId = ${senderId}, senderUsername = ${senderUsername}`); // ! DEBUG")
+
     await addChatBubble(msg, isSent, socket.id);
 });
 
 // ? add last_seen in conv to send missed messages in case of disconnect ?
+// TODO - handle history
 // TODO - check msg recovery handling
 // TODO - Disconnect
 // TODO - check what happens if same user connected in different tabs (don't create new socket)
