@@ -2,7 +2,7 @@ import fp from "fastify-plugin";
 import { parse } from "cookie";
 const userSockets = new Map();
 const socketToSession = new Map();
-// ********************************************************** Handle session */
+// ********************************************************** Authentication */
 function authenticateSession(io, fastify) {
     io.use((socket, next) => {
         const cookies = parse(socket.handshake.headers.cookie || "");
@@ -22,19 +22,65 @@ function authenticateSession(io, fastify) {
         });
     });
 }
-// **************************************** Handle messages & db interaction */
-async function getConversation(fastify, senderId, targetId) {
-    // Prevent duplicates
+// Attach username to socket
+async function getUsername(fastify, userId) {
+    const row = await fastify.database.fetch_one(`SELECT username FROM user WHERE id = ?`, [userId]);
+    if (!row)
+        return ("Unknown user");
+    return (row.username);
+}
+// Send userId and username to client
+function sendUserId(socket) {
+    socket.emit("session", {
+        sessionId: socket.session.userId.toString(),
+        username: socket.username,
+    });
+}
+// ********************************************************** Update history */
+async function runInsertConversation(fastify, user1, user2) {
+    return new Promise((resolve, reject) => {
+        fastify.database.run('INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)', [user1, user2], function (err) {
+            if (err) {
+                console.error("Failed to create conversation:", err.message);
+                return (reject(-1));
+            }
+            console.log(`Created new conversation with ID ${this.lastID} between ${user1} and ${user2}`); // ! DEBUG
+            resolve(this.lastID);
+        });
+    });
+}
+function runInsertMessage(fastify, msg, conversationId, senderId, clientOffset) {
+    return new Promise((resolve, reject) => {
+        fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset) VALUES (?, ?, ?, ?)`, [conversationId, senderId, msg, clientOffset], function (err) {
+            if (err) {
+                console.error("Error inserting message:", err.message);
+                return (reject(-1)); // Reject the promise in case of error
+            }
+            console.log(`Message inserted with ID ${this.lastID}`);
+            resolve(this.lastID); // Resolve the promise with the ID of the inserted message
+        });
+    });
+}
+// ***************************************** Handle messages & conversations */
+async function getAllConversations(fastify, userId, io) {
+    try {
+        const conversations = await fastify.database.fetch_all(`SELECT id, 
+    CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId 
+    FROM conversations WHERE user1_id = ? OR user2_id = ?`, [userId, userId, userId]);
+        io.to(userId.toString()).emit("allConversations", conversations);
+    }
+    catch (err) {
+        console.error("Failed to fetch conversations", err);
+    }
+}
+async function getOrCreateConversation(fastify, senderId, targetId) {
     let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
     try {
         const conv = await fastify.database.fetch_one(`SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`, [user1, user2]);
-        // Return existing conversation ID
         if (conv)
             return (conv.id);
-        // Create conversation if doesn't exist
-        console.log("Creating new conversation between", user1, "and", user2);
-        const res = await fastify.database.run(`INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)`, [user1, user2]);
-        return (res.lastID);
+        const conversationId = await runInsertConversation(fastify, user1, user2);
+        return (conversationId);
     }
     catch (e) {
         console.error("Failed to create or get conversation: ", e);
@@ -43,10 +89,9 @@ async function getConversation(fastify, senderId, targetId) {
 }
 async function insertMessage(fastify, msg, conversationId, senderId, clientOffset) {
     try {
-        const res = await fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset)
-       VALUES (?, ?, ?, ?)`, [conversationId, senderId, msg, clientOffset]);
+        const messageId = await runInsertMessage(fastify, msg, conversationId, senderId, clientOffset);
         console.log(`Message (content = ${msg}) inserted in conversation: `, conversationId); // ! DEBUG
-        return (res.lastID);
+        return (messageId);
     }
     catch (e) {
         console.error("Failed to insert message: ", e);
@@ -55,20 +100,19 @@ async function insertMessage(fastify, msg, conversationId, senderId, clientOffse
 }
 function handleMessages(fastify, socket, io) {
     socket.on("message", async ({ targetId, msg, clientOffset }) => {
-        const senderSessionId = socket.session.userId;
-        const targetSessionId = socketToSession.get(targetId); // ! change this
-        const conversationId = await getConversation(fastify, senderSessionId, targetSessionId);
+        const senderId = socket.session.userId;
+        const conversationId = await getOrCreateConversation(fastify, senderId, parseInt(targetId));
         if (conversationId === -1)
             return;
-        const offset = await insertMessage(fastify, msg, conversationId, senderSessionId, clientOffset);
+        const offset = await insertMessage(fastify, msg, conversationId, senderId, clientOffset);
         const data = {
             senderId: socket.session.userId.toString(),
             senderUsername: socket.username,
             msg,
             serverOffset: offset,
         };
-        io.to(targetSessionId?.toString()).emit("message", data);
-        io.to(senderSessionId?.toString()).emit("message", data);
+        io.to(targetId.toString()).emit("message", data);
+        io.to(senderId.toString()).emit("message", data);
     });
 }
 // ************************************************* Handle message recovery */
@@ -106,10 +150,10 @@ function listUsers(socket, io) {
         const sock = io.of("/").sockets.get(firstSocketId); // Get Socket instance
         if (sock) {
             users.push({
-                userId: sessionId.toString(), // ! CHECK
+                userId: sessionId.toString(),
                 username: sock.username,
             });
-            console.log(`List users: userID = ${sessionId}, username = ${sock.username}`); // ! DEBUG
+            // console.log(`List users: userID = ${sessionId}, username = ${sock.username}`); // ! DEBUG
         }
     }
     socket.emit("users", users);
@@ -117,42 +161,30 @@ function listUsers(socket, io) {
 // New connection - notify existing users
 function notifyUsers(socket) {
     socket.broadcast.emit("User connected", {
-        userId: socket.session.userId.toString(), // ! CHECK
+        userId: socket.session.userId.toString(),
         username: socket.username,
     });
-    console.log(`New user connected: userID = ${socket.session.userId.toString()}, username = ${socket.username}`); // ! DEBUG
+    // console.log(`New user connected: userID = ${socket.session.userId.toString()}, username = ${socket.username}`); // ! DEBUG
 }
 // ************************************************************************* */
-// Attach username to socket
-async function getUsername(fastify, userId) {
-    const row = await fastify.database.fetch_one(`SELECT username FROM user WHERE id = ?`, [userId]);
-    if (!row)
-        return ("Unknown user");
-    return (row.username);
-}
-function sendUserId(socket) {
-    socket.emit("session", {
-        sessionId: socket.session.userId.toString(),
-        username: socket.username,
-    });
-}
 const chatPlugin = async (fastify) => {
     const io = fastify.io;
     authenticateSession(io, fastify);
     io.on("connection", async (socket) => {
-        console.log(`Socket connected:`, socket.id); // ! DEBUG
+        // console.log(`Socket connected:`, socket.id); // ! DEBUG
         const sessionId = socket.session.userId;
         socket.username = await getUsername(fastify, sessionId);
-        socket.join(sessionId.toString()); // ! For sending events to all user sockets >> io.to(userId).emit("message", data);
+        socket.join(sessionId.toString());
         if (!userSockets.has(sessionId))
             userSockets.set(sessionId, new Set());
         userSockets.get(sessionId).add(socket.id);
         socketToSession.set(socket.id, sessionId);
-        sendUserId(socket); // Send user ID to client for identification
+        sendUserId(socket);
         handleMessages(fastify, socket, io);
         // handleRecovery(socket, fastify);
         listUsers(socket, io);
         notifyUsers(socket);
+        getAllConversations(fastify, sessionId, io);
     });
 };
 export default fp(chatPlugin);
@@ -174,4 +206,5 @@ export default fp(chatPlugin);
   }
   socketToSession.delete(socket.id);
 });
+
 */ 

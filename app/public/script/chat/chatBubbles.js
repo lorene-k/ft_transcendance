@@ -1,15 +1,12 @@
 let lastSenderId = "";
 let lastMessageTime = 0;
-export async function loadTemplate(templatePath, type) {
+export async function loadTemplate(templatePath) {
     try {
         const res = await fetch(templatePath);
         const html = await res.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
-        if (type === "bubble")
-            return (doc.body.firstElementChild);
-        if (type === "conversation")
-            return (doc.body);
+        return (doc.body.firstElementChild);
     }
     catch (e) {
         console.error("Failed to fetch html:", e);
@@ -29,7 +26,7 @@ function updateBubbleHeader(bubble, senderId) {
 }
 export async function addChatBubble(message, isSent, senderId) {
     const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
-    const bubble = await loadTemplate(templatePath, "bubble");
+    const bubble = await loadTemplate(templatePath);
     if (!bubble)
         return;
     updateBubbleHeader(bubble, senderId);

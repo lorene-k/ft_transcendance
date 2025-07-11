@@ -3,7 +3,9 @@ import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 // GET /api/chat/conversation?userA=1&userB=2
 export function getConversation(fastify: FastifyInstance) {
     return async function (request: FastifyRequest, reply: FastifyReply) {
-        let { user1, user2 } = request.query as { user1: number; user2: number };
+        const { userA, userB } = request.query as { userA: string; userB: string };
+        let user1 = parseInt(userA);
+        let user2 = parseInt(userB);
         [user1, user2] = [user1, user2].sort((a, b) => a - b);
         try {
           const convId = await fastify.database.fetch_one(
@@ -12,11 +14,11 @@ export function getConversation(fastify: FastifyInstance) {
                 OR (user1_id = ? AND user2_id = ?)`,
             [user1, user2, user1, user2]
           );
-          if (!convId) return (reply.status(204).send({ message: "New conversation" }));
+          if (!convId) return (reply.status(200).send({ message: "New conversation" }));
           return (reply.send(convId));
         } catch (err) {
           console.error("Failed to fetch conversation", err);
-          return (reply.status(500).send({ error: "Database error" }));
+          reply.status(500).send({ error: "Database error" });
         }
     };
 }
@@ -30,7 +32,7 @@ export function getMessages(fastify: FastifyInstance) {
             "SELECT * FROM messages WHERE conversation_id = ? ORDER BY sent_at ASC",
             [conversationId]
           );
-          reply.send(messages);
+          return (reply.send(messages));
         } catch (err) {
           reply.status(500).send({ error: "Failed to fetch messages" });
         }

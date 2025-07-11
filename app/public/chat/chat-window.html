@@ -1,0 +1,16 @@
+<div id="chat-window" class="flex flex-col h-full gap-3">
+  <!-- Header -->
+  <div class="flex items-center gap-8 basis-[10%]">
+    <img class="h-12 w-12 rounded-xl" src="./assets/default-icon.png" />
+    <div id="recipient-name" class="title-style"></div>
+  </div>
+  
+  <!-- Conversation window -->
+  <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4"></div>
+  
+  <!-- Input section -->
+  <div class="basis-[10%] flex flex-row gap-2">
+    <textarea id="msg-input" rows="1" class="box-style w-4/5" placeholder="Type message"></textarea>
+    <button class="button-style w-1/5">Send</button>
+  </div>
+</div>

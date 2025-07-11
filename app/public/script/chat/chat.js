@@ -25,7 +25,7 @@ async function updateConvPreview(userId, targetName) {
         allMessages.prepend(displayed);
     }
     else {
-        const card = await loadTemplate("/chat/conversation.html", "conversation");
+        const card = await loadTemplate("/chat/conversation.html");
         if (!card)
             return;
         card.setAttribute("data-user-id", userId);
@@ -67,9 +67,9 @@ function displayConnectedUsers() {
 // Get connected users
 socket.on("users", (newUsers) => {
     newUsers.forEach((user) => {
+        // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
         if (user.userId === currentSessionId)
             user.self = true;
-        console.log(`TEST 1 : User: ${user.username}, ID: ${user.userId}`); // ! DEBUG
     });
     newUsers = newUsers.sort((a, b) => {
         if (a.self)
@@ -81,6 +81,10 @@ socket.on("users", (newUsers) => {
         return a.username > b.username ? 1 : 0;
     });
     users = newUsers;
+    if (users[0])
+        console.log(`User(0): ${users[0].username}`); // ! DEBUG
+    if (users[1])
+        console.log(`user[1] = ${users[1].username}`);
     displayConnectedUsers();
 });
 // Add user to list
@@ -90,27 +94,46 @@ socket.on("user connected", (user) => {
 });
 // ! Add "user disconnected" to update list
 // *************************************************** Send/Receive messages */
-// Send message
-document.querySelector('button')?.addEventListener('click', (e) => {
-    console.log(`Sending message to ${targetId} from ${socket.auth.username}`); // ! DEBUB - get current username
-    e.preventDefault();
-    const input = document.querySelector('textarea');
-    if (!input)
-        return;
-    const msg = input.value;
-    if (input.value) {
-        // compute unique offset (ensure client delivery after state recovery/temp disconnection)
-        const clientOffset = `${currentSessionId}-${counter++}`;
-        socket.emit("message", { targetId: targetId, msg, clientOffset });
-        input.value = "";
+// Get conversation history
+socket.on("allConversations", (conversations) => {
+    if (!conversations || conversations.length === 0) {
+        console.log("No conversations found.");
     }
-    input.focus();
+    else {
+        console.log("Received conversations: ", conversations);
+        for (const conv of conversations) {
+            const otherUser = users.find(u => u.userId === conv.otherUserId.toString());
+            if (!otherUser)
+                console.error(`User with ID ${conv.id} not found in users list.`); // ! TEST
+            if (otherUser)
+                updateConvPreview(conv.id, otherUser.username);
+        }
+    }
+});
+// Send message
+document.getElementById("conversation-container")?.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target && target.tagName === 'BUTTON') {
+        console.log(`Sending message to ${targetId} from ${socket.auth.username}`); // ! DEBUB - get current username
+        e.preventDefault();
+        const input = document.querySelector('textarea');
+        if (!input)
+            return;
+        const msg = input.value;
+        if (input.value) {
+            // compute unique offset (ensure client delivery after state recovery/temp disconnection)
+            const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // !!!!!!!!! CHECK
+            socket.emit("message", { targetId: targetId, msg, clientOffset });
+            input.value = "";
+        }
+        input.focus();
+    }
 });
 // Listen for messages
 socket.on("message", async ({ senderId, senderUsername, msg, serverOffset }) => {
     console.log(`Received message from ${senderId}: ${msg}`); // ! DEBUG
     const isSent = senderId === currentSessionId;
-    localStorage.setItem("serverOffset", serverOffset); // ! Necessary ??
+    localStorage.setItem("serverOffset", serverOffset);
     socket.auth.serverOffset = serverOffset;
     // Update conversation preview
     if (isSent) {
@@ -126,6 +149,10 @@ socket.on("session", ({ sessionId, username }) => {
     currentSessionId = sessionId;
     socket.auth.username = username;
 });
+// ! FIX - sending to user null ??
+// ! FIX users list - bancal
+// ! FIX - load msg history when opening chat-window
+// TODO - update landing page
 // ? add last_seen in conv to send missed messages in case of disconnect ?
 // TODO - handle history
 // TODO - check msg recovery handling
