@@ -1,7 +1,5 @@
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
 import { openChat } from "./chatHistory.js";
-export let targetId = null;
-let users = [];
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 export const socket = io('http://localhost:8080', {
@@ -13,6 +11,9 @@ export const socket = io('http://localhost:8080', {
     // ackTimeout: 10000, // Use emit with ack to guarantee msg delivery
     // retries: 3
 });
+export let currentSessionId = "";
+export let targetId = null;
+let users = [];
 // ********************************************* Update conversation preview */
 async function updateConvPreview(userId, targetName) {
     const allMessages = document.getElementById("all-messages");
@@ -33,7 +34,7 @@ async function updateConvPreview(userId, targetName) {
             name.textContent = targetName;
         card.addEventListener("click", () => {
             targetId = userId;
-            openChat({ userID: userId, username: targetName, self: false });
+            openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);
     }
@@ -42,12 +43,12 @@ async function updateConvPreview(userId, targetName) {
 // Add user to active users list
 function addActiveUser(userList, user) {
     const li = document.createElement("li");
-    li.textContent = user.username; // ! If target username needed, get here
+    li.textContent = user.username;
     if (user.self)
         return;
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
-        targetId = user.userID;
+        targetId = user.userId;
         console.log("Target set to:", targetId); // ! DEBUG
         openChat(user);
     });
@@ -66,10 +67,9 @@ function displayConnectedUsers() {
 // Get connected users
 socket.on("users", (newUsers) => {
     newUsers.forEach((user) => {
-        if (user.userID === socket.id) {
+        if (user.userId === currentSessionId)
             user.self = true;
-            socket.auth.username = user.username;
-        }
+        console.log(`TEST 1 : User: ${user.username}, ID: ${user.userId}`); // ! DEBUG
     });
     newUsers = newUsers.sort((a, b) => {
         if (a.self)
@@ -100,7 +100,7 @@ document.querySelector('button')?.addEventListener('click', (e) => {
     const msg = input.value;
     if (input.value) {
         // compute unique offset (ensure client delivery after state recovery/temp disconnection)
-        const clientOffset = `${socket.id}-${counter++}`;
+        const clientOffset = `${currentSessionId}-${counter++}`;
         socket.emit("message", { targetId: targetId, msg, clientOffset });
         input.value = "";
     }
@@ -109,18 +109,22 @@ document.querySelector('button')?.addEventListener('click', (e) => {
 // Listen for messages
 socket.on("message", async ({ senderId, senderUsername, msg, serverOffset }) => {
     console.log(`Received message from ${senderId}: ${msg}`); // ! DEBUG
-    const isSent = senderId === socket.id;
+    const isSent = senderId === currentSessionId;
     localStorage.setItem("serverOffset", serverOffset); // ! Necessary ??
     socket.auth.serverOffset = serverOffset;
     // Update conversation preview
     if (isSent) {
-        const targetUser = users.find(u => u.userID === targetId);
+        const targetUser = users.find(u => u.userId === targetId);
         if (targetUser)
             updateConvPreview(targetId, targetUser.username);
     }
     else
         updateConvPreview(targetId, senderUsername);
-    await addChatBubble(msg, isSent, socket.id);
+    await addChatBubble(msg, isSent, currentSessionId);
+});
+socket.on("session", ({ sessionId, username }) => {
+    currentSessionId = sessionId;
+    socket.auth.username = username;
 });
 // ? add last_seen in conv to send missed messages in case of disconnect ?
 // TODO - handle history

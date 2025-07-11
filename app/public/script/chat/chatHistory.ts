@@ -1,4 +1,4 @@
-import { User, socket } from "./chat.js";
+import { User, currentSessionId } from "./chat.js";
 import { addChatBubble } from "./chatBubbles.js";
 
 // Get conversation ID
@@ -26,7 +26,7 @@ export async function openChat(user: User) {
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName) return;
     recipientName.textContent = user.username;
-    const conversationId = await getConversationId(socket.id, user.userID);
+    const conversationId = await getConversationId(currentSessionId, user.userId);
     if (!conversationId ) {
       console.log("No existing conversation found.");
       chatBox.innerHTML = "";
@@ -35,8 +35,8 @@ export async function openChat(user: User) {
     const messages = await getMessages(conversationId);
     if (messages) {
         for (const message of messages) {
-          const isSent = message.sender_id === socket.id;
-          await addChatBubble(message.content, isSent, socket.id);
+          const isSent = message.sender_id === currentSessionId;
+          await addChatBubble(message.content, isSent, currentSessionId);
         }
     } else
         console.error("Failed to fetch messages for conversation ID:", conversationId);

@@ -65,18 +65,16 @@ async function insertMessage(fastify: FastifyInstance, msg: string, conversation
   }
 }
 
-function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
+function handleMessages(fastify: FastifyInstance, socket: any, io: any) {    // ! change to user ID
   socket.on("message", async ({ targetId, msg, clientOffset } :
     { targetId: string, msg: string, clientOffset: number }) => {
     const senderSessionId = socket.session.userId;
-
     const targetSessionId = socketToSession.get(targetId); // ! change this
-
     const conversationId = await getConversation(fastify, senderSessionId, targetSessionId!);
     if (conversationId === -1) return;
     const offset = await insertMessage(fastify, msg, conversationId, senderSessionId, clientOffset);
     const data = {
-      senderId: socket.id,
+      senderId: socket.session.userId.toString(),
       senderUsername: socket.username,
       msg,
       serverOffset: offset,
@@ -120,12 +118,12 @@ function listUsers(socket: Socket, io: any) {
   for (const [sessionId, socketIds] of userSockets) {
     const firstSocketId = socketIds.values().next().value; // Get first socket ID
     const sock = io.of("/").sockets.get(firstSocketId);    // Get Socket instance
-
     if (sock) {
       users.push({
-        userID: sessionId.toString(), // ! CHECK
+        userId: sessionId.toString(), // ! CHECK
         username: sock.username,
       });
+      console.log(`List users: userID = ${sessionId}, username = ${sock.username}`); // ! DEBUG
     }
   }
   socket.emit("users", users);
@@ -134,9 +132,10 @@ function listUsers(socket: Socket, io: any) {
 // New connection - notify existing users
 function notifyUsers(socket: Socket) {
    socket.broadcast.emit("User connected", {
-    userID: socket.session.userId?.toString(), // ! CHECK
+    userId: socket.session.userId.toString(), // ! CHECK
     username: socket.username,
   });
+  console.log(`New user connected: userID = ${socket.session.userId.toString()}, username = ${socket.username}`); // ! DEBUG
 }
 
 // ************************************************************************* */
@@ -150,18 +149,26 @@ async function getUsername(fastify: FastifyInstance, userId: number) { // ! Mayb
   return (row.username);
 }
 
+function sendUserId(socket: Socket) {
+socket.emit("session", {
+  sessionId: socket.session.userId.toString(),
+  username: socket.username,
+});
+}
+
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const io = fastify.io;
   authenticateSession(io, fastify);
   
   io.on("connection", async (socket) => {
-    console.log(`User connected:`, socket.id);
+    console.log(`Socket connected:`, socket.id); // ! DEBUG
     const sessionId = socket.session.userId;
     socket.username = await getUsername(fastify, sessionId!);
     socket.join(sessionId.toString());                 // ! For sending events to all user sockets >> io.to(userId).emit("message", data);
     if (!userSockets.has(sessionId)) userSockets.set(sessionId, new Set());
     userSockets.get(sessionId)!.add(socket.id);
     socketToSession.set(socket.id, sessionId);
+    sendUserId(socket);         // Send user ID to client for identification
     handleMessages(fastify, socket, io);
     // handleRecovery(socket, fastify);
     listUsers(socket, io);
