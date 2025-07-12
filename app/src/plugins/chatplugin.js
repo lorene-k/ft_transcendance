@@ -44,19 +44,18 @@ async function runInsertConversation(fastify, user1, user2) {
                 console.error("Failed to create conversation:", err.message);
                 return (reject(-1));
             }
-            console.log(`Created new conversation with ID ${this.lastID} between ${user1} and ${user2}`); // ! DEBUG
             resolve(this.lastID);
         });
     });
 }
 function runInsertMessage(fastify, msg, conversationId, senderId, clientOffset) {
     return new Promise((resolve, reject) => {
-        fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset) VALUES (?, ?, ?, ?)`, [conversationId, senderId, msg, clientOffset], function (err) {
+        fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset)
+      VALUES (?, ?, ?, ?)`, [conversationId, senderId, msg, clientOffset], function (err) {
             if (err) {
                 console.error("Error inserting message:", err.message);
                 return (reject(-1));
             }
-            console.log(`Message inserted with ID ${this.lastID}`);
             resolve(this.lastID);
         });
     });
@@ -90,7 +89,6 @@ async function getOrCreateConversation(fastify, senderId, targetId) {
 async function insertMessage(fastify, msg, conversationId, senderId, clientOffset) {
     try {
         const messageId = await runInsertMessage(fastify, msg, conversationId, senderId, clientOffset);
-        console.log(`Message (content = ${msg}) inserted in conversation: `, conversationId); // ! DEBUG
         return (messageId);
     }
     catch (e) {
@@ -116,7 +114,7 @@ function handleMessages(fastify, socket, io) {
     });
 }
 // ************************************************* Handle message recovery */
-// async function handleRecovery(socket : any, fastify : FastifyInstance) { // ! filter by conversationId
+// async function handleRecovery(socket : any, fastify : FastifyInstance) { // ! get conv Id
 //   if (!socket.recovered) {
 //     try {
 //       await fastify.database.each(
@@ -141,7 +139,6 @@ function handleMessages(fastify, socket, io) {
 //     }
 //   }
 // }
-// ! get conv ID
 // ******************************************************** Get active users */
 function listUsers(socket, io) {
     const users = [];
@@ -153,7 +150,6 @@ function listUsers(socket, io) {
                 userId: sessionId.toString(),
                 username: sock.username,
             });
-            // console.log(`List users: userID = ${sessionId}, username = ${sock.username}`); // ! DEBUG
         }
     }
     socket.emit("users", users);
@@ -164,7 +160,6 @@ function notifyUsers(socket) {
         userId: socket.session.userId.toString(),
         username: socket.username,
     });
-    // console.log(`New user connected: userID = ${socket.session.userId.toString()}, username = ${socket.username}`); // ! DEBUG
 }
 // ************************************************************************* */
 const chatPlugin = async (fastify) => {
@@ -189,12 +184,8 @@ const chatPlugin = async (fastify) => {
 };
 export default fp(chatPlugin);
 // ! handle disconnect + call on logout + session expiration
-// io.emit(event, data) – Broadcast to all clients
-// socket.emit(event, data) – Send to the specific socket
-// (client to server = socket.emit("message", "Hello server!");)
-// socket.broadcast.emit(event, data) – Send to everyone except sender
+// ? Handle msg recovery
 /*
-  Disconnect :
    socket.on("disconnect", () => {
   const userId = socketToSession.get(socket.id);
   if (userId) {
@@ -206,5 +197,4 @@ export default fp(chatPlugin);
   }
   socketToSession.delete(socket.id);
 });
-
 */ 

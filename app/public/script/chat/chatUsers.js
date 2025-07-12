@@ -13,7 +13,7 @@ function addActiveUser(userList, user) {
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
         targetId = user.userId;
-        console.log("Target set to:", targetId); // ! DEBUG
+        // console.log("Target set to:", user.userId); // ! DEBUG
         openChat(user);
     });
     userList.appendChild(li);
@@ -25,12 +25,13 @@ function displayConnectedUsers() {
         return;
     userList.innerHTML = "";
     users.forEach((user) => {
+        // console.log(`User: ${user.username} (${user.userId})`); // ! DEBUG
         addActiveUser(userList, user);
     });
 }
 // ***************************************************** Get connected users */
 export function getConnectedUsers(socket) {
-    // Get active user list
+    // Get active users list
     socket.on("users", (newUsers) => {
         newUsers.forEach((user) => {
             console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
@@ -47,10 +48,6 @@ export function getConnectedUsers(socket) {
             return a.username > b.username ? 1 : 0;
         });
         users = newUsers;
-        if (users[0])
-            console.log(`User(0): ${users[0].username}`); // ! DEBUG
-        if (users[1])
-            console.log(`user[1] = ${users[1].username}`);
         displayConnectedUsers();
     });
     // Add user to list

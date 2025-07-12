@@ -27,7 +27,7 @@ function authenticateSession(io : any, fastify : FastifyInstance) {
 }
 
 // Attach username to socket
-async function getUsername(fastify: FastifyInstance, userId: number) { // ! What to do in case of change ?
+async function getUsername(fastify: FastifyInstance, userId: number) { // ! Check username change
   const row = await fastify.database.fetch_one(
     `SELECT username FROM user WHERE id = ?`,
     [userId]
@@ -45,7 +45,8 @@ socket.emit("session", {
 }
 
 // ********************************************************** Update history */
-async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
+async function runInsertConversation(fastify: FastifyInstance, user1: number,
+  user2: number): Promise<number> {
   return new Promise((resolve, reject) => {
     fastify.database.run(
       'INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)',
@@ -55,23 +56,23 @@ async function runInsertConversation(fastify: FastifyInstance, user1: number, us
         console.error("Failed to create conversation:", err.message);
         return (reject(-1));
       }
-      console.log(`Created new conversation with ID ${this.lastID} between ${user1} and ${user2}`); // ! DEBUG
       resolve(this.lastID);
     });
   });
 }
 
-function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId: number, senderId: number, clientOffset: number): Promise<number> {
+function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
+  senderId: number, clientOffset: number): Promise<number> {
   return new Promise((resolve, reject) => {
     fastify.database.run(
-      `INSERT INTO messages (conversation_id, sender_id, content, client_offset) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO messages (conversation_id, sender_id, content, client_offset)
+      VALUES (?, ?, ?, ?)`,
       [conversationId, senderId, msg, clientOffset],
       function (this: any, err: Error | null) {
         if (err) {
           console.error("Error inserting message:", err.message);
           return (reject(-1));
         }
-        console.log(`Message inserted with ID ${this.lastID}`);
         resolve(this.lastID);
       }
     );
@@ -93,7 +94,8 @@ async function getAllConversations(fastify: FastifyInstance, userId: number, io:
   }
 }
 
-async function getOrCreateConversation(fastify: FastifyInstance, senderId: number, targetId: number): Promise<number> {
+async function getOrCreateConversation(fastify: FastifyInstance, senderId: number,
+  targetId: number): Promise<number> {
   let [user1, user2] = [senderId!, targetId!].sort((a, b) => a - b);
   try {
     const conv = await fastify.database.fetch_one(
@@ -109,10 +111,10 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
   }
 }
 
-async function insertMessage(fastify: FastifyInstance, msg: string, conversationId: number, senderId: number, clientOffset: number): Promise<number> {
+async function insertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
+  senderId: number, clientOffset: number): Promise<number> {
   try {
     const messageId = await runInsertMessage(fastify, msg, conversationId, senderId, clientOffset);
-    console.log(`Message (content = ${msg}) inserted in conversation: `, conversationId); // ! DEBUG
     return (messageId);
   } catch (e) {
     console.error("Failed to insert message: ", e);
@@ -139,7 +141,7 @@ function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
 }
 
 // ************************************************* Handle message recovery */
-// async function handleRecovery(socket : any, fastify : FastifyInstance) { // ! filter by conversationId
+// async function handleRecovery(socket : any, fastify : FastifyInstance) { // ! get conv Id
 //   if (!socket.recovered) {
 //     try {
 //       await fastify.database.each(
@@ -164,7 +166,6 @@ function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
 //     }
 //   }
 // }
-// ! get conv ID
 
 // ******************************************************** Get active users */
 function listUsers(socket: Socket, io: any) {
@@ -177,7 +178,6 @@ function listUsers(socket: Socket, io: any) {
         userId: sessionId.toString(),
         username: sock.username,
       });
-      // console.log(`List users: userID = ${sessionId}, username = ${sock.username}`); // ! DEBUG
     }
   }
   socket.emit("users", users);
@@ -189,7 +189,6 @@ function notifyUsers(socket: Socket) {
     userId: socket.session.userId.toString(),
     username: socket.username,
   });
-  // console.log(`New user connected: userID = ${socket.session.userId.toString()}, username = ${socket.username}`); // ! DEBUG
 }
 
 // ************************************************************************* */
@@ -217,14 +216,8 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
 export default fp(chatPlugin);
 
 // ! handle disconnect + call on logout + session expiration
-// io.emit(event, data) – Broadcast to all clients
-// socket.emit(event, data) – Send to the specific socket
-// (client to server = socket.emit("message", "Hello server!");)
-
-// socket.broadcast.emit(event, data) – Send to everyone except sender
-
+// ? Handle msg recovery
 /*
-  Disconnect : 
    socket.on("disconnect", () => {
   const userId = socketToSession.get(socket.id);
   if (userId) {
@@ -236,5 +229,4 @@ export default fp(chatPlugin);
   }
   socketToSession.delete(socket.id);
 });
-
 */

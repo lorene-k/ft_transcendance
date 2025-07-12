@@ -1,5 +1,7 @@
+import { Message } from "./chatHistory.js";
+
 let lastSenderId = "";
-let lastMessageTime: number = 0;
+let lastMsgTime: string = "";
 
 export async function loadTemplate(templatePath : string) {
     try {
@@ -13,26 +15,35 @@ export async function loadTemplate(templatePath : string) {
     }
 }
 
-function updateBubbleHeader(bubble: Element, senderId: string) {
+function updateBubbleHeader(bubble: Element, message: Message) {
   const timeElem = bubble?.querySelector(".chat-time");
   const headerElem = bubble?.querySelector(".chat-bubble-header");
-  const isSameSender = senderId === lastSenderId;
-  const isRecent = Date.now() - lastMessageTime < (60_000);
-  lastSenderId = senderId;
-  lastMessageTime = Date.now();
-  if (timeElem) timeElem.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (isSameSender && isRecent && headerElem) headerElem.remove();    // ! CHANGE IS SAME SENDER
+  const currMsgTime = message.sentAt.toISOString().slice(0,16); // Format: "2025-07-11T14:35" (seconds, milliseconds, and timezone removed)
+  if (lastSenderId == "" && lastMsgTime === "") {
+    lastSenderId = message.senderId;
+    lastMsgTime = currMsgTime;
+  }
+  const isSameSender = message.senderId === lastSenderId;
+  const isSameMinute = currMsgTime === lastMsgTime;
+  lastSenderId = message.senderId;
+  lastMsgTime = currMsgTime;
+  if (timeElem) timeElem.textContent = message.sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isSameSender && isSameMinute && headerElem) headerElem.remove();
 }
 
-export async function addChatBubble(message : string, isSent : boolean, senderId : string) {
+export async function addChatBubble(currentSessionId: string, message: Message) {
+  const isSent = message.senderId === currentSessionId;
   const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
   const bubble = await loadTemplate(templatePath);
   if (!bubble) return;
-  updateBubbleHeader(bubble, senderId);
+  updateBubbleHeader(bubble, message);
   const textElem = bubble?.querySelector("p");
-  if (textElem) textElem.textContent = message;
+  if (textElem) textElem.textContent = message.content;
   const conversation = document.getElementById("conversation-box");
   if (!conversation) return;
   conversation.appendChild(bubble);
+  console.debug("Added chat bubble:", message.content, "from", message.senderId); // ! DEBUG
   conversation.scrollTop = conversation.scrollHeight;
 }
+
+// - TODO update time if history
