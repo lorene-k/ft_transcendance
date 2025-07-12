@@ -18,6 +18,7 @@ async function getMessages(conversationId) {
     const messages = await res.json();
     return (messages);
 }
+// Load chat window
 async function openFirstConv() {
     const convContainer = document.getElementById("conversation-container");
     const chatWindow = await loadTemplate("/chat/chat-window.html");

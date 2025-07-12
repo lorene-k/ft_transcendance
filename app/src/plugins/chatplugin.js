@@ -54,10 +54,10 @@ function runInsertMessage(fastify, msg, conversationId, senderId, clientOffset) 
         fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset) VALUES (?, ?, ?, ?)`, [conversationId, senderId, msg, clientOffset], function (err) {
             if (err) {
                 console.error("Error inserting message:", err.message);
-                return (reject(-1)); // Reject the promise in case of error
+                return (reject(-1));
             }
             console.log(`Message inserted with ID ${this.lastID}`);
-            resolve(this.lastID); // Resolve the promise with the ID of the inserted message
+            resolve(this.lastID);
         });
     });
 }

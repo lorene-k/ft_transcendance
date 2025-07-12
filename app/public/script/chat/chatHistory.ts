@@ -1,5 +1,6 @@
-import { User, currentSessionId } from "./chat.js";
+import { currentSessionId } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
+import { User } from "./chatUsers.js";
 
 // Get conversation ID
 async function getConversationId(user1: string, user2: string) {
@@ -18,6 +19,7 @@ async function getMessages(conversationId: number) {
     return (messages);
 }
 
+// Load chat window
 async function openFirstConv() {
     const convContainer = document.getElementById("conversation-container");
     const chatWindow = await loadTemplate("/chat/chat-window.html");

@@ -1,8 +1,10 @@
-import { addChatBubble, loadTemplate }from "./chatBubbles.js";
-import { openChat } from "./chatHistory.js";
+import { addChatBubble }from "./chatBubbles.js";
+import { users, targetId, updateConvPreview, getConnectedUsers } from "./chatUsers.js";
+import "./chatUsers.js";
 
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
+
 declare const io: any;
 export const socket = io('http://localhost:8080', {
     withCredentials: true,
@@ -13,91 +15,11 @@ export const socket = io('http://localhost:8080', {
     // ackTimeout: 10000, // Use emit with ack to guarantee msg delivery
     // retries: 3
 });
-
-export interface User {
-  userId: string;
-  username: string;
-  self?: boolean;
-}
 export let currentSessionId = "";
-export let targetId: string | null = null;
-let users: User[] = [];
-
-// ********************************************* Update conversation preview */
-async function updateConvPreview(userId: string, targetName: string) {
-  const allMessages = document.getElementById("all-messages");
-  if (!allMessages) return;
-  const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
-  if (displayed) {
-    displayed.classList.add("transition-all", "duration-300");
-    allMessages.prepend(displayed);
-  } else {
-    const card = await loadTemplate("/chat/conversation.html");
-    if (!card) return;
-    card.setAttribute("data-user-id", userId);
-    const name = card.querySelector("p");
-    if (name) name.textContent = targetName;
-    card.addEventListener("click", () => {
-      targetId = userId;
-      openChat({ userId: userId, username: targetName, self: false });
-    });
-    allMessages.prepend(card);
-  }
-}
-
-// ******************************************************* List active users */
-// Add user to active users list
-function addActiveUser(userList: HTMLElement, user: User) {
-  const li = document.createElement("li");
-  li.textContent = user.username;
-  if (user.self) return;
-  li.style.cursor = "pointer";
-  li.addEventListener("click", () => {
-    targetId = user.userId;
-    console.log("Target set to:", targetId); // ! DEBUG
-    openChat(user);
-  });
-  userList.appendChild(li);
-}
-
-// Display connected users
-function displayConnectedUsers() {
-  const userList = document.getElementById("user-list");
-  if (!userList) return;
-  userList.innerHTML = "";
-  users.forEach((user) => {
-    addActiveUser(userList, user);
-  });
-}
-
-// Get connected users
-socket.on("users", (newUsers: User[]) => {
-  newUsers.forEach((user) => {
-    // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
-    if (user.userId === currentSessionId) user.self = true;
-  });
-  newUsers = newUsers.sort((a, b) => {
-    if (a.self) return -1;
-    if (b.self) return 1;
-    if (a.username < b.username) return -1;
-    return a.username > b.username ? 1 : 0;
-  });
-  users = newUsers;
-  if (users[0]) console.log(`User(0): ${users[0].username}`); // ! DEBUG
-  if (users[1]) console.log(`user[1] = ${users[1].username}`);
-  displayConnectedUsers();
-});
-
-// Add user to list
-socket.on("user connected", (user: User) => {
-  users.push(user);
-  displayConnectedUsers();
-});
-
-// ! Add "user disconnected" to update list
-
 
 // *************************************************** Send/Receive messages */
+getConnectedUsers(socket);
+
 // Get conversation history
 socket.on("allConversations", (conversations: any[]) => {  // ! check if conv.id needed (maybe attach it to preview instead of data-user-id to avoid api call to get conv id ?)
   if (!conversations || conversations.length === 0) {
@@ -146,6 +68,7 @@ socket.on("message", async ({ senderId, senderUsername, msg, serverOffset } :
     await addChatBubble(msg, isSent, currentSessionId);
 });
 
+// Get current user info
 socket.on("session", ({ sessionId, username } :
   { sessionId: string, username: string }) => {
   currentSessionId = sessionId;
@@ -157,7 +80,6 @@ socket.on("session", ({ sessionId, username } :
 // ! FIX - load msg history when opening chat-window
 // TODO - update landing page
 // ? add last_seen in conv to send missed messages in case of disconnect ?
-// TODO - handle history
 // TODO - check msg recovery handling
 // TODO - Disconnect
 // TODO - check what happens if same user connected in different tabs (don't create new socket)
