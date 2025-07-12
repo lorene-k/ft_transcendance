@@ -69,10 +69,10 @@ function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId:
       function (this: any, err: Error | null) {
         if (err) {
           console.error("Error inserting message:", err.message);
-          return (reject(-1)); // Reject the promise in case of error
+          return (reject(-1));
         }
         console.log(`Message inserted with ID ${this.lastID}`);
-        resolve(this.lastID); // Resolve the promise with the ID of the inserted message
+        resolve(this.lastID);
       }
     );
   });
