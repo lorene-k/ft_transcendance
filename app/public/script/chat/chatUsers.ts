@@ -1,4 +1,4 @@
-import { socket, currentSessionId } from "./chat.js";
+import { currentSessionId } from "./chat.js";
 import { openChat } from "./chatHistory.js";
 import { loadTemplate }from "./chatBubbles.js";
 
@@ -42,7 +42,7 @@ export function getConnectedUsers(socket: any) {
     // Get active users list
     socket.on("users", (newUsers: User[]) => {
       newUsers.forEach((user) => {
-        console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
+        // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
         if (user.userId === currentSessionId) user.self = true;
       });
       newUsers = newUsers.sort((a, b) => {
@@ -71,13 +71,14 @@ export async function updateConvPreview(userId: string, targetName: string) {
       displayed.classList.add("transition-all", "duration-300");
       allMessages.prepend(displayed);
     } else {
-      const card = await loadTemplate("/chat/conversation.html");
+      const card = await loadTemplate("/chat/conv-preview.html");
       if (!card) return;
       card.setAttribute("data-user-id", userId);
       const name = card.querySelector("p");
       if (name) name.textContent = targetName;
       card.addEventListener("click", () => {
         targetId = userId;
+        // console.log("Target set to:", userId); // ! DEBUG
         openChat({ userId: userId, username: targetName, self: false });
       });
       allMessages.prepend(card);

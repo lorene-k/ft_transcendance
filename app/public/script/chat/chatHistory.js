@@ -36,7 +36,7 @@ export async function openChat(user) {
         return;
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
-    const conversationId = await getConversationId(currentSessionId, user.userId);
+    const conversationId = await getConversationId(currentSessionId, user.userId); // ! PB HERE ! (when receiving 1st msg)
     if (!conversationId) {
         console.log("No existing conversation found.");
         return;

@@ -7,8 +7,7 @@ export function getConversation(fastify) {
         [user1, user2] = [user1, user2].sort((a, b) => a - b);
         try {
             const convId = await fastify.database.fetch_one(`SELECT id FROM conversations 
-             WHERE (user1_id = ? AND user2_id = ?) 
-                OR (user1_id = ? AND user2_id = ?)`, [user1, user2, user1, user2]);
+             WHERE (user1_id = ? AND user2_id = ?)`, [user1, user2]);
             if (!convId)
                 return (reply.status(200).send({ message: "New conversation" }));
             return (reply.send(convId));

@@ -30,7 +30,7 @@ socket.on("allConversations", (conversations: any[]) => {
     // console.log("Received conversations: ", conversations); // ! DEBUG
     for (const conv of conversations) {
       const otherUser = users.find(u => u.userId === conv.otherUserId.toString());
-      if (otherUser) updateConvPreview(conv.id, otherUser.username!);
+      if (otherUser) updateConvPreview(otherUser.userId, otherUser.username!);
     }
   }
 });
@@ -46,6 +46,7 @@ document.getElementById("conversation-container")?.addEventListener('click', (e)
     if (input.value) {
         // Ensure client delivery after state recovery/temp disconnection
         const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // !!!!!!!!! CHECK
+        console.log("TEST : targetId = ", targetId);
         socket.emit("message", { targetId: targetId, msg, clientOffset });
         input.value = "";
     }
@@ -63,8 +64,9 @@ socket.on("message", async ({ senderId, senderUsername, msg, serverOffset } :
     // Update conversation preview
     if (isSent) {
       const targetUser = users.find(u => u.userId === targetId);
-      if (targetUser) updateConvPreview(targetId!, targetUser.username!);
-    } else updateConvPreview(targetId!, senderUsername!);
+      if (targetUser) updateConvPreview(targetUser.userId, targetUser.username);
+    } else 
+      updateConvPreview(senderId, senderUsername);
     const message: Message = {
       content: msg,
       senderId: senderId,
@@ -81,12 +83,10 @@ socket.on("session", ({ sessionId, username } :
 });
 
 // ! FIX : msg bubbles x2 when sent
-// TODO - update landing page (add search bar for friends & new conversations)
-// ? add last_seen in conv to send missed messages in case of disconnect (cache) ?
-// TODO - check msg recovery handling
 // TODO - Disconnect
-// TODO - check what happens if same user connected in different tabs (don't create new socket)
-// >> check if session.userId exists in map, assign socket.id to it (change map to hold socket.id ARRAY)
+// ? add last_seen in conv to send missed messages in case of disconnect (cache) ?
+// TODO - update landing page (add search bar for friends & new conversations)
+// TODO - check msg recovery handling
 
 // TODO - handle blocked users
 // TODO - Announce next tournament (io.emit)

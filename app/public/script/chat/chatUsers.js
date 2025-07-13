@@ -67,7 +67,7 @@ export async function updateConvPreview(userId, targetName) {
         allMessages.prepend(displayed);
     }
     else {
-        const card = await loadTemplate("/chat/conversation.html");
+        const card = await loadTemplate("/chat/conv-preview.html");
         if (!card)
             return;
         card.setAttribute("data-user-id", userId);
@@ -76,6 +76,7 @@ export async function updateConvPreview(userId, targetName) {
             name.textContent = targetName;
         card.addEventListener("click", () => {
             targetId = userId;
+            console.log("Target set to:", userId); // ! DEBUG
             openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);
