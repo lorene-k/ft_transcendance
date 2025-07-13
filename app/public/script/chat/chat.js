@@ -1,6 +1,5 @@
 import { addChatBubble } from "./chatBubbles.js";
 import { users, targetId, updateConvPreview, getConnectedUsers } from "./chatUsers.js";
-import "./chatUsers.js";
 let counter = 0;
 const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
 export const socket = io('http://localhost:8080', {
@@ -13,9 +12,10 @@ export const socket = io('http://localhost:8080', {
     // retries: 3
 });
 export let currentSessionId = "";
-// *************************************************** Send/Receive messages */
+// ******************************************************* Handle connection */
 // Get active users list
 getConnectedUsers(socket);
+// *************************************************** Send/Receive messages */
 // Get conversation history
 socket.on("allConversations", (conversations) => {
     if (!conversations || conversations.length === 0) {
@@ -31,9 +31,11 @@ socket.on("allConversations", (conversations) => {
     }
 });
 // Send message
-document.getElementById("conversation-container")?.addEventListener('click', (e) => {
-    const target = e.target;
-    if (target && target.tagName === 'BUTTON') {
+export function setSendBtnListener() {
+    const sendBtn = document.getElementById("send-btn");
+    if (!sendBtn)
+        return;
+    sendBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const input = document.querySelector('textarea');
         if (!input)
@@ -42,19 +44,18 @@ document.getElementById("conversation-container")?.addEventListener('click', (e)
         if (input.value) {
             // Ensure client delivery after state recovery/temp disconnection
             const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // !!!!!!!!! CHECK
-            console.log("TEST : targetId = ", targetId);
+            // console.log("TEST : targetId = ", targetId); // ! DEBUG
             socket.emit("message", { targetId: targetId, msg, clientOffset });
             input.value = "";
         }
         input.focus();
-    }
-});
+    });
+}
 // Listen for messages
 socket.on("message", async ({ senderId, senderUsername, msg, serverOffset }) => {
     const isSent = senderId === currentSessionId;
     localStorage.setItem("serverOffset", serverOffset);
     socket.auth.serverOffset = serverOffset;
-    // Update conversation preview
     if (isSent) {
         const targetUser = users.find(u => u.userId === targetId);
         if (targetUser)
@@ -74,13 +75,10 @@ socket.on("session", ({ sessionId, username }) => {
     currentSessionId = sessionId;
     socket.auth.username = username;
 });
-// ! FIX : msg bubbles x2 when sent
-// TODO - Disconnect
-// ? add last_seen in conv to send missed messages in case of disconnect (cache) ?
-// TODO - update landing page (add search bar for friends & new conversations)
-// TODO - check msg recovery handling
 // TODO - handle blocked users
+// ? check msg recovery handling
+// ? add last_seen in conv to send missed messages in case of disconnect (cache) ?
+// ? update landing page (add search bar for friends & new conversations)
 // TODO - Announce next tournament (io.emit)
 // >> server side : io.to(session.socketId).emit("event", data);
-// TODO - create landing page for new chat, otherwise display last conversation
 // TODO - friends (search bar w/ db fetch)

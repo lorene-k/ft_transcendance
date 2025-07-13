@@ -34,7 +34,7 @@ export function getConnectedUsers(socket) {
     // Get active users list
     socket.on("users", (newUsers) => {
         newUsers.forEach((user) => {
-            console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
+            // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
             if (user.userId === currentSessionId)
                 user.self = true;
         });
@@ -76,10 +76,9 @@ export async function updateConvPreview(userId, targetName) {
             name.textContent = targetName;
         card.addEventListener("click", () => {
             targetId = userId;
-            console.log("Target set to:", userId); // ! DEBUG
+            // console.log("Target set to:", userId); // ! DEBUG
             openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);
     }
 }
-// ! Add "user disconnected" to update list

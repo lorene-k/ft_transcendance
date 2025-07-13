@@ -46,12 +46,12 @@ export async function addChatBubble(currentSessionId, message) {
     const textElem = bubble?.querySelector("p");
     if (textElem)
         textElem.textContent = message.content;
-    const conversation = document.getElementById("conversation-box"); // ! PB here (normal if conv window not loaded )
+    const conversation = document.getElementById("conversation-box");
     if (!conversation) {
         console.error("Conversation box element not found.");
         return;
     }
     conversation.appendChild(bubble);
-    console.debug("Added chat bubble:", message.content, "from", message.senderId); // ! DEBUG
+    // console.debug("Added chat bubble:", message.content, "from", message.senderId); // ! DEBUG
     conversation.scrollTop = conversation.scrollHeight;
 }

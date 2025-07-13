@@ -84,5 +84,3 @@ export async function updateConvPreview(userId: string, targetName: string) {
       allMessages.prepend(card);
     }
 }
-
-// ! Add "user disconnected" to update list

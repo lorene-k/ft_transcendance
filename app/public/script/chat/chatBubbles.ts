@@ -48,7 +48,7 @@ export async function addChatBubble(currentSessionId: string, message: Message) 
   updateBubbleHeader(bubble, message);
   const textElem = bubble?.querySelector("p");
   if (textElem) textElem.textContent = message.content;
-  const conversation = document.getElementById("conversation-box"); // ! PB here (normal if conv window not loaded )
+  const conversation = document.getElementById("conversation-box");
   if (!conversation) {
     console.error("Conversation box element not found.");
     return;

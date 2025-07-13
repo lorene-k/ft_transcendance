@@ -34,4 +34,12 @@
   .chat-bubble-header {
     @apply flex flex-row items-center space-x-2 ;
   }
+
+  .dropdown-menu-style {
+    @apply mr-5 w-40 min-w-40 bg-gray-100 rounded-xl shadow-sm transition ease-out duration-150 origin-top-right;
+  }
+
+  .dropdown-item-style {
+    @apply text-sm font-normal text-gray-900 hover:bg-blue-200 block w-full text-left p-2 cursor-pointer;
+  }
 }

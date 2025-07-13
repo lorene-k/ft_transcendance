@@ -69,17 +69,17 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- -- ------------------------------
--- -- Table: blocked users
--- -- ------------------------------
--- CREATE TABLE IF NOT EXISTS blocked (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     blocker_id INTEGER NOT NULL,
---     blocked_id INTEGER NOT NULL,
---     UNIQUE(blocker_id, blocked_id),
---     FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
---     FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
--- );
+-- ------------------------------
+-- Table: blocked users
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS blocked (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    blocker_id INTEGER NOT NULL,
+    blocked_id INTEGER NOT NULL,
+    UNIQUE(blocker_id, blocked_id),
+    FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
+);
 
 -- -- ------------------------------
 -- -- Table: friends

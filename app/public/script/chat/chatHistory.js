@@ -1,5 +1,6 @@
-import { currentSessionId } from "./chat.js";
+import { currentSessionId, setSendBtnListener } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
+import { handleOptions } from "./chatOptions.js";
 // Get conversation ID
 async function getConversationId(user1, user2) {
     const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
@@ -24,7 +25,13 @@ async function openFirstConv() {
     const chatWindow = await loadTemplate("/chat/chat-window.html");
     if (!chatWindow || !convContainer)
         return;
+    const p = document.getElementById("conv-placeholder");
+    if (p)
+        p.remove();
     convContainer.appendChild(chatWindow);
+    setSendBtnListener();
+    // Handle chat options (dropdown menu)
+    handleOptions();
 }
 // Open conversation
 export async function openChat(user) {
@@ -36,7 +43,7 @@ export async function openChat(user) {
         return;
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
-    const conversationId = await getConversationId(currentSessionId, user.userId); // ! PB HERE ! (when receiving 1st msg)
+    const conversationId = await getConversationId(currentSessionId, user.userId);
     if (!conversationId) {
         console.log("No existing conversation found.");
         return;

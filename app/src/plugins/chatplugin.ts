@@ -242,3 +242,17 @@ export default fp(chatPlugin);
 
 // ? Handle msg recovery
 // ? Display dates in msg history
+
+// ! Ensure "exactly once" msg delivery
+// 1. Offset : avoid sending same msg twice
+// 2. Acknowledge msg delivery
+/*
+ADD ack & timeouts :
+socket.emit("message", msgData, (ack) => {
+  if (ack.success) {
+    // Mark as delivered
+  } else {
+    // Retry or notify failure
+  }
+});
+*/
