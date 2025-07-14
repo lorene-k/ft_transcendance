@@ -6,8 +6,8 @@ export const socket = io('http://localhost:8080', {
     auth: {
         serverOffset: 0
     },
-    // ackTimeout: 10000,
-    // retries: 3,
+    ackTimeout: 10000,
+    retries: 3,
 });
 export let currentSessionId = "";
 export const targetToConvId = new Map();
@@ -35,7 +35,7 @@ socket.on("allConversations", (conversations, convInfo) => {
         // console.warn("targetUsers =", targetUsers); // ! DEBUG
     }
 });
-// Send message (with ack)
+// Send message
 function sendMessage(msg) {
     const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
     socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId }, (response) => {
@@ -46,22 +46,39 @@ function sendMessage(msg) {
         // console.log("Acknowledged by server:", response); // ! DEBUG
     });
 }
-// Set send button listener
-export function setSendBtnListener() {
-    const sendBtn = document.getElementById("send-btn");
-    if (!sendBtn)
-        return;
-    sendBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const input = document.querySelector('textarea');
-        if (input && input.value) {
-            const msg = input.value;
-            sendMessage(msg);
-            input.value = "";
-            input.focus();
+// Get input value
+function getInput(input) {
+    if (input && input.value) {
+        const msg = input.value;
+        sendMessage(msg);
+        input.value = "";
+        input.focus();
+    }
+}
+// Send with ctrl+enter / cmd+enter
+function setInputListener(input) {
+    input.addEventListener("keydown", (e) => {
+        const isMac = navigator.userAgent.toUpperCase().includes("MAC");
+        const isModifierPressed = isMac ? e.metaKey : e.ctrlKey;
+        if (e.key === "Enter" && isModifierPressed) {
+            e.preventDefault();
+            getInput(input);
         }
     });
 }
+// Set send listeners (button & keydown events)
+export function setSendListeners() {
+    const sendBtn = document.getElementById("send-btn");
+    const input = document.querySelector('textarea');
+    if (!sendBtn || !input)
+        return;
+    setInputListener(input);
+    sendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        getInput(input);
+    });
+}
+// Get target name from active users or open conversations list
 function getTargetUsername(otherUserId, senderUsername, isSent) {
     if (isSent) {
         const targetUser = targetUsers.find(u => u.userId === otherUserId.toString());

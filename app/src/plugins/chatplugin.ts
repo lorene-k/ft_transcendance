@@ -154,7 +154,7 @@ function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
     try {
       const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
       if (conversationId === -1) return (callback({ status: "error" }));
-      msg.convId = conversationId; // ! CHECK (redundant ?)
+      msg.convId = currConvId = conversationId; // CHECK (redundant ?)
       msg.serverOffset = await insertMessage(fastify, msg);
       io.to(msg.targetId).emit("message", msg);
       io.to(msg.senderId).emit("message", msg);

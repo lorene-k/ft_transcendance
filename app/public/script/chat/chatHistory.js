@@ -1,4 +1,4 @@
-import { currentSessionId, setSendBtnListener } from "./chat.js";
+import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
 import { handleOptions } from "./chatOptions.js";
 // Get conversation ID
@@ -29,7 +29,8 @@ async function openFirstConv() {
     if (p)
         p.remove();
     convContainer.appendChild(chatWindow);
-    setSendBtnListener();
+    const input = document.querySelector('textarea');
+    setSendListeners();
     handleOptions(); // ! TODO 
 }
 // Display all messages

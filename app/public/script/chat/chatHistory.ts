@@ -1,4 +1,4 @@
-import { currentSessionId, setSendBtnListener } from "./chat.js";
+import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
 import { User } from "./chatUsers.js";
 import { handleOptions } from "./chatOptions.js";
@@ -34,7 +34,8 @@ async function openFirstConv() {
     const p = document.getElementById("conv-placeholder");
     if (p) p.remove();
     convContainer.appendChild(chatWindow);
-    setSendBtnListener();
+    const input = document.querySelector('textarea');
+    setSendListeners();
     handleOptions(); // ! TODO 
 }
 
