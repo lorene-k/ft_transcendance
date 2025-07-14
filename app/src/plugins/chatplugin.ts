@@ -177,13 +177,13 @@ function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
   socket.on("message", async (msg: Message) => {
     msg.senderId = socket.session.userId.toString();
     msg.senderUsername = socket.username;
-    console.log("Received message content :", msg.content); // ! DEBUG
+    // console.log("Received message :", msg); // ! DEBUG
     try {
       const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
       if (conversationId === -1) return;
       msg.convId = conversationId; // ! Already received from client
       msg.serverOffset = await insertMessage(fastify, msg);
-      io.to(msg.targetId).emit("message", msg);
+      io.to(msg.targetId!.toString()).emit("message", msg);
       io.to(msg.senderId).emit("message", msg);
       // console.log("Message sent:", msg); // ! DEBUG
     } catch (err: any) {
@@ -285,3 +285,4 @@ export default fp(chatPlugin);
 // TODO - Handle blocks
 // After merge : Check dependencies & socket.io versions ("socket.io": "^4.7.2", "socket.io-client": "^4.7.2")
 // Check Socket.IO versions mismatch (rare but can cause ack issues)
+// ! Careful with types (check typeof() if pb)

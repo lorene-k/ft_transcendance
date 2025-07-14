@@ -28,7 +28,7 @@ socket.on("allConversations", (conversations: any[], convInfo: Record<number, st
     // console.log("Received conversations: ", conversations); // ! DEBUG
     for (const conv of conversations) {
       const otherUsername = convInfo[conv.otherUserId];
-      if (otherUsername) updateConvPreview(conv.otherUserId, otherUsername);
+      if (otherUsername) updateConvPreview(conv.otherUserId.toString(), otherUsername);
       targetToConvId.set(conv.otherUserId.toString(), conv.id);
       targetUsers.push({
         userId: conv.otherUserId.toString(),
@@ -88,6 +88,7 @@ function getTargetUsername(otherUserId: string, senderUsername: string, isSent: 
 socket.on("message", async ({ senderId, senderUsername, content, serverOffset } :
   { senderId: string; senderUsername: string, content: string, serverOffset: number }) => {
     try {
+      // console.log("Received message :", content); // ! DEBUG
       const isSent = senderId === currentSessionId;
       const otherUserId = isSent ? targetId : senderId;
       const otherUsername = getTargetUsername(otherUserId!, senderUsername, isSent);
@@ -115,7 +116,7 @@ socket.on("session", ({ sessionId, username } :
   socket.auth.username = username; // ! Useless ?
 });
 
-// ! FIX : only conv preview w/ active user displayed
+// ! FIX : must refresh page to see msg
 // TODO - handle message recovery
 // TODO - handle blocked users
 

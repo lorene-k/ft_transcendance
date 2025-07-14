@@ -21,7 +21,7 @@ function addActiveUser(userList: HTMLElement, user: User) {
   li.style.cursor = "pointer";
   li.addEventListener("click", () => {
     targetId = user.userId;
-    console.log("Target set to:", targetId); // ! DEBUG
+    // console.log("Target set to:", targetId); // ! DEBUG
     currConvId = targetToConvId.get(targetId)!;
     openChat(user);
   });
@@ -80,7 +80,7 @@ export async function updateConvPreview(userId: string, targetName: string) {
     if (name) name.textContent = targetName;
     card.addEventListener("click", () => {
       targetId = userId;
-      console.log("Target set to:", targetId); // ! DEBUG
+      // console.log("Target set to:", targetId); // ! DEBUG
       currConvId = targetToConvId.get(targetId)!;
       openChat({ userId: userId, username: targetName, self: false });
     });
