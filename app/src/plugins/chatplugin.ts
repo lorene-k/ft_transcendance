@@ -171,35 +171,38 @@ function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
 }
 
 // ************************************************* Handle message recovery */
-// async function handleRecovery(socket: Socket, fastify: FastifyInstance, io: any) { // ! CHECK
-//   if (!socket.recovered) {
-//     try {
-//       const valid = await fastify.database.fetch_one(
-//         `SELECT 1 FROM conversations 
-//          WHERE id = ? AND (user1_id = ? OR user2_id = ?)`,
-//         [currConvId, socket.session.userId, socket.session.userId]
-//       );
-//       if (!valid) return;
-//       const messages = await fastify.database.fetch_all(
-//         `SELECT id, content, sender_id, sent_at FROM messages
-//          WHERE conversation_id = ? AND id > ? 
-//          ORDER BY id ASC`,
-//         [currConvId, socket.handshake.auth.serverOffset || 0]
-//         );
-//       for (const entry of messages) {
-//         const msg: Message = {
-//         senderId: entry.sender_id,
-//         content: entry.content,
-//         sentAt: entry.sent_at,
-//         serverOffset: entry.id,
-//         }
-//         io.to(socket.session.userId!.toString()).emit("message", msg);
-//       }
-//     } catch (err) {
-//       console.error("Message recovery failed:", err);
-//     }
-//   }
-// }
+async function handleRecovery(socket: Socket, fastify: FastifyInstance, io: any) {  // TODO - test
+  // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
+  // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG
+  if (!socket.recovered) {
+    try {
+      const valid = await fastify.database.fetch_one(
+        `SELECT 1 FROM conversations 
+         WHERE id = ? AND (user1_id = ? OR user2_id = ?)`,
+        [currConvId, socket.session.userId, socket.session.userId]
+      );
+      if (!valid) return;
+      const messages = await fastify.database.fetch_all(
+        `SELECT id, content, sender_id, sent_at FROM messages
+         WHERE conversation_id = ? AND id > ? 
+         ORDER BY id ASC`,
+        [currConvId, socket.handshake.auth.serverOffset || 0]
+        );
+      for (const entry of messages) {
+        const msg: Message = {
+        senderId: entry.sender_id,
+        content: entry.content,
+        sentAt: entry.sent_at,
+        serverOffset: entry.id,
+        }
+        // console.log("Recovered message:", msg); // ! DEBUG
+        io.to(socket.session.userId!.toString()).emit("message", msg);
+      }
+    } catch (err) {
+      console.error("Message recovery failed:", err);
+    }
+  }
+}
 
 // ******************************************************** Get active users */
 function listUsers(socket: Socket, io: any) {
@@ -253,7 +256,7 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
     listUsers(socket, io);
     notifyUsers(socket);
     getAllConversations(fastify, socket.session.userId, io);
-    // handleRecovery(socket, fastify, io);
+    handleRecovery(socket, fastify, io);
     handleDisconnect(socket);
   });
 };
@@ -261,7 +264,6 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
 export default fp(chatPlugin);
 
 // TODO - Handle blocks
-// TODO - Update active users list without needing to refresh (emit each time a new user connects)
 // After merge : Check dependencies & socket.io versions ("socket.io": "^4.7.2", "socket.io-client": "^4.7.2")
 // Check Socket.IO versions mismatch (rare but can cause ack issues)
 // ! Careful with types (check typeof() if pb)
