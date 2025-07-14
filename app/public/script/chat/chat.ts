@@ -39,22 +39,15 @@ socket.on("allConversations", (conversations: any[], convInfo: Record<number, st
   }
 });
 
-// // Send message (with ack)
-// function sendMessage(msg: string) {
-//   const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
-//   socket.emit("message", { targetId: targetId, msg, clientOffset, currConvId },
-//     (response: { status: string; serverOffset?: number }) => {
-//       console.log("message : ", msg); // ! DEBUG
-//       if (!response) {console.error("TEST") ; return;} // ! DEBUG
-//       if (response.serverOffset) socket.auth.serverOffset = response.serverOffset;
-//       console.log("Acknowledged by server:", response);
-//   });
-// }
-
-// Send message
+// Send message (with ack)
 function sendMessage(msg: string) {
   const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
-  socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId });
+  socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId },
+    (response: { status: string; serverOffset?: number }) => {
+      if (!response) return;
+      if (response.serverOffset) socket.auth.serverOffset = response.serverOffset;
+      // console.log("Acknowledged by server:", response); // ! DEBUG
+  });
 }
 
 // Set send button listener

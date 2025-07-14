@@ -114,48 +114,28 @@ async function insertMessage(fastify, msg) {
         return (-1);
     }
 }
-// With ack
-// function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
-//   socket.on("message", async (msg: Message,
-//     callback: (response: { status: string; serverOffset?: number }) => void) => {
-//     msg.senderId = socket.session.userId.toString();
-//     msg.senderUsername = socket.username;
-//     try {
-//       const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
-//       if (conversationId === -1) return (callback({ status: "error" }));
-//       msg.convId = currConvId = conversationId; // ! CHECK (redundant ?)
-//       msg.serverOffset = await insertMessage(fastify, msg);
-//       io.to(msg.targetId).emit("message", msg);
-//       console.log("msg = ", msg); // ! DEBUG
-//       callback({ status: "ok", serverOffset: msg.serverOffset });
-//       io.to(msg.senderId!.toString()).emit("message", msg);
-//     } catch (err: any) {
-//       if (err.errno === "SQLITE_CONSTRAINT") {
-//         callback({ status: "duplicate" });
-//       } else {
-//         console.log("Message insert failed:", err);
-//         callback({ status: "retry" });
-//       }
-//     }
-//   });
-// }
 function handleMessages(fastify, socket, io) {
-    socket.on("message", async (msg) => {
+    socket.on("message", async (msg, callback) => {
         msg.senderId = socket.session.userId.toString();
         msg.senderUsername = socket.username;
-        // console.log("Received message :", msg); // ! DEBUG
         try {
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId));
             if (conversationId === -1)
-                return;
-            msg.convId = conversationId; // ! Already received from client
+                return (callback({ status: "error" }));
+            msg.convId = conversationId; // ! CHECK (redundant ?)
             msg.serverOffset = await insertMessage(fastify, msg);
-            io.to(msg.targetId.toString()).emit("message", msg);
+            io.to(msg.targetId).emit("message", msg);
             io.to(msg.senderId).emit("message", msg);
-            // console.log("Message sent:", msg); // ! DEBUG
+            callback({ status: "ok", serverOffset: msg.serverOffset });
         }
         catch (err) {
-            console.log("Message insert failed:", err);
+            if (err.errno === "SQLITE_CONSTRAINT") {
+                callback({ status: "duplicate" });
+            }
+            else {
+                console.log("Message insert failed:", err);
+                callback({ status: "retry" });
+            }
         }
     });
 }
@@ -243,6 +223,7 @@ const chatPlugin = async (fastify) => {
 };
 export default fp(chatPlugin);
 // TODO - Handle blocks
+// TODO - Update active users list without needing to refresh (emit each time a new user connects)
 // After merge : Check dependencies & socket.io versions ("socket.io": "^4.7.2", "socket.io-client": "^4.7.2")
 // Check Socket.IO versions mismatch (rare but can cause ack issues)
 // ! Careful with types (check typeof() if pb)
