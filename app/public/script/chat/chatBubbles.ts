@@ -1,8 +1,11 @@
 import { Message } from "./chatHistory.js";
+import { targetId } from "./chatUsers.js";
 
 let lastSenderId = "";
+let lastTargetId = "";
 let lastMsgTime: string = "";
 
+// Load html templates
 export async function loadTemplate(templatePath : string) {
     try {
     const res = await fetch(templatePath);
@@ -15,6 +18,7 @@ export async function loadTemplate(templatePath : string) {
     }
 }
 
+// Format current message time to "YYYY-MM-DD-HH-MM"
 function getTimeString(date: Date): string {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -24,19 +28,23 @@ function getTimeString(date: Date): string {
   return (`${year}-${month}-${day}-${hours}-${minutes}`);
 }
 
+// Update bubble header with time
 function updateBubbleHeader(bubble: Element, message: Message) {
   const timeElem = bubble?.querySelector(".chat-time");
   const headerElem = bubble?.querySelector(".chat-bubble-header");
   // const currMsgTime = message.sentAt.toISOString().slice(0,16); // Format: "2025-07-11T14:35"
   const currMsgTime = getTimeString(message.sentAt);
   const isSameSender = message.senderId === lastSenderId;
+  const isSameTarget = targetId === lastTargetId;
   const isSameMinute = currMsgTime === lastMsgTime;
   if (timeElem) timeElem.textContent = message.sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (isSameSender && isSameMinute && headerElem) headerElem.remove();
+  if (isSameSender && isSameTarget && isSameMinute && headerElem) headerElem.remove();
   lastSenderId = message.senderId;
   lastMsgTime = currMsgTime;
+  lastTargetId = targetId!;
 }
 
+// Add chat bubble to conversation box
 export async function addChatBubble(currentSessionId: string, message: Message) {
   const isSent = message.senderId === currentSessionId;
   const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
@@ -49,11 +57,7 @@ export async function addChatBubble(currentSessionId: string, message: Message) 
   const textElem = bubble?.querySelector("p");
   if (textElem) textElem.textContent = message.content;
   const conversation = document.getElementById("conversation-box");
-  if (!conversation) {
-    console.error("Conversation box element not found.");
-    return;
-  }
+  if (!conversation) return;
   conversation.appendChild(bubble);
-  // console.debug("Added chat bubble:", message.content, "from", message.senderId); // ! DEBUG
   conversation.scrollTop = conversation.scrollHeight;
 }

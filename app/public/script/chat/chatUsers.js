@@ -1,7 +1,7 @@
 import { currentSessionId, targetToConvId } from "./chat.js";
 import { openChat } from "./chatHistory.js";
 import { loadTemplate } from "./chatBubbles.js";
-export let users = [];
+export let activeUsers = []; // !Active users only - useless ??
 export let targetId = null;
 export let currConvId = null;
 // ******************************************************* List active users */
@@ -14,8 +14,8 @@ function addActiveUser(userList, user) {
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
         targetId = user.userId;
+        console.log("Target set to:", targetId); // ! DEBUG
         currConvId = targetToConvId.get(targetId);
-        console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
         openChat(user);
     });
     userList.appendChild(li);
@@ -26,7 +26,7 @@ function displayConnectedUsers() {
     if (!userList)
         return;
     userList.innerHTML = "";
-    users.forEach((user) => {
+    activeUsers.forEach((user) => {
         // console.log(`User: ${user.username} (${user.userId})`); // ! DEBUG
         addActiveUser(userList, user);
     });
@@ -49,12 +49,12 @@ export function getConnectedUsers(socket) {
                 return -1;
             return a.username > b.username ? 1 : 0;
         });
-        users = newUsers;
+        activeUsers = newUsers;
         displayConnectedUsers();
     });
     // Add user to list
     socket.on("user connected", (user) => {
-        users.push(user);
+        activeUsers.push(user);
         displayConnectedUsers();
     });
 }
@@ -78,8 +78,8 @@ export async function updateConvPreview(userId, targetName) {
             name.textContent = targetName;
         card.addEventListener("click", () => {
             targetId = userId;
+            console.log("Target set to:", targetId); // ! DEBUG
             currConvId = targetToConvId.get(targetId);
-            console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
             openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);

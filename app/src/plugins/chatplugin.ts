@@ -5,6 +5,17 @@ import { Socket } from "socket.io";
 
 const userSockets = new Map<number, Set<string>>();
 const socketToSession = new Map<string, number>();
+let currConvId = 0; // ! useless ?
+interface Message {
+  senderId: number;
+  content: string;
+  senderUsername?: string;
+  targetId?: string;
+  clientOffset?: string;
+  serverOffset?: number;
+  sentAt?: Date;
+  convId?: number;
+}
 
 // ********************************************************** Authentication */
 function authenticateSession(io : any, fastify : FastifyInstance) {
@@ -36,6 +47,16 @@ async function getUsername(fastify: FastifyInstance, userId: number) {
   return (row.username);
 }
 
+// Attach socket info to session
+async function setSessionInfo(fastify: FastifyInstance, socket: Socket) {
+  const sessionId = socket.session.userId;
+  socket.username = await getUsername(fastify, sessionId!);
+  socket.join(sessionId.toString());
+  if (!userSockets.has(sessionId)) userSockets.set(sessionId, new Set());
+  userSockets.get(sessionId)!.add(socket.id);
+  socketToSession.set(socket.id, sessionId);
+} 
+
 // Send userId and username to client
 function sendUserId(socket: Socket) {
 socket.emit("session", {
@@ -61,18 +82,18 @@ async function runInsertConversation(fastify: FastifyInstance, user1: number,
   });
 }
 
-function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
-  senderId: number, clientOffset: string): Promise<number> {
+function runInsertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
   return new Promise((resolve, reject) => {
     fastify.database.run(
       `INSERT INTO messages (conversation_id, sender_id, content, client_offset)
       VALUES (?, ?, ?, ?)`,
-      [conversationId, senderId, msg, clientOffset],
+      [msg.convId, msg.senderId, msg.content, msg.clientOffset],
       function (this: any, err: Error | null) {
         if (err) {
           console.error("Error inserting message:", err.message);
           return (reject(-1));
         }
+        // console.log("Message inserted with content:", msg.content); // ! PB HERE
         resolve(this.lastID);
       }
     );
@@ -82,13 +103,18 @@ function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId:
 // ***************************************** Handle messages & conversations */
 async function getAllConversations(fastify: FastifyInstance, userId: number, io: any) {
   try {
+    const convInfo: Record<number, string> = {};
     const conversations = await fastify.database.fetch_all(
     `SELECT id, 
-    CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId 
+    CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId
     FROM conversations WHERE user1_id = ? OR user2_id = ?`,
     [userId, userId, userId]
     );
-    io.to(userId.toString()).emit("allConversations", conversations);
+    for (const conv of conversations) {
+      const username = await getUsername(fastify, conv.otherUserId);
+      if (username) convInfo[conv.otherUserId] = username;
+    }
+    io.to(userId.toString()).emit("allConversations", conversations, convInfo);
   } catch (err) {
     console.error("Failed to fetch conversations", err);
   }
@@ -102,71 +128,97 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
       `SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`,
       [user1, user2]
     );
-    // console.log("GETCONV : user1 = ", user1, "user2 = ", user2); // ! DEBUG
     if (conv) return (conv.id);
     const conversationId = await runInsertConversation(fastify, user1, user2);
-    // console.log("New conversation created with id:", conversationId); // ! DEBUG
     return (conversationId);
-  } catch (e) {
-    console.error("Failed to create or get conversation: ", e);
+  } catch (err) {
+    console.error("Failed to create or get conversation: ", err);
     return (-1);
   }
 }
 
-async function insertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
-  senderId: number, clientOffset: string): Promise<number> {
+async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
   try {
-    const messageId = await runInsertMessage(fastify, msg, conversationId, senderId, clientOffset);
-    // console.log("Message inserted with ID:", messageId); // ! DEBUG
+    const messageId = await runInsertMessage(fastify, msg);
     return (messageId);
-  } catch (e) {
-    console.error("Failed to insert message: ", e);
+  } catch (err) {
+    console.error("Failed to insert message: ", err);
     return (-1);
   }
 }
 
-function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
-  socket.on("message", async ({ targetId, msg, clientOffset } :
-    { targetId: string, msg: string, clientOffset: string }) => {
-    const senderId = socket.session.userId;
-    const conversationId = await getOrCreateConversation(fastify, senderId, parseInt(targetId));
-    if (conversationId === -1) return;
-    const offset = await insertMessage(fastify, msg, conversationId, senderId, clientOffset);
-    const data = {
-      senderId: socket.session.userId.toString(),
-      senderUsername: socket.username,
-      msg,
-      serverOffset: offset,
-    };
-    // console.log("Message sent to target :", targetId, "and sender : ", senderId); // ! DEBUG
-    io.to(targetId.toString()).emit("message", data);
-    io.to(senderId.toString()).emit("message", data);
+// With ack
+// function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
+//   socket.on("message", async (msg: Message,
+//     callback: (response: { status: string; serverOffset?: number }) => void) => {
+//     msg.senderId = socket.session.userId.toString();
+//     msg.senderUsername = socket.username;
+//     try {
+//       const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
+//       if (conversationId === -1) return (callback({ status: "error" }));
+//       msg.convId = currConvId = conversationId; // ! CHECK (redundant ?)
+//       msg.serverOffset = await insertMessage(fastify, msg);
+//       io.to(msg.targetId).emit("message", msg);
+//       console.log("msg = ", msg); // ! DEBUG
+//       callback({ status: "ok", serverOffset: msg.serverOffset });
+//       io.to(msg.senderId!.toString()).emit("message", msg);
+//     } catch (err: any) {
+//       if (err.errno === "SQLITE_CONSTRAINT") {
+//         callback({ status: "duplicate" });
+//       } else {
+//         console.log("Message insert failed:", err);
+//         callback({ status: "retry" });
+//       }
+//     }
+//   });
+// }
+
+function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
+  socket.on("message", async (msg: Message) => {
+    msg.senderId = socket.session.userId.toString();
+    msg.senderUsername = socket.username;
+    console.log("Received message content :", msg.content); // ! DEBUG
+    try {
+      const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
+      if (conversationId === -1) return;
+      msg.convId = conversationId; // ! Already received from client
+      msg.serverOffset = await insertMessage(fastify, msg);
+      io.to(msg.targetId).emit("message", msg);
+      io.to(msg.senderId).emit("message", msg);
+      // console.log("Message sent:", msg); // ! DEBUG
+    } catch (err: any) {
+        console.log("Message insert failed:", err);
+    }
   });
 }
 
 // ************************************************* Handle message recovery */
-// async function handleRecovery(socket : any, fastify : FastifyInstance) { // ! get conv Id
+// async function handleRecovery(socket: Socket, fastify: FastifyInstance, io: any) { // ! CHECK
 //   if (!socket.recovered) {
 //     try {
-//       await fastify.database.each(
-//         `SELECT id, content, sender_id FROM messages
-//          WHERE conversation_id = ? AND id > ? 
-//          ORDER BY sent_at ASC`,
-//         [conversationId, socket.handshake.auth.serverOffset || 0],
-//         (_err, row) => {
-//           socket.emit("message", {
-//             senderId: row.sender_id,
-//             msg: row.content,
-//             serverOffset: row.id,
-//           });
-//         }
+//       const valid = await fastify.database.fetch_one(
+//         `SELECT 1 FROM conversations 
+//          WHERE id = ? AND (user1_id = ? OR user2_id = ?)`,
+//         [currConvId, socket.session.userId, socket.session.userId]
 //       );
-//         (_err: Error | null, row: { id: number; content: string }) => {
-//           socket.emit('message', { senderId: 'server', msg: row.content, serverOffset: row.id });
+//       if (!valid) return;
+//       const messages = await fastify.database.fetch_all(
+//         `SELECT id, content, sender_id, sent_at FROM messages
+//          WHERE conversation_id = ? AND id > ? 
+//          ORDER BY id ASC`,
+//         [currConvId, socket.handshake.auth.serverOffset || 0]
+//         );
+//       for (const entry of messages) {
+//         const msg: Message = {
+//         senderId: entry.sender_id,
+//         content: entry.content,
+//         sentAt: entry.sent_at,
+//         serverOffset: entry.id,
 //         }
-//       )
-//     } catch (e) {
-//       console.error("Failed to recover messages: ", e);
+//         io.to(socket.session.userId!.toString()).emit("message", msg);
+//       }
+//     } catch (err) {
+//       console.error("Message recovery failed:", err);
 //     }
 //   }
 // }
@@ -175,8 +227,8 @@ function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
 function listUsers(socket: Socket, io: any) {
   const users = [];
   for (const [sessionId, socketIds] of userSockets) {
-    const firstSocketId = socketIds.values().next().value; // Get first socket ID
-    const sock = io.of("/").sockets.get(firstSocketId);    // Get Socket instance
+    const firstSocketId = socketIds.values().next().value;
+    const sock = io.of("/").sockets.get(firstSocketId);
     if (sock) {
       users.push({
         userId: sessionId.toString(),
@@ -184,7 +236,6 @@ function listUsers(socket: Socket, io: any) {
       });
     }
   }
-  // console.log("Active users:", users); // ! DEBUG
   socket.emit("users", users);
 }
 
@@ -204,15 +255,12 @@ function handleDisconnect(socket: Socket) {
       const socketSet = userSockets.get(userId);
       if (socketSet) {
         socketSet.delete(socket.id);
-        // console.log(`Socket ${socket.id} disconnected for user ${userId}.`); // ! DEBUG
         if (socketSet.size === 0) {
           userSockets.delete(userId);
-          // console.log(`All sockets for user ${userId} disconnected.`); // ! DEBUG
         }
       }
     }
     socketToSession.delete(socket.id);
-    // console.log(`Socket ${socket.id} removed from session.`); // ! DEBUG
   });
 }
 
@@ -221,38 +269,19 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
   authenticateSession(io, fastify);
   
   io.on("connection", async (socket) => {
-    // console.log(`Socket connected:`, socket.id); // ! DEBUG
-    const sessionId = socket.session.userId;
-    socket.username = await getUsername(fastify, sessionId!);
-    socket.join(sessionId.toString());
-    if (!userSockets.has(sessionId)) userSockets.set(sessionId, new Set());
-    userSockets.get(sessionId)!.add(socket.id);
-    socketToSession.set(socket.id, sessionId);
+    await setSessionInfo(fastify, socket);
     sendUserId(socket);
     handleMessages(fastify, socket, io);
-    // handleRecovery(socket, fastify);
     listUsers(socket, io);
     notifyUsers(socket);
-    getAllConversations(fastify, sessionId, io);
+    getAllConversations(fastify, socket.session.userId, io);
+    // handleRecovery(socket, fastify, io);
     handleDisconnect(socket);
   });
 };
 
 export default fp(chatPlugin);
 
-// ? Handle msg recovery
-// ? Display dates in msg history
-
-// ! Ensure "exactly once" msg delivery
-// 1. Offset : avoid sending same msg twice
-// 2. Acknowledge msg delivery
-/*
-ADD ack & timeouts :
-socket.emit("message", msgData, (ack) => {
-  if (ack.success) {
-    // Mark as delivered
-  } else {
-    // Retry or notify failure
-  }
-});
-*/
+// TODO - Handle blocks
+// After merge : Check dependencies & socket.io versions ("socket.io": "^4.7.2", "socket.io-client": "^4.7.2")
+// Check Socket.IO versions mismatch (rare but can cause ack issues)

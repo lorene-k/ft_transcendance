@@ -1,98 +1,124 @@
 import { addChatBubble }from "./chatBubbles.js";
-import { users, targetId, updateConvPreview, getConnectedUsers, currConvId } from "./chatUsers.js";
+import { activeUsers, targetId, updateConvPreview, getConnectedUsers, currConvId, User } from "./chatUsers.js";
 import { Message } from "./chatHistory.js";
-
-let counter = 0;
-const lastOffset = localStorage.getItem(`serverOffset-${currConvId}`) || "0";
 
 declare const io: any;
 export const socket = io('http://localhost:8080', {
     withCredentials: true,
     transports: ['websocket'],
     auth: {
-        serverOffset: lastOffset
-      },
-    // ackTimeout: 10000, // Use emit with ack to guarantee msg delivery
-    // retries: 3
+      serverOffset: 0
+    },
+    // ackTimeout: 10000,
+    // retries: 3,
 });
 export let currentSessionId = "";
-export const targetToConvId = new Map<string, string>();
+export const targetToConvId = new Map<string, number>();
+let counter = 0;
+const targetUsers: User[] = [];
 
-// ******************************************************* Handle connection */
 // Get active users list
 getConnectedUsers(socket);
 
-// *************************************************** Send/Receive messages */
 // Get conversation history
-socket.on("allConversations", (conversations: any[]) => {
+socket.on("allConversations", (conversations: any[], convInfo: Record<number, string>) => {
   if (!conversations || conversations.length === 0) {
     console.log("No conversations found.");
   } else {
     // console.log("Received conversations: ", conversations); // ! DEBUG
     for (const conv of conversations) {
-      const otherUser = users.find(u => u.userId === conv.otherUserId.toString());
-      if (otherUser) updateConvPreview(otherUser.userId, otherUser.username!);
-      targetToConvId.set(conv.otherUserId.toString(), conv.id.toString()); // ! CHECK
+      const otherUsername = convInfo[conv.otherUserId];
+      if (otherUsername) updateConvPreview(conv.otherUserId, otherUsername);
+      targetToConvId.set(conv.otherUserId.toString(), conv.id);
+      targetUsers.push({
+        userId: conv.otherUserId.toString(),
+        username: otherUsername,
+      }); // ! ADD SELF ? (useless?)
     }
+    // console.warn("targetUsers =", targetUsers); // ! DEBUG
   }
 });
 
+// // Send message (with ack)
+// function sendMessage(msg: string) {
+//   const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
+//   socket.emit("message", { targetId: targetId, msg, clientOffset, currConvId },
+//     (response: { status: string; serverOffset?: number }) => {
+//       console.log("message : ", msg); // ! DEBUG
+//       if (!response) {console.error("TEST") ; return;} // ! DEBUG
+//       if (response.serverOffset) socket.auth.serverOffset = response.serverOffset;
+//       console.log("Acknowledged by server:", response);
+//   });
+// }
+
 // Send message
+function sendMessage(msg: string) {
+  const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
+  socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId });
+}
+
+// Set send button listener
 export function setSendBtnListener() {
   const sendBtn = document.getElementById("send-btn") as HTMLButtonElement;
   if (!sendBtn) return;
   sendBtn.addEventListener('click', (e) => {
     e.preventDefault();
     const input = document.querySelector('textarea');
-    if (!input) return ;
-    const msg = input.value;
-    if (input.value) {
-        // Ensure client delivery after state recovery/temp disconnection
-        const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // !!!!!!!!! CHECK
-        // console.log("TEST : targetId = ", targetId); // ! DEBUG
-        socket.emit("message", { targetId: targetId, msg, clientOffset });
-        input.value = "";
+    if (input && input.value) {
+      const msg = input.value;
+      sendMessage(msg);
+      input.value = "";
+      input.focus();
     }
-    input.focus();
   });
 }
 
+function getTargetUsername(otherUserId: string, senderUsername: string, isSent: boolean): string { // ! WHY IS ID A NUMBER ?
+  if (isSent) {
+    const targetUser = targetUsers.find(u => u.userId === otherUserId.toString());
+    if (targetUser) return (targetUser.username);
+    const activeTargetUser = activeUsers.find(u => u.userId === otherUserId.toString());
+    if (activeTargetUser) return (activeTargetUser.username);
+  } else return (senderUsername);
+  console.warn("No target user found for ID:", otherUserId);
+  return ("Unknown User");
+}
+
 // Listen for messages
-socket.on("message", async ({ senderId, senderUsername, msg, serverOffset } :
-    { senderId: string; senderUsername: string, msg: string, serverOffset: string }) => {
-    const isSent = senderId === currentSessionId;
-    const userId = isSent ? targetId : senderId;
-    const username = isSent ? users.find(u => u.userId === targetId)?.username : senderUsername;
-    if (!userId || !username) {
-      console.error("Invalid user ID or username received in message event.");
-      return;
+socket.on("message", async ({ senderId, senderUsername, content, serverOffset } :
+  { senderId: string; senderUsername: string, content: string, serverOffset: number }) => {
+    try {
+      const isSent = senderId === currentSessionId;
+      const otherUserId = isSent ? targetId : senderId;
+      const otherUsername = getTargetUsername(otherUserId!, senderUsername, isSent);
+      if (!otherUserId || !otherUsername) {
+        console.error("Invalid user ID or username received in message event.");
+        return;
+      }
+      socket.auth.serverOffset = serverOffset;
+      updateConvPreview(otherUserId, otherUsername);
+      const message: Message = {
+        content: content,
+        senderId: senderId,
+        sentAt: new Date()
+      }
+      await addChatBubble(currentSessionId, message);
+    } catch (e) {
+      console.error("Error processing message received from server:", e);
     }
-    updateConvPreview(userId, username);
-    localStorage.setItem(`serverOffset-${currConvId}`, serverOffset);
-    console.log("Listening for msg : CURR CONV ID = ", currConvId); // ! DEBUG
-    socket.auth.serverOffset = serverOffset;
-    const message: Message = {
-      content: msg,
-      senderId: senderId,
-      sentAt: new Date()
-    }
-    await addChatBubble(currentSessionId, message);
 });
 
 // Get current user info
 socket.on("session", ({ sessionId, username } :
   { sessionId: string, username: string }) => {
   currentSessionId = sessionId;
-  socket.auth.username = username;
+  socket.auth.username = username; // ! Useless ?
 });
 
+// ! FIX : only conv preview w/ active user displayed
+// TODO - handle message recovery
 // TODO - handle blocked users
 
-// ? check msg recovery handling
-// ? add last_seen in conv to send missed messages in case of disconnect (cache) ?
-// ? update landing page (add search bar for friends & new conversations)
-
-// TODO - Announce next tournament (io.emit)
-// >> server side : io.to(session.socketId).emit("event", data);
-
 // TODO - friends (search bar w/ db fetch)
+// TODO - invite to game
+// TODO - Announce next tournament (io.emit)

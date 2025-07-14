@@ -30,8 +30,23 @@ async function openFirstConv() {
         p.remove();
     convContainer.appendChild(chatWindow);
     setSendBtnListener();
-    // Handle chat options (dropdown menu)
-    handleOptions();
+    handleOptions(); // ! TODO 
+}
+// Display all messages
+async function displayMessageHistory(conversationId) {
+    const messages = await getMessageHistory(conversationId);
+    if (messages) {
+        for (const entry of messages) {
+            const message = {
+                content: entry.content,
+                senderId: entry.sender_id.toString(),
+                sentAt: new Date(entry.sent_at)
+            };
+            await addChatBubble(currentSessionId, message);
+        }
+    }
+    else
+        console.error("Failed to fetch messages for conversation ID:", conversationId);
 }
 // Open conversation
 export async function openChat(user) {
@@ -48,21 +63,9 @@ export async function openChat(user) {
         console.log("No existing conversation found.");
         return;
     }
-    const messages = await getMessageHistory(conversationId);
-    if (messages) {
-        for (const entry of messages) {
-            const message = {
-                content: entry.content,
-                senderId: entry.sender_id.toString(),
-                sentAt: new Date(entry.sent_at)
-            };
-            await addChatBubble(currentSessionId, message);
-        }
-    }
-    else
-        console.error("Failed to fetch messages for conversation ID:", conversationId);
+    displayMessageHistory(conversationId);
 }
-// ? ADD DATES 
-// ! Load profile picture
-// ! Cache Last Messages
-// >> GET /api/chat/:conversationId/messages?since=123
+// TODO - ADD DATES 
+// TODO - Load profile picture
+// ? Cache Last Messages
+// ? GET /api/chat/:conversationId/messages?since=123

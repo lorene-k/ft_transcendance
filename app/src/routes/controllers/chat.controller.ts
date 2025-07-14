@@ -28,7 +28,7 @@ export function getMessages(fastify: FastifyInstance) {
         const { conversationId } = request.params as { conversationId: string };
         try {
           const messages = await fastify.database.fetch_all(
-            "SELECT * FROM messages WHERE conversation_id = ? ORDER BY sent_at ASC",
+            "SELECT * FROM messages WHERE conversation_id = ? ORDER BY id ASC",
             [conversationId]
           );
           return (reply.send(messages));

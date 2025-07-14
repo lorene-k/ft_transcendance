@@ -8,82 +8,82 @@ export interface User {
     self?: boolean;
 }
 
-export let users: User[] = [];
+export let activeUsers: User[] = [];    // !Active users only - useless ??
 export let targetId: string | null = null;
-export let currConvId : string | null = null;
+export let currConvId : number | null = null;
 
 // ******************************************************* List active users */
 // Add user to active users list
 function addActiveUser(userList: HTMLElement, user: User) {
-    const li = document.createElement("li");
-    li.textContent = user.username;
-    if (user.self) return;
-    li.style.cursor = "pointer";
-    li.addEventListener("click", () => {
-      targetId = user.userId;
-      currConvId = targetToConvId.get(targetId)!;
-      console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
-      openChat(user);
-    });
-    userList.appendChild(li);
-  }
+  const li = document.createElement("li");
+  li.textContent = user.username;
+  if (user.self) return;
+  li.style.cursor = "pointer";
+  li.addEventListener("click", () => {
+    targetId = user.userId;
+    console.log("Target set to:", targetId); // ! DEBUG
+    currConvId = targetToConvId.get(targetId)!;
+    openChat(user);
+  });
+  userList.appendChild(li);
+}
   
-  // Display connected users
-  function displayConnectedUsers() {
-    const userList = document.getElementById("user-list");
-    if (!userList) return;
-    userList.innerHTML = "";
-    users.forEach((user) => {
-      // console.log(`User: ${user.username} (${user.userId})`); // ! DEBUG
-      addActiveUser(userList, user);
-    });
-  }
+// Display connected users
+function displayConnectedUsers() {
+  const userList = document.getElementById("user-list");
+  if (!userList) return;
+  userList.innerHTML = "";
+  activeUsers.forEach((user) => {
+    // console.log(`User: ${user.username} (${user.userId})`); // ! DEBUG
+    addActiveUser(userList, user);
+  });
+}
   
 // ***************************************************** Get connected users */
 export function getConnectedUsers(socket: any) {
-    // Get active users list
-    socket.on("users", (newUsers: User[]) => {
-      newUsers.forEach((user) => {
-        // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
-        if (user.userId === currentSessionId) user.self = true;
-      });
-      newUsers = newUsers.sort((a, b) => {
-        if (a.self) return -1;
-        if (b.self) return 1;
-        if (a.username < b.username) return -1;
-        return a.username > b.username ? 1 : 0;
-      });
-      users = newUsers;
-      displayConnectedUsers();
+  // Get active users list
+  socket.on("users", (newUsers: User[]) => {
+    newUsers.forEach((user) => {
+      // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
+      if (user.userId === currentSessionId) user.self = true;
     });
+    newUsers = newUsers.sort((a, b) => {
+      if (a.self) return -1;
+      if (b.self) return 1;
+      if (a.username < b.username) return -1;
+      return a.username > b.username ? 1 : 0;
+    });
+    activeUsers = newUsers;
+    displayConnectedUsers();
+  });
   
-    // Add user to list
-    socket.on("user connected", (user: User) => {
-      users.push(user);
-      displayConnectedUsers();
-    });
+  // Add user to list
+  socket.on("user connected", (user: User) => {
+    activeUsers.push(user);
+    displayConnectedUsers();
+  });
 }
 
 // ********************************************* Update conversation preview */
 export async function updateConvPreview(userId: string, targetName: string) {
-    const allMessages = document.getElementById("all-messages");
-    if (!allMessages) return;
-    const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
-    if (displayed) {
-      displayed.classList.add("transition-all", "duration-300");
-      allMessages.prepend(displayed);
-    } else {
-      const card = await loadTemplate("/chat/conv-preview.html");
-      if (!card) return;
-      card.setAttribute("data-user-id", userId);
-      const name = card.querySelector("p");
-      if (name) name.textContent = targetName;
-      card.addEventListener("click", () => {
-        targetId = userId;
-        currConvId = targetToConvId.get(targetId)!;
-        console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
-        openChat({ userId: userId, username: targetName, self: false });
-      });
-      allMessages.prepend(card);
-    }
+  const allMessages = document.getElementById("all-messages");
+  if (!allMessages) return;
+  const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
+  if (displayed) {
+    displayed.classList.add("transition-all", "duration-300");
+    allMessages.prepend(displayed);
+  } else {
+    const card = await loadTemplate("/chat/conv-preview.html");
+    if (!card) return;
+    card.setAttribute("data-user-id", userId);
+    const name = card.querySelector("p");
+    if (name) name.textContent = targetName;
+    card.addEventListener("click", () => {
+      targetId = userId;
+      console.log("Target set to:", targetId); // ! DEBUG
+      currConvId = targetToConvId.get(targetId)!;
+      openChat({ userId: userId, username: targetName, self: false });
+    });
+    allMessages.prepend(card);
+  }
 }

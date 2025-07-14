@@ -1,5 +1,8 @@
+import { targetId } from "./chatUsers.js";
 let lastSenderId = "";
+let lastTargetId = "";
 let lastMsgTime = "";
+// Load html templates
 export async function loadTemplate(templatePath) {
     try {
         const res = await fetch(templatePath);
@@ -12,6 +15,7 @@ export async function loadTemplate(templatePath) {
         console.error("Failed to fetch html:", e);
     }
 }
+// Format current message time to "YYYY-MM-DD-HH-MM"
 function getTimeString(date) {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -20,20 +24,24 @@ function getTimeString(date) {
     const minutes = date.getMinutes().toString().padStart(2, "0");
     return (`${year}-${month}-${day}-${hours}-${minutes}`);
 }
+// Update bubble header with time
 function updateBubbleHeader(bubble, message) {
     const timeElem = bubble?.querySelector(".chat-time");
     const headerElem = bubble?.querySelector(".chat-bubble-header");
     // const currMsgTime = message.sentAt.toISOString().slice(0,16); // Format: "2025-07-11T14:35"
     const currMsgTime = getTimeString(message.sentAt);
     const isSameSender = message.senderId === lastSenderId;
+    const isSameTarget = targetId === lastTargetId;
     const isSameMinute = currMsgTime === lastMsgTime;
     if (timeElem)
         timeElem.textContent = message.sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    if (isSameSender && isSameMinute && headerElem)
+    if (isSameSender && isSameTarget && isSameMinute && headerElem)
         headerElem.remove();
     lastSenderId = message.senderId;
     lastMsgTime = currMsgTime;
+    lastTargetId = targetId;
 }
+// Add chat bubble to conversation box
 export async function addChatBubble(currentSessionId, message) {
     const isSent = message.senderId === currentSessionId;
     const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
@@ -47,11 +55,8 @@ export async function addChatBubble(currentSessionId, message) {
     if (textElem)
         textElem.textContent = message.content;
     const conversation = document.getElementById("conversation-box");
-    if (!conversation) {
-        console.error("Conversation box element not found.");
+    if (!conversation)
         return;
-    }
     conversation.appendChild(bubble);
-    // console.debug("Added chat bubble:", message.content, "from", message.senderId); // ! DEBUG
     conversation.scrollTop = conversation.scrollHeight;
 }
