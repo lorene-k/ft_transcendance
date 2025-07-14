@@ -62,7 +62,7 @@ async function runInsertConversation(fastify: FastifyInstance, user1: number,
 }
 
 function runInsertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
-  senderId: number, clientOffset: number): Promise<number> {
+  senderId: number, clientOffset: string): Promise<number> {
   return new Promise((resolve, reject) => {
     fastify.database.run(
       `INSERT INTO messages (conversation_id, sender_id, content, client_offset)
@@ -114,7 +114,7 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
 }
 
 async function insertMessage(fastify: FastifyInstance, msg: string, conversationId: number,
-  senderId: number, clientOffset: number): Promise<number> {
+  senderId: number, clientOffset: string): Promise<number> {
   try {
     const messageId = await runInsertMessage(fastify, msg, conversationId, senderId, clientOffset);
     // console.log("Message inserted with ID:", messageId); // ! DEBUG
@@ -127,7 +127,7 @@ async function insertMessage(fastify: FastifyInstance, msg: string, conversation
 
 function handleMessages(fastify: FastifyInstance, socket: any, io: any) {
   socket.on("message", async ({ targetId, msg, clientOffset } :
-    { targetId: string, msg: string, clientOffset: number }) => {
+    { targetId: string, msg: string, clientOffset: string }) => {
     const senderId = socket.session.userId;
     const conversationId = await getOrCreateConversation(fastify, senderId, parseInt(targetId));
     if (conversationId === -1) return;

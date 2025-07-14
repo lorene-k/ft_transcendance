@@ -1,8 +1,9 @@
-import { currentSessionId } from "./chat.js";
+import { currentSessionId, targetToConvId } from "./chat.js";
 import { openChat } from "./chatHistory.js";
 import { loadTemplate } from "./chatBubbles.js";
 export let users = [];
 export let targetId = null;
+export let currConvId = null;
 // ******************************************************* List active users */
 // Add user to active users list
 function addActiveUser(userList, user) {
@@ -13,7 +14,8 @@ function addActiveUser(userList, user) {
     li.style.cursor = "pointer";
     li.addEventListener("click", () => {
         targetId = user.userId;
-        // console.log("Target set to:", user.userId); // ! DEBUG
+        currConvId = targetToConvId.get(targetId);
+        console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
         openChat(user);
     });
     userList.appendChild(li);
@@ -76,7 +78,8 @@ export async function updateConvPreview(userId, targetName) {
             name.textContent = targetName;
         card.addEventListener("click", () => {
             targetId = userId;
-            // console.log("Target set to:", userId); // ! DEBUG
+            currConvId = targetToConvId.get(targetId);
+            console.log("Target set to:", targetId, "ConvId set to:", currConvId); // ! DEBUG
             openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);

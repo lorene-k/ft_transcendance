@@ -1,7 +1,7 @@
 import { addChatBubble } from "./chatBubbles.js";
-import { users, targetId, updateConvPreview, getConnectedUsers } from "./chatUsers.js";
+import { users, targetId, updateConvPreview, getConnectedUsers, currConvId } from "./chatUsers.js";
 let counter = 0;
-const lastOffset = parseInt(localStorage.getItem("serverOffset") || "0");
+const lastOffset = localStorage.getItem(`serverOffset-${currConvId}`) || "0";
 export const socket = io('http://localhost:8080', {
     withCredentials: true,
     transports: ['websocket'],
@@ -12,6 +12,7 @@ export const socket = io('http://localhost:8080', {
     // retries: 3
 });
 export let currentSessionId = "";
+export const targetToConvId = new Map();
 // ******************************************************* Handle connection */
 // Get active users list
 getConnectedUsers(socket);
@@ -27,6 +28,7 @@ socket.on("allConversations", (conversations) => {
             const otherUser = users.find(u => u.userId === conv.otherUserId.toString());
             if (otherUser)
                 updateConvPreview(otherUser.userId, otherUser.username);
+            targetToConvId.set(conv.otherUserId.toString(), conv.id.toString()); // ! CHECK
         }
     }
 });
@@ -54,15 +56,16 @@ export function setSendBtnListener() {
 // Listen for messages
 socket.on("message", async ({ senderId, senderUsername, msg, serverOffset }) => {
     const isSent = senderId === currentSessionId;
-    localStorage.setItem("serverOffset", serverOffset);
-    socket.auth.serverOffset = serverOffset;
-    if (isSent) {
-        const targetUser = users.find(u => u.userId === targetId);
-        if (targetUser)
-            updateConvPreview(targetUser.userId, targetUser.username);
+    const userId = isSent ? targetId : senderId;
+    const username = isSent ? users.find(u => u.userId === targetId)?.username : senderUsername;
+    if (!userId || !username) {
+        console.error("Invalid user ID or username received in message event.");
+        return;
     }
-    else
-        updateConvPreview(senderId, senderUsername);
+    updateConvPreview(userId, username);
+    localStorage.setItem(`serverOffset-${currConvId}`, serverOffset);
+    console.log("Listening for msg : CURR CONV ID = ", currConvId); // ! DEBUG
+    socket.auth.serverOffset = serverOffset;
     const message = {
         content: msg,
         senderId: senderId,

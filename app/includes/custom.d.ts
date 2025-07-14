@@ -19,5 +19,6 @@ declare module "socket.io" {
     interface Socket {
         session: Session;
         username: string;
+        recovered: boolean;
     }
 }
