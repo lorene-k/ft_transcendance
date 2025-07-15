@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { runInsertConversation, runInsertMessage } from './chatHistory.js';
-import { getUsername } from './chatAuthenticate.js';
+import { SocketManager } from './chatSocketManager.js';
 import { Socket } from 'socket.io';
 
 export interface Message {
@@ -15,8 +15,7 @@ export interface Message {
 }
 export let currConvId = 0;
 
-// Fetch all conversations for a user
-export async function getAllConversations(fastify: FastifyInstance, userId: number, io: any) {
+export async function getAllConversations(fastify: FastifyInstance, userId: number, io: any, socketManager: SocketManager) {
     try {
         const convInfo: Record<number, string> = {};
         const conversations = await fastify.database.fetch_all(
@@ -26,7 +25,7 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
         [userId, userId, userId]
         );
         for (const conv of conversations) {
-          const username = await getUsername(fastify, conv.otherUserId);
+          const username = await socketManager.getUsername(conv.otherUserId);
           if (username) convInfo[conv.otherUserId] = username;
         }
         io.to(userId.toString()).emit("allConversations", conversations, convInfo);
@@ -35,7 +34,6 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
     }
 }
 
-// Get existing conversation or create a new one
 async function getOrCreateConversation(fastify: FastifyInstance, senderId: number,
     targetId: number): Promise<number> {
     let [user1, user2] = [senderId!, targetId!].sort((a, b) => a - b);
@@ -53,7 +51,6 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
     }
 }
 
-// Insert message into database
 async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
     try {
         const messageId = await runInsertMessage(fastify, msg);
@@ -64,7 +61,6 @@ async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<nu
     }
 }
 
-// Save and emit messages
 export function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
     socket.on("message", async (msg: Message, callback) => {
         msg.senderId = socket.session.userId.toString();

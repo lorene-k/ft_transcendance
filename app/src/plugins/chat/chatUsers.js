@@ -1,7 +1,6 @@
-import { userSockets } from "./chatAuthenticate.js";
-// Send active users list to client
-export function listUsers(socket, io) {
+export function listUsers(socket, io, socketManager) {
     const users = [];
+    const userSockets = socketManager.getUserSockets();
     for (const [sessionId, socketIds] of userSockets) {
         const firstSocketId = socketIds.values().next().value;
         const sock = io.of("/").sockets.get(firstSocketId);
@@ -14,7 +13,6 @@ export function listUsers(socket, io) {
     }
     socket.emit("users", users);
 }
-// New connection - notify existing users
 export function notifyUsers(socket) {
     socket.broadcast.emit("User connected", {
         userId: socket.session.userId.toString(),

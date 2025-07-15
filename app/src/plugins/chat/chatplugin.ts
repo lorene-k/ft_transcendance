@@ -1,40 +1,24 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { Socket } from "socket.io";
-import { sendUserId, setSessionInfo, authenticateSession, socketToSession, userSockets, getUsername } from "./chatAuthenticate.js";
+import { SocketManager } from "./chatSocketManager.js";
 import { handleMessages, getAllConversations } from "./chatMessages.js";
 import { handleRecovery } from "./chatRecovery.js";
 import { listUsers, notifyUsers } from "./chatUsers.js";
 
-function handleDisconnect(socket: Socket) {
-  socket.on("disconnect", () => {
-    const userId = socketToSession.get(socket.id);
-    if (userId) {
-      const socketSet = userSockets.get(userId);
-      if (socketSet) {
-        socketSet.delete(socket.id);
-        if (socketSet.size === 0) {
-          userSockets.delete(userId);
-        }
-      }
-    }
-    socketToSession.delete(socket.id);
-  });
-}
-
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const io = fastify.io;
-  authenticateSession(io, fastify);
+  const socketManager = new SocketManager(fastify);
+  socketManager.authenticate(io);
   
   io.on("connection", async (socket) => {
-    await setSessionInfo(fastify, socket);
-    sendUserId(socket);
+    await socketManager.setSessionInfo(socket);
+    socketManager.sendUserId(socket);
     handleMessages(fastify, socket, io);
-    listUsers(socket, io);
+    listUsers(socket, io, socketManager);
     notifyUsers(socket);
-    getAllConversations(fastify, socket.session.userId, io);
+    getAllConversations(fastify, socket.session.userId, io, socketManager);
     handleRecovery(socket, fastify, io);
-    handleDisconnect(socket);
+    socketManager.handleDisconnect(socket);
   });
 };
 

@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
 import { Message, currConvId } from './chatMessages.js';
 
-// Get messages after socket recovery
 export async function handleRecovery(socket: Socket, fastify: FastifyInstance, io: any) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
     // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG

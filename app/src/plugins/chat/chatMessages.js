@@ -1,15 +1,13 @@
 import { runInsertConversation, runInsertMessage } from './chatHistory.js';
-import { getUsername } from './chatAuthenticate.js';
 export let currConvId = 0;
-// Fetch all conversations for a user
-export async function getAllConversations(fastify, userId, io) {
+export async function getAllConversations(fastify, userId, io, socketManager) {
     try {
         const convInfo = {};
         const conversations = await fastify.database.fetch_all(`SELECT id, 
         CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId
         FROM conversations WHERE user1_id = ? OR user2_id = ?`, [userId, userId, userId]);
         for (const conv of conversations) {
-            const username = await getUsername(fastify, conv.otherUserId);
+            const username = await socketManager.getUsername(conv.otherUserId);
             if (username)
                 convInfo[conv.otherUserId] = username;
         }
@@ -19,7 +17,6 @@ export async function getAllConversations(fastify, userId, io) {
         console.error("Failed to fetch conversations", err);
     }
 }
-// Get existing conversation or create a new one
 async function getOrCreateConversation(fastify, senderId, targetId) {
     let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
     try {
@@ -34,7 +31,6 @@ async function getOrCreateConversation(fastify, senderId, targetId) {
         return (-1);
     }
 }
-// Insert message into database
 async function insertMessage(fastify, msg) {
     try {
         const messageId = await runInsertMessage(fastify, msg);
@@ -45,7 +41,6 @@ async function insertMessage(fastify, msg) {
         return (-1);
     }
 }
-// Save and emit messages
 export function handleMessages(fastify, socket, io) {
     socket.on("message", async (msg, callback) => {
         msg.senderId = socket.session.userId.toString();
