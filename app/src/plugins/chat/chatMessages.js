@@ -1,5 +1,7 @@
 import { runInsertConversation, runInsertMessage } from './chatHistory.js';
 import { getUsername } from './chatAuthenticate.js';
+export let currConvId = 0;
+// Fetch all conversations for a user
 export async function getAllConversations(fastify, userId, io) {
     try {
         const convInfo = {};
@@ -17,6 +19,7 @@ export async function getAllConversations(fastify, userId, io) {
         console.error("Failed to fetch conversations", err);
     }
 }
+// Get existing conversation or create a new one
 async function getOrCreateConversation(fastify, senderId, targetId) {
     let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
     try {
@@ -31,6 +34,7 @@ async function getOrCreateConversation(fastify, senderId, targetId) {
         return (-1);
     }
 }
+// Insert message into database
 async function insertMessage(fastify, msg) {
     try {
         const messageId = await runInsertMessage(fastify, msg);
@@ -41,6 +45,7 @@ async function insertMessage(fastify, msg) {
         return (-1);
     }
 }
+// Save and emit messages
 export function handleMessages(fastify, socket, io) {
     socket.on("message", async (msg, callback) => {
         msg.senderId = socket.session.userId.toString();
@@ -49,7 +54,7 @@ export function handleMessages(fastify, socket, io) {
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId));
             if (conversationId === -1)
                 return (callback({ status: "error" }));
-            msg.convId = conversationId; // ! CHECK (redundant ?)
+            msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
             io.to(msg.targetId).emit("message", msg);
             io.to(msg.senderId).emit("message", msg);

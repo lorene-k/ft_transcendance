@@ -1,9 +1,21 @@
 import { FastifyInstance } from 'fastify';
-import { Message } from './chatplugin.js';
 import { runInsertConversation, runInsertMessage } from './chatHistory.js';
 import { getUsername } from './chatAuthenticate.js';
 import { Socket } from 'socket.io';
 
+export interface Message {
+    senderId: number;
+    content: string;
+    senderUsername?: string;
+    targetId?: string;
+    clientOffset?: string;
+    serverOffset?: number;
+    sentAt?: Date;
+    convId?: number;
+}
+export let currConvId = 0;
+
+// Fetch all conversations for a user
 export async function getAllConversations(fastify: FastifyInstance, userId: number, io: any) {
     try {
         const convInfo: Record<number, string> = {};
@@ -21,8 +33,9 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
     } catch (err) {
         console.error("Failed to fetch conversations", err);
     }
-  }
-  
+}
+
+// Get existing conversation or create a new one
 async function getOrCreateConversation(fastify: FastifyInstance, senderId: number,
     targetId: number): Promise<number> {
     let [user1, user2] = [senderId!, targetId!].sort((a, b) => a - b);
@@ -39,7 +52,8 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
         return (-1);
     }
 }
-  
+
+// Insert message into database
 async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
     try {
         const messageId = await runInsertMessage(fastify, msg);
@@ -49,7 +63,8 @@ async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<nu
         return (-1);
     }
 }
-  
+
+// Save and emit messages
 export function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
     socket.on("message", async (msg: Message, callback) => {
         msg.senderId = socket.session.userId.toString();
@@ -57,7 +72,7 @@ export function handleMessages(fastify: FastifyInstance, socket: Socket, io: any
         try {
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
             if (conversationId === -1) return (callback({ status: "error" }));
-            msg.convId = conversationId; // ! CHECK (redundant ?)
+            msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
             io.to(msg.targetId).emit("message", msg);
             io.to(msg.senderId).emit("message", msg);

@@ -5,6 +5,7 @@ import { parse } from "cookie";
 export const userSockets = new Map<number, Set<string>>();
 export const socketToSession = new Map<string, number>();
 
+// Authenticate session before connecting socket
 export function authenticateSession(io : any, fastify : FastifyInstance) {
     io.use((socket: Socket, next: Function) => {
       const cookies = parse(socket.handshake.headers.cookie || "");

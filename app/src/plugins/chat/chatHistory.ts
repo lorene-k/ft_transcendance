@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { Message } from './chatplugin.js';
+import { Message } from './chatMessages.js';
 
+// Insert new conversation into database
 export async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
     return new Promise((resolve, reject) => {
       fastify.database.run(
@@ -16,6 +17,7 @@ export async function runInsertConversation(fastify: FastifyInstance, user1: num
     });
 }
 
+// Insert new message into database
 export function runInsertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
   return new Promise((resolve, reject) => {
     fastify.database.run(
