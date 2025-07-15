@@ -1,5 +1,8 @@
 import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
+import { handleOptions } from "./chatOptions.js";
+import { socket } from "./chat.js";
+import { checkBlockedTarget } from "./chatBlocks.js";
 // Get conversation ID
 async function getConversationId(user1, user2) {
     try {
@@ -48,7 +51,7 @@ async function openFirstConv() {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     setSendListeners();
-    // await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
+    await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
 }
 // Display all messages
 async function displayMessageHistory(conversationId) {
@@ -80,7 +83,7 @@ export async function openChat(user) {
     if (!conversationId)
         return;
     displayMessageHistory(conversationId);
-    //  checkBlockedTarget();
+    checkBlockedTarget();
 }
 // TODO - ADD DATES 
 // TODO - Load profile picture

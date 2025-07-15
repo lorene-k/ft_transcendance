@@ -18,7 +18,7 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
     listUsers(socket, io, socketManager);
     notifyUsers(socket);
     getAllConversations(fastify, socket.session.userId, io, socketManager);
-    handleBlocks(socket, fastify);
+    handleBlocks(socket, fastify, io);
     handleRecovery(socket, fastify, io);
     socketManager.handleDisconnect(socket);
   });

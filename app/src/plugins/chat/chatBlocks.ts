@@ -1,6 +1,11 @@
 import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 
+interface BlockedUser {
+  targetId: number;
+  block: boolean;
+}
+
 async function runInsertBlock(fastify: FastifyInstance, blockerId: number, blockedId: number): Promise<number> {
     return new Promise((resolve, reject) => {
       fastify.database.run(
@@ -31,18 +36,22 @@ async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, block
       });
 }
 
-export function handleBlocks(socket: Socket, fastify: FastifyInstance) {
-    socket.on("blockUser", async ({ targetId, block }) => {
+export function handleBlocks(socket: Socket, fastify: FastifyInstance, io: any) {
+    socket.on("blockUser", async (blocked: BlockedUser, callback) => {
         try {
-            if (block) {
+          const targetId = blocked.targetId;
+            if (blocked.block) {
                 const blockId = await runInsertBlock(fastify, socket.session.userId, targetId);
                 console.log(`User ${socket.session.userId} blocked user ${targetId}, block ID: ${blockId}`);
-            } else if (!block) {
+                callback({ status: "blocked" });
+            } else if (!blocked.block) {
                 const res = await runDeleteBlock(fastify, socket.session.userId, targetId);
                 console.log(`User ${socket.session.userId} unblocked user ${targetId}, result: ${res}`);
+                callback({ status: "unblocked" });
             }
         } catch (err: any) {
             console.error("Error handling blockUser event:", err);
+            callback({ status: "DB error"});
         }
     });
 }

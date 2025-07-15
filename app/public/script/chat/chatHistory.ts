@@ -2,9 +2,9 @@ import { P } from "pino";
 import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
 import { User } from "./chatUsers.js";
-// import { handleOptions } from "./chatOptions.js";
-// import { socket } from "./chat.js";
-// import { checkBlockedTarget } from "./chatOptions.js";
+import { handleOptions } from "./chatOptions.js";
+import { socket } from "./chat.js";
+import { checkBlockedTarget } from "./chatBlocks.js";
 
 export interface Message {
   content: string;
@@ -57,14 +57,14 @@ async function openFirstConv() {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     setSendListeners();
-    // await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
+    await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
 }
 
 // Display all messages
 async function displayMessageHistory(conversationId: number) {
   const messages = await getMessageHistory(conversationId);
   if (messages) {
-    for (const entry of messages) {
+    for (const entry of messages as any) {
       const message: Message = {
         content: entry.content,
         senderId: entry.sender_id.toString(), // Ignore squiggles
@@ -87,7 +87,7 @@ export async function openChat(user: User) {
     const conversationId = await getConversationId(currentSessionId, user.userId);
     if (!conversationId) return;
     displayMessageHistory(conversationId);
-  //  checkBlockedTarget();
+    checkBlockedTarget();
 }
 
 // TODO - ADD DATES 

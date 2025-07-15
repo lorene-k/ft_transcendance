@@ -20,20 +20,24 @@ async function runDeleteBlock(fastify, blockerId, blockedId) {
         });
     });
 }
-export function handleBlocks(socket, fastify) {
-    socket.on("blockUser", async ({ targetId, block }) => {
+export function handleBlocks(socket, fastify, io) {
+    socket.on("blockUser", async (blocked, callback) => {
         try {
-            if (block) {
+            const targetId = blocked.targetId;
+            if (blocked.block) {
                 const blockId = await runInsertBlock(fastify, socket.session.userId, targetId);
                 console.log(`User ${socket.session.userId} blocked user ${targetId}, block ID: ${blockId}`);
+                callback({ status: "blocked" });
             }
-            else if (!block) {
+            else if (!blocked.block) {
                 const res = await runDeleteBlock(fastify, socket.session.userId, targetId);
                 console.log(`User ${socket.session.userId} unblocked user ${targetId}, result: ${res}`);
+                callback({ status: "unblocked" });
             }
         }
         catch (err) {
             console.error("Error handling blockUser event:", err);
+            callback({ status: "DB error" });
         }
     });
 }
