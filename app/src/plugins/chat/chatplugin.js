@@ -1,52 +1,6 @@
 import fp from "fastify-plugin";
-import { parse } from "cookie";
-const userSockets = new Map();
-const socketToSession = new Map();
+import { sendUserId, setSessionInfo, authenticateSession, socketToSession, userSockets, getUsername } from "./chatAuthenticate.js";
 let currConvId = 0; // ! useless ?
-// ********************************************************** Authentication */
-function authenticateSession(io, fastify) {
-    io.use((socket, next) => {
-        const cookies = parse(socket.handshake.headers.cookie || "");
-        const signedSessionId = cookies.sessionId;
-        if (!signedSessionId)
-            return (next(new Error("No session Id found")));
-        const sessionId = signedSessionId.split(".")[0];
-        fastify.sessionStore.get(sessionId, (err, session) => {
-            if (err || !session || !session.authenticated)
-                return (next(new Error("Unauthorized connection")));
-            socket.session = session;
-            fastify.sessionStore.set(sessionId, session, (e) => {
-                if (e)
-                    return (next(new Error("No session Id found")));
-                next();
-            });
-        });
-    });
-}
-// Attach username to socket
-async function getUsername(fastify, userId) {
-    const row = await fastify.database.fetch_one(`SELECT username FROM user WHERE id = ?`, [userId]);
-    if (!row)
-        return ("Unknown user");
-    return (row.username);
-}
-// Attach socket info to session
-async function setSessionInfo(fastify, socket) {
-    const sessionId = socket.session.userId;
-    socket.username = await getUsername(fastify, sessionId);
-    socket.join(sessionId.toString());
-    if (!userSockets.has(sessionId))
-        userSockets.set(sessionId, new Set());
-    userSockets.get(sessionId).add(socket.id);
-    socketToSession.set(socket.id, sessionId);
-}
-// Send userId and username to client
-function sendUserId(socket) {
-    socket.emit("session", {
-        sessionId: socket.session.userId.toString(),
-        username: socket.username,
-    });
-}
 // ********************************************************** Update history */
 async function runInsertConversation(fastify, user1, user2) {
     return new Promise((resolve, reject) => {

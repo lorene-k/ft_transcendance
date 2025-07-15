@@ -33,7 +33,7 @@ socket.on("allConversations", (conversations: any[], convInfo: Record<number, st
       targetUsers.push({
         userId: conv.otherUserId.toString(),
         username: otherUsername,
-      }); // ! ADD SELF ? (useless?)
+      });
     }
     // console.warn("targetUsers =", targetUsers); // ! DEBUG
   }
