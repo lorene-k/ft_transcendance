@@ -13,7 +13,7 @@ export function getConversation(fastify: FastifyInstance) {
              WHERE (user1_id = ? AND user2_id = ?)`,
             [user1, user2]
           );
-          if (!convId) return (reply.status(200).send({ message: "New conversation" }));
+          if (!convId) return (reply.status(404).send({ message: "New conversation" }));
           return (reply.send(convId));
         } catch (err) {
           console.error("Failed to fetch conversation", err);
@@ -26,14 +26,36 @@ export function getConversation(fastify: FastifyInstance) {
 export function getMessages(fastify: FastifyInstance) {
     return async function (request: FastifyRequest, reply: FastifyReply) {
         const { conversationId } = request.params as { conversationId: string };
+        const convId = parseInt(conversationId);
         try {
           const messages = await fastify.database.fetch_all(
             "SELECT * FROM messages WHERE conversation_id = ? ORDER BY id ASC",
-            [conversationId]
+            [convId]
           );
           return (reply.send(messages));
         } catch (err) {
-          reply.status(500).send({ error: "Failed to fetch messages" });
+          console.error("Failed to fetch messages", err);
+          reply.status(500).send({ error: "Database error" });
         }
     };
+}
+
+// GET /api/chat/blocked?blocker=1
+export function getBlocked(fastify: FastifyInstance) {
+  return async function (request: FastifyRequest, reply: FastifyReply) {
+    const { blocker } = request.query as { blocker: string };
+    const blockerId = parseInt(blocker);
+    try {
+      const blockedUsers = await fastify.database.fetch_all(
+        `SELECT blocked_id FROM blocks WHERE blocker_id = ?`,
+        [blockerId]
+      );
+      if (!blockedUsers) return (reply.status(404).send({ message: "No blocked users" }));
+      console.log("Blocked users:", blockedUsers); // ! DEBUG
+      return (reply.send(blockedUsers));
+    } catch (err) {
+      console.error("Failed to fetch blocked users", err);
+      reply.status(500).send({ error: "Database error" });
+    }
+  }
 }

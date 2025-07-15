@@ -1,15 +1,15 @@
-import { FastifyInstance } from 'fastify';
-import { Message } from './chatMessages.js';
+import { FastifyInstance } from "fastify";
+import { Message } from "./chatMessages.js";
 
 export async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
     return new Promise((resolve, reject) => {
       fastify.database.run(
-        'INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)',
+        `INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)`,
         [user1, user2],
         function (this: any, err: Error | null) {
         if (err) {
           console.error("Failed to create conversation:", err.message);
-          return (reject(-1));
+          return (reject(err));
         }
         resolve(this.lastID);
       });
@@ -25,7 +25,7 @@ export function runInsertMessage(fastify: FastifyInstance, msg: Message): Promis
       function (this: any, err: Error | null) {
         if (err) {
           console.error("Error inserting message:", err.message);
-          return (reject(-1));
+          return (reject(err));
         }
         resolve(this.lastID);
       }

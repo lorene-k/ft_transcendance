@@ -15,7 +15,7 @@ export function listUsers(socket: Socket, io: any, socketManager: SocketManager)
         }
     }
     socket.emit("users", users);
-  }
+}
 
 export function notifyUsers(socket: Socket) {
     socket.broadcast.emit("User connected", {

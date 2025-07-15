@@ -4,6 +4,7 @@ import { SocketManager } from "./chatSocketManager.js";
 import { handleMessages, getAllConversations } from "./chatMessages.js";
 import { handleRecovery } from "./chatRecovery.js";
 import { listUsers, notifyUsers } from "./chatUsers.js";
+import { handleBlocks } from "./chatBlocks.js";
 
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const io = fastify.io;
@@ -17,6 +18,7 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
     listUsers(socket, io, socketManager);
     notifyUsers(socket);
     getAllConversations(fastify, socket.session.userId, io, socketManager);
+    handleBlocks(socket, fastify);
     handleRecovery(socket, fastify, io);
     socketManager.handleDisconnect(socket);
   });
@@ -24,7 +26,4 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
 
 export default fp(chatPlugin);
 
-// TODO - Handle blocks
-// After merge : Check dependencies & socket.io versions ("socket.io": "^4.7.2", "socket.io-client": "^4.7.2")
-// Check Socket.IO versions mismatch (rare but can cause ack issues)
-// ! Careful with types (check typeof() if pb)
+// ! Test all if deleting user (conversations, blocks, etc.)

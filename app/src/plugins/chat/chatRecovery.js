@@ -1,4 +1,4 @@
-import { currConvId } from './chatMessages.js';
+import { currConvId } from "./chatMessages.js";
 export async function handleRecovery(socket, fastify, io) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
     // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG

@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { getRoot, getGame, getAccount, getChat } from "./controllers/root.controller.js";
 import { check_user } from "./controllers/api.controller.js";
 import { register, login, logout } from "./controllers/auth.controller.js";
-import { getConversation, getMessages } from "./controllers/chat.controller.js";
+import { getConversation, getMessages, getBlocked } from "./controllers/chat.controller.js";
 
 /**
  * A plugin that provide encapsulated routes
@@ -41,6 +41,7 @@ async function api(fastify: FastifyInstance, options: FastifyPluginOptions) {
     // api/chat
     fastify.get("/api/chat/conversation", getConversation(fastify));
     fastify.get("/api/chat/:conversationId/messages", getMessages(fastify));
+    fastify.get("/api/chat/blocked", getBlocked(fastify));
 }
 
 export default { routes, api, auth };

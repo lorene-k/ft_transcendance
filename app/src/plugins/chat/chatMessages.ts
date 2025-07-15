@@ -1,7 +1,7 @@
-import { FastifyInstance } from 'fastify';
-import { runInsertConversation, runInsertMessage } from './chatHistory.js';
-import { SocketManager } from './chatSocketManager.js';
-import { Socket } from 'socket.io';
+import { FastifyInstance } from "fastify";
+import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
+import { SocketManager } from "./chatSocketManager.js";
+import { Socket } from "socket.io";
 
 export interface Message {
     senderId: number;
@@ -28,6 +28,7 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
           const username = await socketManager.getUsername(conv.otherUserId);
           if (username) convInfo[conv.otherUserId] = username;
         }
+        // console.log("All conversations:", conversations); // ! DEBUG - OK
         io.to(userId.toString()).emit("allConversations", conversations, convInfo);
     } catch (err) {
         console.error("Failed to fetch conversations", err);
@@ -42,8 +43,10 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
           `SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`,
           [user1, user2]
         );
+        // if (conv) console.log("Get conversation: conv =", conv); // ! DEBUG
         if (conv) return (conv.id);
         const conversationId = await runInsertConversation(fastify, user1, user2);
+        // console.log(`Created new conversation between ${user1} and ${user2}, ID: ${conversationId}`); // ! DEBUG
         return (conversationId);
     } catch (err) {
         console.error("Failed to create or get conversation: ", err);
@@ -54,6 +57,7 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
 async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
     try {
         const messageId = await runInsertMessage(fastify, msg);
+        // console.log(`Message inserted with ID: ${messageId}, content: ${msg.content}`); // ! DEBUG
         return (messageId);
     } catch (err) {
         console.error("Failed to insert message: ", err);

@@ -1,3 +1,5 @@
+import { getBlockedUsers, blockOrUnblockUser } from "./chatBlocks.js";
+// ******************************************************************** TODO */
 function addFriend() {
     console.log("Add friend");
     // Use socket to emit() friend request 
@@ -11,16 +13,11 @@ function inviteToGame() {
     // (push notif on receiver end)
     // Listen for socket response to update UI & load game
 }
-function blockUser() {
-    console.log("Block user clicked");
-    // frontend : socket.emit block request
-    // BACKEND : insert block status when received
-    // API or socket.emit to check if senderId blocked by receiverId before sending msg
-}
-// ******************************************************* Handle connection */
-export function handleOptions() {
+// ******************************************** Handle dropdown menu options */
+export async function handleOptions(socket) {
     const optionsIcon = document.getElementById("options-icon");
     const optionsMenu = document.getElementById("options-menu");
+    await getBlockedUsers();
     // Toggle dropdown menu visibility
     const toggleDropdown = (show) => {
         if (show) {
@@ -58,7 +55,7 @@ export function handleOptions() {
                 inviteToGame();
                 break;
             case "block-user":
-                blockUser();
+                blockOrUnblockUser(socket);
                 break;
         }
         toggleDropdown(false);

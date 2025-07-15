@@ -1,7 +1,10 @@
+import { P } from "pino";
 import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
 import { User } from "./chatUsers.js";
-import { handleOptions } from "./chatOptions.js";
+// import { handleOptions } from "./chatOptions.js";
+// import { socket } from "./chat.js";
+// import { checkBlockedTarget } from "./chatOptions.js";
 
 export interface Message {
   content: string;
@@ -10,20 +13,38 @@ export interface Message {
 }
 
 // Get conversation ID
-async function getConversationId(user1: string, user2: string) {
+async function getConversationId(user1: string, user2: string): Promise<number | null> {
+  try {
     const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
-    if (res.status === 404 || res.status === 500) return (null);
     const data = await res.json();
-    if (!data) return (null);
+    if (res.status === 404) {
+      console.log(data.message);
+      return (null);
+    } else if (res.status === 500) {
+      console.error(data.message);
+      return (null);
+    }
     return (data.id);
+  } catch (err) {
+    console.error("Failed to fetch or parse JSON:", err);
+    return (null);
+  }
 }
 
 // Get message history
-async function getMessageHistory(conversationId: number) {
+async function getMessageHistory(conversationId: number): Promise<Message[] | null> {
+  try {
     const res = await fetch(`/api/chat/${conversationId}/messages`);
-    if (res.status === 500) return (null);
-    const messages = await res.json();
-    return (messages);
+    const data = await res.json();
+    if (res.status === 500) {
+      console.error(data.message);
+      return (null);
+    }
+    return (data);
+  } catch (err) {
+    console.error("Failed to fetch or parse JSON:", err);
+    return (null);
+  }
 }
 
 // Load chat window
@@ -36,7 +57,7 @@ async function openFirstConv() {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     setSendListeners();
-    handleOptions(); // ! TODO 
+    // await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
 }
 
 // Display all messages
@@ -46,7 +67,7 @@ async function displayMessageHistory(conversationId: number) {
     for (const entry of messages) {
       const message: Message = {
         content: entry.content,
-        senderId: entry.sender_id.toString(),
+        senderId: entry.sender_id.toString(), // Ignore squiggles
         sentAt: new Date(entry.sent_at)
       }
       await addChatBubble(currentSessionId, message);
@@ -64,11 +85,9 @@ export async function openChat(user: User) {
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
     const conversationId = await getConversationId(currentSessionId, user.userId);
-    if (!conversationId) {
-      console.log("No existing conversation found.");
-      return;
-    }
-   displayMessageHistory(conversationId);
+    if (!conversationId) return;
+    displayMessageHistory(conversationId);
+  //  checkBlockedTarget();
 }
 
 // TODO - ADD DATES 

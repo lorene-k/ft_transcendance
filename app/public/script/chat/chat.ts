@@ -44,9 +44,12 @@ function sendMessage(msg: string) {
   const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
   socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId },
     (response: { status: string; serverOffset?: number }) => {
-      if (!response) return;
+      if (!response) {
+        console.error("No response received from server.");
+        return;
+      }
       if (response.serverOffset) socket.auth.serverOffset = response.serverOffset;
-      // console.log("Acknowledged by server:", response); // ! DEBUG
+      console.log("Acknowledged by server:", response); // ! DEBUG
   });
 }
 
@@ -128,9 +131,6 @@ socket.on("session", ({ sessionId, username } :
   socket.auth.username = username; // ! Useless ?
 });
 
-// ! FIX : must refresh page to see msg
-// TODO - handle message recovery
-// TODO - handle blocked users
 
 // TODO - friends (search bar w/ db fetch)
 // TODO - invite to game

@@ -1,23 +1,40 @@
 import { currentSessionId, setSendListeners } from "./chat.js";
 import { addChatBubble, loadTemplate } from "./chatBubbles.js";
-import { handleOptions } from "./chatOptions.js";
 // Get conversation ID
 async function getConversationId(user1, user2) {
-    const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
-    if (res.status === 404 || res.status === 500)
+    try {
+        const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
+        const data = await res.json();
+        if (res.status === 404) {
+            console.log(data.message);
+            return (null);
+        }
+        else if (res.status === 500) {
+            console.error(data.message);
+            return (null);
+        }
+        return (data.id);
+    }
+    catch (err) {
+        console.error("Failed to fetch or parse JSON:", err);
         return (null);
-    const data = await res.json();
-    if (!data)
-        return (null);
-    return (data.id);
+    }
 }
 // Get message history
 async function getMessageHistory(conversationId) {
-    const res = await fetch(`/api/chat/${conversationId}/messages`);
-    if (res.status === 500)
+    try {
+        const res = await fetch(`/api/chat/${conversationId}/messages`);
+        const data = await res.json();
+        if (res.status === 500) {
+            console.error(data.message);
+            return (null);
+        }
+        return (data);
+    }
+    catch (err) {
+        console.error("Failed to fetch or parse JSON:", err);
         return (null);
-    const messages = await res.json();
-    return (messages);
+    }
 }
 // Load chat window
 async function openFirstConv() {
@@ -31,7 +48,7 @@ async function openFirstConv() {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     setSendListeners();
-    handleOptions(); // ! TODO 
+    // await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
 }
 // Display all messages
 async function displayMessageHistory(conversationId) {
@@ -40,7 +57,7 @@ async function displayMessageHistory(conversationId) {
         for (const entry of messages) {
             const message = {
                 content: entry.content,
-                senderId: entry.sender_id.toString(),
+                senderId: entry.sender_id.toString(), // Ignore squiggles
                 sentAt: new Date(entry.sent_at)
             };
             await addChatBubble(currentSessionId, message);
@@ -60,11 +77,10 @@ export async function openChat(user) {
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
     const conversationId = await getConversationId(currentSessionId, user.userId);
-    if (!conversationId) {
-        console.log("No existing conversation found.");
+    if (!conversationId)
         return;
-    }
     displayMessageHistory(conversationId);
+    //  checkBlockedTarget();
 }
 // TODO - ADD DATES 
 // TODO - Load profile picture

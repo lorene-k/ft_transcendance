@@ -39,11 +39,13 @@ socket.on("allConversations", (conversations, convInfo) => {
 function sendMessage(msg) {
     const clientOffset = `${currentSessionId}-${Date.now()}-${counter++}`; // OR USE getRandomValues() to generate a unique offset
     socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: currConvId }, (response) => {
-        if (!response)
+        if (!response) {
+            console.error("No response received from server.");
             return;
+        }
         if (response.serverOffset)
             socket.auth.serverOffset = response.serverOffset;
-        // console.log("Acknowledged by server:", response); // ! DEBUG
+        console.log("Acknowledged by server:", response); // ! DEBUG
     });
 }
 // Get input value
@@ -122,9 +124,6 @@ socket.on("session", ({ sessionId, username }) => {
     currentSessionId = sessionId;
     socket.auth.username = username; // ! Useless ?
 });
-// ! FIX : must refresh page to see msg
-// TODO - handle message recovery
-// TODO - handle blocked users
 // TODO - friends (search bar w/ db fetch)
 // TODO - invite to game
 // TODO - Announce next tournament (io.emit)

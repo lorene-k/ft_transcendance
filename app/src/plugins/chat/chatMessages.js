@@ -1,4 +1,4 @@
-import { runInsertConversation, runInsertMessage } from './chatHistory.js';
+import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 export let currConvId = 0;
 export async function getAllConversations(fastify, userId, io, socketManager) {
     try {
@@ -11,6 +11,7 @@ export async function getAllConversations(fastify, userId, io, socketManager) {
             if (username)
                 convInfo[conv.otherUserId] = username;
         }
+        // console.log("All conversations:", conversations); // ! DEBUG - OK
         io.to(userId.toString()).emit("allConversations", conversations, convInfo);
     }
     catch (err) {
@@ -21,9 +22,11 @@ async function getOrCreateConversation(fastify, senderId, targetId) {
     let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
     try {
         const conv = await fastify.database.fetch_one(`SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`, [user1, user2]);
+        // if (conv) console.log("Get conversation: conv =", conv); // ! DEBUG
         if (conv)
             return (conv.id);
         const conversationId = await runInsertConversation(fastify, user1, user2);
+        // console.log(`Created new conversation between ${user1} and ${user2}, ID: ${conversationId}`); // ! DEBUG
         return (conversationId);
     }
     catch (err) {
@@ -34,6 +37,7 @@ async function getOrCreateConversation(fastify, senderId, targetId) {
 async function insertMessage(fastify, msg) {
     try {
         const messageId = await runInsertMessage(fastify, msg);
+        // console.log(`Message inserted with ID: ${messageId}, content: ${msg.content}`); // ! DEBUG
         return (messageId);
     }
     catch (err) {

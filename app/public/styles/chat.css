@@ -40,6 +40,6 @@
   }
 
   .dropdown-item-style {
-    @apply text-sm font-normal text-gray-900 hover:bg-blue-200 block w-full text-left p-2 cursor-pointer;
+    @apply text-sm font-normal text-gray-900 rounded-xl hover:bg-blue-200 block w-full text-left p-2 cursor-pointer;
   }
 }
