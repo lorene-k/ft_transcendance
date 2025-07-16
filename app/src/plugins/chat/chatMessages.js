@@ -45,20 +45,31 @@ async function insertMessage(fastify, msg) {
         return (-1);
     }
 }
-export function handleMessages(fastify, socket, chatNamespace) {
+async function checkBlockedTarget(senderId, targetId, fastify) {
+    try {
+        const isBlocked = await fastify.database.fetch_one(`SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?`, [targetId, senderId]);
+        // console.log(`${senderId} blocked by ${targetId} isBlocked = ${isBlocked ? true : false}`); // ! DEBUG
+        return (isBlocked ? true : false);
+    }
+    catch (err) {
+        console.error("Error checking blocked target:", err);
+        return (null);
+    }
+}
+export async function handleMessages(fastify, socket, chatNamespace) {
     socket.on("message", async (msg, callback) => {
         try {
             msg.senderId = socket.session.userId.toString();
+            const senderBlocked = await checkBlockedTarget(msg.senderId, parseInt(msg.targetId), fastify);
             msg.senderUsername = socket.username;
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId));
             if (conversationId === -1)
                 return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
-            if (!msg.targetId || !msg.senderId)
-                return (callback({ status: "error" }));
-            chatNamespace.to(msg.targetId).emit("message", msg);
-            chatNamespace.to(msg.senderId.toString()).emit("message", msg);
+            if (!senderBlocked)
+                chatNamespace.to(msg.targetId).emit("message", msg);
+            chatNamespace.to(msg.senderId.toString()).emit("message", msg); // ! emit only to sender
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         }
         catch (err) {

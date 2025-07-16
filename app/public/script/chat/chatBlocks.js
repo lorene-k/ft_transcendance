@@ -58,16 +58,3 @@ export function blockOrUnblockUser(socket) {
         }
     });
 }
-//  Without response
-// export function blockOrUnblockUser(socket: any) {
-//     const isBlocked = checkBlockedTarget();
-//     socket.emit("blockUser", { targetId: parseInt(targetId!), block: !isBlocked });
-//         toggleBlockedMsg(isBlocked);
-//         if (!isBlocked) blockedUsers.push(targetId!);
-//         else {
-//             const index = blockedUsers.indexOf(targetId!);
-//             if (index !== -1) blockedUsers.splice(index, 1);
-//             console.log(`User ${currentSessionId} unblocked user ${targetId}`);
-//         }
-// }
-// ! FIX - no response received from server

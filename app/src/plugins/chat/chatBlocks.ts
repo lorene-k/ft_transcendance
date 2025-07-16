@@ -59,21 +59,3 @@ export function handleBlocks(socket: Socket, fastify: FastifyInstance) {
         }
     });
 }
-
-//  Without response
-// export function handleBlocks(socket: Socket, fastify: FastifyInstance, io: any) {
-//   socket.on("blockUser", async (blocked: BlockedUser) => {
-//       try {
-//         const targetId = blocked.targetId;
-//           if (blocked.block) {
-//               const blockId = await runInsertBlock(fastify, socket.session.userId, targetId);
-//               if (!blockId) throw new Error("Failed to block user");
-//           } else if (!blocked.block) {
-//               const res = await runDeleteBlock(fastify, socket.session.userId, targetId);
-//               if (!res) throw new Error("Failed to unblock user");
-//           }
-//       } catch (err: any) {
-//           console.error("Error handling blockUser event:", err);
-//       }
-//   });
-// }
