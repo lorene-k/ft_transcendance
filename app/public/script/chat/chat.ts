@@ -7,7 +7,8 @@ export const socket = io("http://localhost:8080/chat", {
     withCredentials: true,
     transports: ['websocket'],
     auth: {
-      serverOffset: 0
+      serverOffset: 0,
+      username: "",
     },
     ackTimeout: 10000,
     retries: 3,
