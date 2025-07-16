@@ -45,14 +45,13 @@ export function checkBlockedTarget(): boolean {
 export function blockOrUnblockUser(socket: any) {
     const isBlocked = checkBlockedTarget();
     socket.emit("blockUser", { targetId: parseInt(targetId!), block: !isBlocked }, (response: { status: string }) => {
-        if (!response) console.error("No response received from server."); // ! DEBUG - add return statement
-        else console.log("Response from server: ", response.status); // ! DEBUG
-        toggleBlockedMsg(isBlocked);
-        if (!isBlocked) blockedUsers.push(targetId!);
-        else {
-            const index = blockedUsers.indexOf(targetId!);
-            if (index !== -1) blockedUsers.splice(index, 1);
-            console.log(`User ${currentSessionId} unblocked user ${targetId}`);
-        }
+        if (!response) console.error("No response received from server."); // ! solve server ack pb
+        else console.log("Response from server: ", response.status);
     });
+    if (!isBlocked) blockedUsers.push(targetId!);
+    else {
+        const index = blockedUsers.indexOf(targetId!);
+        if (index !== -1) blockedUsers.splice(index, 1);
+    }
+    checkBlockedTarget();
 }

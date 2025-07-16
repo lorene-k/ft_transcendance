@@ -6,7 +6,21 @@ interface BlockedUser {
   block: boolean;
 }
 
-async function runInsertBlock(fastify: FastifyInstance, blockerId: number, blockedId: number): Promise<number> {
+export async function checkBlockedTarget(senderId: number, targetId: number, fastify: FastifyInstance): Promise<boolean | null> {
+   try {
+        const isBlocked = await fastify.database.fetch_one(
+            `SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?`,
+            [targetId, senderId]
+        );
+        // console.log(`${senderId} blocked by ${targetId} isBlocked = ${isBlocked ? true : false}`); // ! DEBUG
+        return (isBlocked ? true : false);
+   } catch (err) {
+         console.error("Error checking blocked target:", err);
+         return (null);
+   }
+}
+
+async function runInsertBlock(fastify: FastifyInstance, blockerId: number, blockedId: number): Promise<void> {
     return new Promise((resolve, reject) => {
       fastify.database.run(
         `INSERT INTO blocks (blocker_id, blocked_id) VALUES (?, ?)`,
@@ -16,12 +30,12 @@ async function runInsertBlock(fastify: FastifyInstance, blockerId: number, block
           console.error("Failed to insert blocked user:", err.message);
           return (reject(err));
         }
-        resolve(this.lastID);
+        resolve();
       });
     });
 }
 
-async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, blockedId: number): Promise<number> {
+async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, blockedId: number): Promise<void>  {
     return new Promise((resolve, reject) => {
         fastify.database.run(
           `DELETE FROM blocks WHERE blocker_id = ? AND blocked_id = ?`,
@@ -31,7 +45,7 @@ async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, block
             console.error("Failed to insert blocked user:", err.message);
             return (reject(err));
           }
-          resolve(this.lastID);
+          resolve();
         });
       });
 }
@@ -40,19 +54,15 @@ export function handleBlocks(socket: Socket, fastify: FastifyInstance) {
     socket.on("blockUser", async (blocked: BlockedUser, callback) => {
         try {
           const targetId = blocked.targetId;
-          let response = "";
             if (blocked.block) {
-                const blockId = await runInsertBlock(fastify, socket.session.userId, targetId);
-                if (!blockId) throw new Error("Failed to block user");
-                response = "blocked";
+                await runInsertBlock(fastify, socket.session.userId, targetId);
+                return callback({ status: "blocked" });
                 // console.log(`User ${socket.session.userId} blocked user ${targetId}, block ID: ${blockId}`); // ! DEBUG
             } else if (!blocked.block) {
-                const res = await runDeleteBlock(fastify, socket.session.userId, targetId);
-                if (!res) throw new Error("Failed to unblock user");
-                response = "unblocked";
+              await runDeleteBlock(fastify, socket.session.userId, targetId);
+                return callback({ status: "unblocked" });
                 // console.log(`User ${socket.session.userId} unblocked user ${targetId}, result: ${res}`); // ! DEBUG
             }
-            return callback({ status: response });
         } catch (err: any) {
             console.error("Error handling blockUser event:", err);
             callback({ status: "error"});

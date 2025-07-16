@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 import { SocketManager } from "./chatSocketManager.js";
 import { Socket, Namespace } from "socket.io";
+import { checkBlockedTarget } from "./chatBlocks.js";
 
 export interface Message {
     senderId: number;
@@ -63,20 +64,6 @@ async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<nu
         console.error("Failed to insert message: ", err);
         return (-1);
     }
-}
-
-async function checkBlockedTarget(senderId: number, targetId: number, fastify: FastifyInstance): Promise<boolean | null> {
-   try {
-        const isBlocked = await fastify.database.fetch_one(
-            `SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?`,
-            [targetId, senderId]
-        );
-        // console.log(`${senderId} blocked by ${targetId} isBlocked = ${isBlocked ? true : false}`); // ! DEBUG
-        return (isBlocked ? true : false);
-   } catch (err) {
-         console.error("Error checking blocked target:", err);
-         return (null);
-   }
 }
 
 export async function handleMessages(fastify: FastifyInstance, socket: Socket, chatNamespace: Namespace) {

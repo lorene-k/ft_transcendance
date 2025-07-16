@@ -1,4 +1,5 @@
 import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
+import { checkBlockedTarget } from "./chatBlocks.js";
 export let currConvId = 0;
 export async function getAllConversations(fastify, userId, chatNamespace, socketManager) {
     try {
@@ -43,17 +44,6 @@ async function insertMessage(fastify, msg) {
     catch (err) {
         console.error("Failed to insert message: ", err);
         return (-1);
-    }
-}
-async function checkBlockedTarget(senderId, targetId, fastify) {
-    try {
-        const isBlocked = await fastify.database.fetch_one(`SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?`, [targetId, senderId]);
-        // console.log(`${senderId} blocked by ${targetId} isBlocked = ${isBlocked ? true : false}`); // ! DEBUG
-        return (isBlocked ? true : false);
-    }
-    catch (err) {
-        console.error("Error checking blocked target:", err);
-        return (null);
     }
 }
 export async function handleMessages(fastify, socket, chatNamespace) {

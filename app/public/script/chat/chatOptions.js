@@ -2,6 +2,7 @@ import { getBlockedUsers, blockOrUnblockUser } from "./chatBlocks.js";
 // ******************************************************************** TODO */
 function addFriend() {
     console.log("Add friend");
+    // Toggle addFriendMsg (change text to "request sent" after sending request, then to "remove friend" if accepted)
     // Use socket to emit() friend request 
     // Listen for socket response to update UI (state : pending / accepted)
     // Include friends list with states
@@ -9,10 +10,13 @@ function addFriend() {
 }
 function inviteToGame() {
     console.log("Invite to game");
+    // Toggle inviteMsg (change text to "invite sent" after sending request,
+    // add popup w/ button "play now" or "cancel" if accepted)
     // Use socket to emit() game invite
     // (push notif on receiver end)
     // Listen for socket response to update UI & load game
 }
+// ! Handle tournament notifs (remove hidden from tournament-section + add flex ?)
 // ******************************************** Handle dropdown menu options */
 export async function handleOptions(socket) {
     const optionsIcon = document.getElementById("options-icon");
