@@ -51,7 +51,7 @@ export function getBlocked(fastify: FastifyInstance) {
         [blockerId]
       );
       if (!blockedUsers) return (reply.status(404).send({ message: "No blocked users" }));
-      console.log("Blocked users:", blockedUsers); // ! DEBUG
+      // console.log("Blocked users:", blockedUsers); // ! DEBUG
       return (reply.send(blockedUsers));
     } catch (err) {
       console.error("Failed to fetch blocked users", err);

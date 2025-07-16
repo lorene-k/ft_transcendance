@@ -20,9 +20,7 @@ function inviteToGame() {
 export async function handleOptions(socket: any) {
     const optionsIcon = document.getElementById("options-icon") as HTMLElement;
     const optionsMenu = document.getElementById("options-menu") as HTMLElement;
-    // console.log("TEST 1");
     getBlockedUsers();
-    // console.log("TEST 2");
     
     // Toggle dropdown menu visibility
     const toggleDropdown = (show: boolean) => {

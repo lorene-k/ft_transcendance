@@ -11,7 +11,7 @@ const chatPlugin: FastifyPluginAsync = async (fastify) => {
   const socketManager = new SocketManager(fastify);
   socketManager.authenticate(io);
   
-  io.on("connection", async (socket) => {
+  io.on("connection", async (socket) => {   // ! ADD namespace io.of("/chat")
     await socketManager.setSessionInfo(socket);
     socketManager.sendUserId(socket);
     handleMessages(fastify, socket, io);

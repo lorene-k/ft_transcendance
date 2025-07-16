@@ -42,7 +42,7 @@ export function getBlocked(fastify) {
             const blockedUsers = await fastify.database.fetch_all(`SELECT blocked_id FROM blocks WHERE blocker_id = ?`, [blockerId]);
             if (!blockedUsers)
                 return (reply.status(404).send({ message: "No blocked users" }));
-            console.log("Blocked users:", blockedUsers); // ! DEBUG
+            // console.log("Blocked users:", blockedUsers); // ! DEBUG
             return (reply.send(blockedUsers));
         }
         catch (err) {

@@ -19,8 +19,8 @@ export async function getAllConversations(fastify, userId, io, socketManager) {
     }
 }
 async function getOrCreateConversation(fastify, senderId, targetId) {
-    let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
     try {
+        let [user1, user2] = [senderId, targetId].sort((a, b) => a - b);
         const conv = await fastify.database.fetch_one(`SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`, [user1, user2]);
         // if (conv) console.log("Get conversation: conv =", conv); // ! DEBUG
         if (conv)
@@ -47,26 +47,23 @@ async function insertMessage(fastify, msg) {
 }
 export function handleMessages(fastify, socket, io) {
     socket.on("message", async (msg, callback) => {
-        msg.senderId = socket.session.userId.toString();
-        msg.senderUsername = socket.username;
         try {
+            msg.senderId = socket.session.userId.toString();
+            msg.senderUsername = socket.username;
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId));
             if (conversationId === -1)
-                return (callback({ status: "error" }));
+                return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
             io.to(msg.targetId).emit("message", msg);
             io.to(msg.senderId).emit("message", msg);
-            callback({ status: "ok", serverOffset: msg.serverOffset });
+            return callback({ status: "ok", serverOffset: msg.serverOffset });
         }
         catch (err) {
-            if (err.errno === "SQLITE_CONSTRAINT") {
+            if (err.errno === "SQLITE_CONSTRAINT")
                 callback({ status: "duplicate" });
-            }
-            else {
-                console.log("Message insert failed:", err);
-                callback({ status: "retry" });
-            }
+            console.error("Message insert failed:", err);
+            callback({ status: "retry" });
         }
     });
 }
