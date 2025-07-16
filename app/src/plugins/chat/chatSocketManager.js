@@ -11,8 +11,8 @@ export class SocketManager {
     getSocketToSession() {
         return (this.socketToSession);
     }
-    authenticate(io) {
-        io.use((socket, next) => {
+    authenticate(chatNamespace) {
+        chatNamespace.use((socket, next) => {
             const cookies = parse(socket.handshake.headers.cookie || "");
             const signedSessionId = cookies.sessionId;
             if (!signedSessionId)

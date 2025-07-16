@@ -1,9 +1,9 @@
-export function listUsers(socket, io, socketManager) {
+export function listUsers(socket, chatNamespace, socketManager) {
     const users = [];
     const userSockets = socketManager.getUserSockets();
     for (const [sessionId, socketIds] of userSockets) {
         const firstSocketId = socketIds.values().next().value;
-        const sock = io.of("/").sockets.get(firstSocketId);
+        const sock = chatNamespace.sockets.get(firstSocketId);
         if (sock) {
             users.push({
                 userId: sessionId.toString(),

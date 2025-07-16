@@ -1,5 +1,5 @@
 import { currConvId } from "./chatMessages.js";
-export async function handleRecovery(socket, fastify, io) {
+export async function handleRecovery(socket, fastify, chatNamespace) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
     // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG
     if (!socket.recovered) {
@@ -19,7 +19,7 @@ export async function handleRecovery(socket, fastify, io) {
                     serverOffset: entry.id,
                 };
                 // console.log("Recovered message:", msg); // ! DEBUG
-                io.to(socket.session.userId.toString()).emit("message", msg);
+                chatNamespace.to(socket.session.userId.toString()).emit("message", msg);
             }
         }
         catch (err) {

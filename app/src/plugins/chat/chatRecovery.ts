@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { Socket } from "socket.io";
+import { Socket, Namespace } from "socket.io";
 import { Message, currConvId } from "./chatMessages.js";
 
-export async function handleRecovery(socket: Socket, fastify: FastifyInstance, io: any) {
+export async function handleRecovery(socket: Socket, fastify: FastifyInstance, chatNamespace: Namespace) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
     // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG
     if (!socket.recovered) {
@@ -27,7 +27,7 @@ export async function handleRecovery(socket: Socket, fastify: FastifyInstance, i
           serverOffset: entry.id,
           }
           // console.log("Recovered message:", msg); // ! DEBUG
-          io.to(socket.session.userId!.toString()).emit("message", msg);
+          chatNamespace.to(socket.session.userId!.toString()).emit("message", msg);
         }
       } catch (err) {
         console.error("Message recovery failed:", err);

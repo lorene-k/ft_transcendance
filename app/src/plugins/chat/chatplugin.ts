@@ -5,21 +5,22 @@ import { handleMessages, getAllConversations } from "./chatMessages.js";
 import { handleRecovery } from "./chatRecovery.js";
 import { listUsers, notifyUsers } from "./chatUsers.js";
 import { handleBlocks } from "./chatBlocks.js";
+import { Socket } from "socket.io";
 
 const chatPlugin: FastifyPluginAsync = async (fastify) => {
-  const io = fastify.io;
+  const chatNamespace = fastify.io.of("/chat");
   const socketManager = new SocketManager(fastify);
-  socketManager.authenticate(io);
+  socketManager.authenticate(chatNamespace);
   
-  io.on("connection", async (socket) => {   // ! ADD namespace io.of("/chat")
+  chatNamespace.on("connection", async (socket: Socket) => {   // ! ADD namespace io.of("/chat")
     await socketManager.setSessionInfo(socket);
     socketManager.sendUserId(socket);
-    handleMessages(fastify, socket, io);
-    listUsers(socket, io, socketManager);
+    handleMessages(fastify, socket, chatNamespace);
+    listUsers(socket, chatNamespace, socketManager);
     notifyUsers(socket);
-    getAllConversations(fastify, socket.session.userId, io, socketManager);
-    handleBlocks(socket, fastify, io);
-    handleRecovery(socket, fastify, io);
+    getAllConversations(fastify, socket.session.userId, chatNamespace, socketManager);
+    handleBlocks(socket, fastify);
+    handleRecovery(socket, fastify, chatNamespace);
     socketManager.handleDisconnect(socket);
   });
 };

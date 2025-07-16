@@ -1,5 +1,5 @@
 import { FastifyInstance, Session } from "fastify";
-import { Socket } from "socket.io";
+import { Socket, Namespace } from "socket.io";
 import { parse } from "cookie";
 
 export class SocketManager {
@@ -16,8 +16,8 @@ export class SocketManager {
     return (this.socketToSession);
   }
 
-  authenticate(io: any) {
-    io.use((socket: Socket, next: Function) => {
+  authenticate(chatNamespace: Namespace) {
+    chatNamespace.use((socket: Socket, next: Function) => {
       const cookies = parse(socket.handshake.headers.cookie || "");
       const signedSessionId = cookies.sessionId;
       if (!signedSessionId) return (next(new Error("No session Id found")));

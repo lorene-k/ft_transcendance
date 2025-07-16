@@ -3,7 +3,7 @@ import { activeUsers, targetId, updateConvPreview, getConnectedUsers, currConvId
 import { Message } from "./chatHistory.js";
 
 declare const io: any;
-export const socket = io('http://localhost:8080', {
+export const socket = io("http://localhost:8080/chat", {
     withCredentials: true,
     transports: ['websocket'],
     auth: {

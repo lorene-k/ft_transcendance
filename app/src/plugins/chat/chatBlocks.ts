@@ -36,7 +36,7 @@ async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, block
       });
 }
 
-export function handleBlocks(socket: Socket, fastify: FastifyInstance, io: any) {
+export function handleBlocks(socket: Socket, fastify: FastifyInstance) {
     socket.on("blockUser", async (blocked: BlockedUser, callback) => {
         try {
           const targetId = blocked.targetId;

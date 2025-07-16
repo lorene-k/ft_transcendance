@@ -1,6 +1,6 @@
 import { addChatBubble } from "./chatBubbles.js";
 import { activeUsers, targetId, updateConvPreview, getConnectedUsers, currConvId } from "./chatUsers.js";
-export const socket = io('http://localhost:8080', {
+export const socket = io("http://localhost:8080/chat", {
     withCredentials: true,
     transports: ['websocket'],
     auth: {

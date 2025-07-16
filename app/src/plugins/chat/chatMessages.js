@@ -1,6 +1,6 @@
 import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 export let currConvId = 0;
-export async function getAllConversations(fastify, userId, io, socketManager) {
+export async function getAllConversations(fastify, userId, chatNamespace, socketManager) {
     try {
         const convInfo = {};
         const conversations = await fastify.database.fetch_all(`SELECT id, 
@@ -12,7 +12,7 @@ export async function getAllConversations(fastify, userId, io, socketManager) {
                 convInfo[conv.otherUserId] = username;
         }
         // console.log("All conversations:", conversations); // ! DEBUG - OK
-        io.to(userId.toString()).emit("allConversations", conversations, convInfo);
+        chatNamespace.to(userId.toString()).emit("allConversations", conversations, convInfo);
     }
     catch (err) {
         console.error("Failed to fetch conversations", err);
@@ -45,7 +45,7 @@ async function insertMessage(fastify, msg) {
         return (-1);
     }
 }
-export function handleMessages(fastify, socket, io) {
+export function handleMessages(fastify, socket, chatNamespace) {
     socket.on("message", async (msg, callback) => {
         try {
             msg.senderId = socket.session.userId.toString();
@@ -55,8 +55,10 @@ export function handleMessages(fastify, socket, io) {
                 return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
-            io.to(msg.targetId).emit("message", msg);
-            io.to(msg.senderId).emit("message", msg);
+            if (!msg.targetId || !msg.senderId)
+                return (callback({ status: "error" }));
+            chatNamespace.to(msg.targetId).emit("message", msg);
+            chatNamespace.to(msg.senderId.toString()).emit("message", msg);
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         }
         catch (err) {

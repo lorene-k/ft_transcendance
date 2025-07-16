@@ -20,7 +20,7 @@ async function runDeleteBlock(fastify, blockerId, blockedId) {
         });
     });
 }
-export function handleBlocks(socket, fastify, io) {
+export function handleBlocks(socket, fastify) {
     socket.on("blockUser", async (blocked, callback) => {
         try {
             const targetId = blocked.targetId;

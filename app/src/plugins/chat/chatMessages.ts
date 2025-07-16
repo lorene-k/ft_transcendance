@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 import { SocketManager } from "./chatSocketManager.js";
-import { Socket } from "socket.io";
+import { Socket, Namespace } from "socket.io";
 
 export interface Message {
     senderId: number;
@@ -15,7 +15,7 @@ export interface Message {
 }
 export let currConvId = 0;
 
-export async function getAllConversations(fastify: FastifyInstance, userId: number, io: any, socketManager: SocketManager) {
+export async function getAllConversations(fastify: FastifyInstance, userId: number, chatNamespace: Namespace, socketManager: SocketManager) {
     try {
         const convInfo: Record<number, string> = {};
         const conversations = await fastify.database.fetch_all(
@@ -29,7 +29,7 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
           if (username) convInfo[conv.otherUserId] = username;
         }
         // console.log("All conversations:", conversations); // ! DEBUG - OK
-        io.to(userId.toString()).emit("allConversations", conversations, convInfo);
+        chatNamespace.to(userId.toString()).emit("allConversations", conversations, convInfo);
     } catch (err) {
         console.error("Failed to fetch conversations", err);
     }
@@ -65,7 +65,7 @@ async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<nu
     }
 }
 
-export function handleMessages(fastify: FastifyInstance, socket: Socket, io: any) {
+export function handleMessages(fastify: FastifyInstance, socket: Socket, chatNamespace: Namespace) {
     socket.on("message", async (msg: Message, callback) => {
         try {
             msg.senderId = socket.session.userId.toString();
@@ -74,8 +74,9 @@ export function handleMessages(fastify: FastifyInstance, socket: Socket, io: any
             if (conversationId === -1) return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg);
-            io.to(msg.targetId).emit("message", msg);
-            io.to(msg.senderId).emit("message", msg);
+            if (!msg.targetId || !msg.senderId ) return (callback({ status: "error" }));
+            chatNamespace.to(msg.targetId).emit("message", msg);
+            chatNamespace.to(msg.senderId.toString()).emit("message", msg);
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         } catch (err: any) {
             if (err.errno === "SQLITE_CONSTRAINT") callback({ status: "duplicate" });
