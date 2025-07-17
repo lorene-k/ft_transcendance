@@ -1,6 +1,6 @@
-import { ChatClient } from "./ChatClient.js";
+import ChatClient from "./ChatClient.js";
 
-export class BlockManager {
+export default class BlockManager {
     private blockedUsers: string[] = [];
     private targetBlocked: boolean = false;
     private chatClient: ChatClient;

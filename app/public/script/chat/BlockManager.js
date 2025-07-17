@@ -1,4 +1,4 @@
-export class BlockManager {
+export default class BlockManager {
     constructor(chatClient) {
         this.blockedUsers = [];
         this.targetBlocked = false;

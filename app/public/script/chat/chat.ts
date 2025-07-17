@@ -1,4 +1,4 @@
-import { ChatClient } from "./ChatClient.js";
+import ChatClient from "./ChatClient.js";
 
 function initChat() {
   const chatClient = new ChatClient();

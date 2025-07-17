@@ -1,12 +1,12 @@
-import { ChatUI } from "./ChatUI.js";
-import { UserManager } from "./UserManager.js";
 import { Message } from "./chatTypes.js";
-import { OptionHandler } from "./OptionHandler.js";
-import { BubbleHandler } from "./BubbleHandler.js";
+import ChatUI from "./ChatUI.js";
+import UserManager from "./UserManager.js";
+import OptionHandler from "./OptionHandler.js";
+import BubbleHandler from "./BubbleHandler.js";
 
 declare const io: any;
 
-export class ChatClient {
+export default class ChatClient {
   private socket: any;
   private sessionId = "";
   private counter = 0;

@@ -1,4 +1,4 @@
-export class BubbleHandler {
+export default class BubbleHandler {
     constructor() {
         this.lastSenderId = "";
         this.lastTargetId = "";

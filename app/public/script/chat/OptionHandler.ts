@@ -1,7 +1,7 @@
-import { ChatClient } from "./ChatClient.js";
-import { BlockManager } from "./BlockManager.js";
+import ChatClient from "./ChatClient.js";
+import BlockManager from "./BlockManager.js";
 
-export class OptionHandler {
+export default class OptionHandler {
   private chatClient: ChatClient;
   private blockManager: BlockManager | null = null;
 

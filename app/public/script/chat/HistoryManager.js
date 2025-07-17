@@ -1,4 +1,4 @@
-export class HistoryManager {
+export default class HistoryManager {
     constructor(chatClient) {
         this.chatClient = chatClient;
     }

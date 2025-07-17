@@ -1,5 +1,5 @@
-import { BlockManager } from "./BlockManager.js";
-export class OptionHandler {
+import BlockManager from "./BlockManager.js";
+export default class OptionHandler {
     constructor(chatClient) {
         this.blockManager = null;
         this.chatClient = chatClient;

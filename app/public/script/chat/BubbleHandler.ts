@@ -1,6 +1,6 @@
 import { Message } from "./chatTypes.js";
 
-export class BubbleHandler {
+export default class BubbleHandler {
     private lastSenderId = "";
     private lastTargetId = "";
     private lastMsgTime: string = "";

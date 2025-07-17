@@ -1,8 +1,8 @@
-import { ChatUI } from "./ChatUI.js";
-import { UserManager } from "./UserManager.js";
-import { OptionHandler } from "./OptionHandler.js";
-import { BubbleHandler } from "./BubbleHandler.js";
-export class ChatClient {
+import ChatUI from "./ChatUI.js";
+import UserManager from "./UserManager.js";
+import OptionHandler from "./OptionHandler.js";
+import BubbleHandler from "./BubbleHandler.js";
+export default class ChatClient {
     constructor() {
         this.sessionId = "";
         this.counter = 0;

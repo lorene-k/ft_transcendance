@@ -1,9 +1,9 @@
 import { User } from "./chatTypes.js";
-import { HistoryManager } from "./HistoryManager.js";
-import { ChatUI } from "./ChatUI.js";
-import { ChatClient } from "./ChatClient.js";
+import HistoryManager from "./HistoryManager.js";
+import ChatUI from "./ChatUI.js";
+import ChatClient from "./ChatClient.js";
 
-export class UserManager {
+export default class UserManager {
   private activeUsers: User[] = [];
   private targetUsers: User[] = [];
   private targetId: string | null = null;

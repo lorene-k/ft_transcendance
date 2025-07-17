@@ -1,7 +1,7 @@
 import { Message, User } from "./chatTypes.js";
-import { ChatClient } from "./ChatClient.js";
+import ChatClient from "./ChatClient.js";
 
-export class HistoryManager {
+export default class HistoryManager {
   private chatClient: ChatClient;
 
   constructor(chatClient: ChatClient) {

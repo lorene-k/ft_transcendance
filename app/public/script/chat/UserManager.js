@@ -1,5 +1,5 @@
-import { HistoryManager } from "./HistoryManager.js";
-export class UserManager {
+import HistoryManager from "./HistoryManager.js";
+export default class UserManager {
     constructor(chatClient) {
         this.activeUsers = [];
         this.targetUsers = [];

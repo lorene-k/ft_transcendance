@@ -1,7 +1,7 @@
 import { Message } from "./chatTypes.js";
-import { ChatClient } from "./ChatClient.js";
+import ChatClient from "./ChatClient.js";
 
-export class ChatUI {
+export default class ChatUI {
   private chatClient: ChatClient;
   
   constructor(chatClient: any) {
