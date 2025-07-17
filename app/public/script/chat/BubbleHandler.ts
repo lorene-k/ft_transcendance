@@ -21,13 +21,21 @@ export default class BubbleHandler {
     
     private updateBubbleHeader(bubble: Element, message: Message, targetId: string) {
       const timeElem = bubble?.querySelector(".chat-time");
+      const dateElem = bubble?.querySelector(".chat-date");
       const headerElem = bubble?.querySelector(".chat-bubble-header");
-      const currMsgTime = this.getTimeString(message.sentAt);
+
+      const  msgTimeDate = this.getTimeString(message.sentAt);
+      const  msgDate = msgTimeDate.slice(5, 10);
+
       const isSameSender = message.senderId === this.lastSenderId;
       const isSameTarget = targetId === this.lastTargetId;
       const isSameMinute = message.sentAt === this.lastMsgTime;
-      if (timeElem) timeElem.textContent = currMsgTime.slice(11, 16);
-      if (isSameSender && isSameTarget && isSameMinute && headerElem) headerElem.remove();
+      const isSameDay = msgTimeDate.slice(0, 10) === this.lastMsgTime.slice(0, 10);
+
+      if (!(isSameSender && isSameTarget && isSameMinute && headerElem)) {
+        if (dateElem && !isSameDay) dateElem.textContent = msgTimeDate.slice(0, 10);
+        if (timeElem) timeElem.textContent = msgTimeDate.slice(11, 16);
+      }
       this.lastSenderId = message.senderId;
       this.lastMsgTime = message.sentAt;
       this.lastTargetId = targetId!;
@@ -45,7 +53,7 @@ export default class BubbleHandler {
         }
     }
     
-    async addChatBubble(currentSessionId: string, message: Message, targetId: string) {
+    async addChatBubble(currentSessionId: string, message: Message, targetId: string) { // !!! FIX - Avoid loading templates multiple times
       const isSent = message.senderId === currentSessionId;
       const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
       const bubble = await this.loadTemplate(templatePath);

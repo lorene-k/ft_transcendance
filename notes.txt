@@ -1,3 +1,6 @@
+INSTALLED
+- socket.io-client
+
 ADDED
 - chat.css
 - /public/chat/
@@ -10,16 +13,18 @@ EDITED
 - tailwind.css
 - root.ts
 - app.ts
-- schema.sql
+- schema.sql (in users : username must be unique)
+- store.ts (l.26) - added this : " if (typeof session.cookie.expires === 'string') session.cookie.expires = new Date(session.cookie.expires); "
+- custom.d.ts
 
 --------------------------------------------------
 TO DO
 
 1. Chat
-- Socket.io chat setup
+OK - Socket.io chat setup
 - Inject messages & names into html (API call)
 - Close connection on logout/session stop
-- Validate the session on every socket event.
+OK - Validate the session on every socket event.
 
 2. History
 - Message DB

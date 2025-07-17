@@ -31,6 +31,10 @@
     @apply text-sm font-normal text-gray-500;
   }
 
+  .chat-date {
+    @apply text-sm font-normal text-gray-500 text-center;
+  }
+
   .chat-bubble-header {
     @apply flex flex-row items-center space-x-2 ;
   }

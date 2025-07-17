@@ -740,6 +740,14 @@
     font-weight: var(--font-weight-normal);
     color: var(--color-gray-500);
   }
+  .chat-date {
+    text-align: center;
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-gray-500);
+  }
   .chat-bubble-header {
     display: flex;
     flex-direction: row;
