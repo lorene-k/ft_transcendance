@@ -1,14 +1,14 @@
 import { openChat } from "./chatHistory.js";
 export class UserManager {
-    constructor(socket, chatClient, chatUI) {
+    constructor(chatClient) {
         this.activeUsers = [];
         this.targetUsers = [];
         this.targetId = null;
         this.convId = null;
         this.targetToConvId = new Map();
-        this.socket = socket;
         this.chatClient = chatClient;
-        this.chatUI = chatUI;
+        this.socket = chatClient.getSocket();
+        this.chatUI = chatClient.getChatUI();
         this.initUserListeners();
     }
     getTargetId() {
@@ -18,7 +18,6 @@ export class UserManager {
         return (this.convId);
     }
     initUserListeners() {
-        // Get active users list
         this.socket.on("users", (newUsers) => {
             newUsers.forEach((user) => {
                 // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
@@ -37,7 +36,6 @@ export class UserManager {
             this.activeUsers = newUsers;
             this.displayActiveUsers();
         });
-        // Add user to list
         this.socket.on("user connected", (user) => {
             this.activeUsers.push(user);
             this.displayActiveUsers();

@@ -2,6 +2,7 @@ import { ChatUI } from "./ChatUI.js";
 import { UserManager } from "./UserManager.js";
 import { Message } from "./chatTypes.js";
 import { addChatBubble } from "./chatBubbles.js";
+import { OptionHandler } from "./OptionHandler.js";
 
 declare const io: any;
 
@@ -11,6 +12,7 @@ export class ChatClient {
   private counter = 0;
   private chatUI: ChatUI;
   private userManager: UserManager;
+  private OptionHandler: OptionHandler;
 
   constructor() {
     this.socket = io("http://localhost:8080/chat", {
@@ -24,8 +26,8 @@ export class ChatClient {
       retries: 3,
     });
     this.chatUI = new ChatUI(this);
-    this.userManager = new UserManager(this.socket, this, this.chatUI);
-
+    this.userManager = new UserManager(this);
+    this.OptionHandler = new OptionHandler(this);
     this.initSocketListeners();
   }
 
@@ -37,8 +39,16 @@ export class ChatClient {
     return (this.socket);
   }
 
+  getChatUI() {
+    return (this.chatUI);
+  }
+
   getUserManager() {
     return (this.userManager);
+  }
+
+  getOptionHandler() {
+    return (this.OptionHandler);
   }
   
    setInputListeners() {

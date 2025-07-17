@@ -1,6 +1,7 @@
 import { ChatUI } from "./ChatUI.js";
 import { UserManager } from "./UserManager.js";
 import { addChatBubble } from "./chatBubbles.js";
+import { OptionHandler } from "./OptionHandler.js";
 export class ChatClient {
     constructor() {
         this.sessionId = "";
@@ -16,7 +17,8 @@ export class ChatClient {
             retries: 3,
         });
         this.chatUI = new ChatUI(this);
-        this.userManager = new UserManager(this.socket, this, this.chatUI);
+        this.userManager = new UserManager(this);
+        this.OptionHandler = new OptionHandler(this);
         this.initSocketListeners();
     }
     getSessionId() {
@@ -25,8 +27,14 @@ export class ChatClient {
     getSocket() {
         return (this.socket);
     }
+    getChatUI() {
+        return (this.chatUI);
+    }
     getUserManager() {
         return (this.userManager);
+    }
+    getOptionHandler() {
+        return (this.OptionHandler);
     }
     setInputListeners() {
         this.chatUI.initInputListeners();

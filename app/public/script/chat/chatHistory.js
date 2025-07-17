@@ -1,6 +1,4 @@
 import { loadTemplate, addChatBubble } from "./chatBubbles.js";
-// import { checkBlockedTarget } from "./chatBlocks.js";
-// import { handleOptions } from "./chatOptions.js";
 async function openFirstConv(chatClient) {
     const convContainer = document.getElementById("conversation-container");
     const chatWindow = await loadTemplate("/chat/chat-window.html");
@@ -12,9 +10,9 @@ async function openFirstConv(chatClient) {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     chatClient.setInputListeners();
-    // await handleOptions(chatClient.getSocket()); // !!!!!!!!!!!!!!!! ONGOING 
+    // chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
 }
-async function getConversationId(user1, user2) {
+async function fetchConversationId(user1, user2) {
     try {
         const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
         const data = await res.json();
@@ -33,7 +31,7 @@ async function getConversationId(user1, user2) {
         return (null);
     }
 }
-async function getMessageHistory(conversationId) {
+async function fetchMessageHistory(conversationId) {
     try {
         const res = await fetch(`/api/chat/${conversationId}/messages`);
         const data = await res.json();
@@ -49,7 +47,7 @@ async function getMessageHistory(conversationId) {
     }
 }
 async function displayMessageHistory(conversationId, sessionId, targetId) {
-    const messages = await getMessageHistory(conversationId);
+    const messages = await fetchMessageHistory(conversationId);
     if (messages) {
         for (const entry of messages) {
             const message = {
@@ -65,17 +63,18 @@ async function displayMessageHistory(conversationId, sessionId, targetId) {
 }
 export async function openChat(user, chatClient) {
     const currentSessionId = chatClient.getSessionId();
-    if (!document.getElementById("chat-window"))
-        await openFirstConv(chatClient);
+    if (!document.getElementById("chat-window")) {
+        const optionHandler = await openFirstConv(chatClient);
+    }
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName)
         return;
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
-    const conversationId = await getConversationId(currentSessionId, user.userId);
+    const conversationId = await fetchConversationId(currentSessionId, user.userId);
     if (!conversationId)
         return;
     displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId());
-    // checkBlockedTarget();
+    // chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }

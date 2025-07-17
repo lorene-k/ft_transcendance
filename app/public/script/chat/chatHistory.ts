@@ -1,8 +1,6 @@
 import { loadTemplate, addChatBubble } from "./chatBubbles.js";
 import { Message, User } from "./chatTypes.js";
 import { ChatClient } from "./ChatClient.js";
-// import { checkBlockedTarget } from "./chatBlocks.js";
-// import { handleOptions } from "./chatOptions.js";
 
 async function openFirstConv(chatClient: ChatClient) {
     const convContainer = document.getElementById("conversation-container");
@@ -13,10 +11,10 @@ async function openFirstConv(chatClient: ChatClient) {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     chatClient.setInputListeners();
-    // await handleOptions(chatClient.getSocket()); // !!!!!!!!!!!!!!!! ONGOING 
+    // chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
 }
 
-async function getConversationId(user1: string, user2: string): Promise<number | null> {
+async function fetchConversationId(user1: string, user2: string): Promise<number | null> {
     try {
       const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
       const data = await res.json();
@@ -34,7 +32,7 @@ async function getConversationId(user1: string, user2: string): Promise<number |
     }
   }
 
-  async function getMessageHistory(conversationId: number): Promise<Message[] | null> {
+  async function fetchMessageHistory(conversationId: number): Promise<Message[] | null> {
     try {
       const res = await fetch(`/api/chat/${conversationId}/messages`);
       const data = await res.json();
@@ -50,7 +48,7 @@ async function getConversationId(user1: string, user2: string): Promise<number |
   }
 
   async function displayMessageHistory(conversationId: number, sessionId: string, targetId: string) {
-    const messages = await getMessageHistory(conversationId);
+    const messages = await fetchMessageHistory(conversationId);
     if (messages) {
       for (const entry of messages as any) {
         const message: Message = {
@@ -66,14 +64,16 @@ async function getConversationId(user1: string, user2: string): Promise<number |
 
 export async function openChat(user: User, chatClient: ChatClient) {
   const currentSessionId = chatClient.getSessionId();
-    if (!document.getElementById("chat-window")) await openFirstConv(chatClient);
+    if (!document.getElementById("chat-window")) {
+      const optionHandler = await openFirstConv(chatClient);
+    }
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName) return;
     chatBox.innerHTML = "";
     recipientName.textContent = user.username;
-    const conversationId = await getConversationId(currentSessionId, user.userId);
+    const conversationId = await fetchConversationId(currentSessionId, user.userId);
     if (!conversationId) return;
     displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId()!);
-    // checkBlockedTarget();
+    // chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }

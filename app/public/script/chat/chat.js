@@ -1,6 +1,7 @@
 import { ChatClient } from "./ChatClient.js";
 function initChat() {
     const chatClient = new ChatClient();
-    window.chatClient = chatClient; // for dev
+    if (!chatClient)
+        console.error("Failed to initialize chatClient.");
 }
 document.addEventListener("DOMContentLoaded", initChat);
