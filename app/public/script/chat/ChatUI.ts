@@ -1,4 +1,3 @@
-import { loadTemplate, addChatBubble } from "./chatBubbles.js";
 import { Message } from "./chatTypes.js";
 import { ChatClient } from "./ChatClient.js";
 
@@ -36,7 +35,8 @@ export class ChatUI {
   }
     
   async displayChatBubble(sessionId: string, message: Message) {
-      await addChatBubble(sessionId, message, this.chatClient.getUserManager().getTargetId()!);
+    const targetId = this.chatClient.getUserManager().getTargetId();
+      await this.chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId!);
     }
 
   async updateConvPreviewUI(userId: string, targetName: string) {
@@ -47,7 +47,7 @@ export class ChatUI {
       displayed.classList.add("transition-all", "duration-300");
       allMessages.prepend(displayed);
     } else {
-      const card = await loadTemplate("/chat/conv-preview.html");
+      const card = await this.chatClient.getBubbleHandler().loadTemplate("/chat/conv-preview.html");
       if (!card) return (null);
       card.setAttribute("data-user-id", userId);
       const name = card.querySelector("p");

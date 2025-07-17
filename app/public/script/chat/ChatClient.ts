@@ -3,6 +3,7 @@ import { UserManager } from "./UserManager.js";
 import { Message } from "./chatTypes.js";
 import { addChatBubble } from "./chatBubbles.js";
 import { OptionHandler } from "./OptionHandler.js";
+import { BubbleHandler } from "./BubbleHandler.js";
 
 declare const io: any;
 
@@ -13,6 +14,7 @@ export class ChatClient {
   private chatUI: ChatUI;
   private userManager: UserManager;
   private OptionHandler: OptionHandler;
+  private bubbleHandler: BubbleHandler
 
   constructor() {
     this.socket = io("http://localhost:8080/chat", {
@@ -28,6 +30,7 @@ export class ChatClient {
     this.chatUI = new ChatUI(this);
     this.userManager = new UserManager(this);
     this.OptionHandler = new OptionHandler();
+    this.bubbleHandler = new BubbleHandler();
     this.initSocketListeners();
   }
 
@@ -49,6 +52,10 @@ export class ChatClient {
 
   getOptionHandler() {
     return (this.OptionHandler);
+  }
+
+  getBubbleHandler() {
+    return (this.bubbleHandler);
   }
   
    setInputListeners() {
@@ -82,7 +89,7 @@ export class ChatClient {
             senderId: senderId,
             sentAt: (new Date()).toISOString().slice(0,21)
           }
-          await addChatBubble(this.sessionId, message, this.userManager.getTargetId()!);
+          await this.bubbleHandler.addChatBubble(this.sessionId, message, this.userManager.getTargetId()!);
         } catch (e) {
           console.error("Error processing message received from server:", e);
         }

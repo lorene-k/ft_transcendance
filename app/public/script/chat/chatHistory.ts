@@ -1,10 +1,9 @@
-import { loadTemplate, addChatBubble } from "./chatBubbles.js";
 import { Message, User } from "./chatTypes.js";
 import { ChatClient } from "./ChatClient.js";
 
 async function openFirstConv(chatClient: ChatClient) {
     const convContainer = document.getElementById("conversation-container");
-    const chatWindow = await loadTemplate("/chat/chat-window.html");
+    const chatWindow = await chatClient.getBubbleHandler().loadTemplate("/chat/chat-window.html");
     if (!chatWindow || !convContainer) return;
     const p = document.getElementById("conv-placeholder");
     if (p) p.remove();
@@ -47,7 +46,9 @@ async function fetchConversationId(user1: string, user2: string): Promise<number
     }
   }
 
-  async function displayMessageHistory(conversationId: number, sessionId: string, targetId: string) {
+  async function displayMessageHistory(conversationId: number, chatClient: ChatClient) {
+    const sessionId = chatClient.getSessionId();
+    const targetId = chatClient.getUserManager().getTargetId();
     const messages = await fetchMessageHistory(conversationId);
     if (messages) {
       for (const entry of messages as any) {
@@ -56,7 +57,7 @@ async function fetchConversationId(user1: string, user2: string): Promise<number
           senderId: entry.sender_id.toString(),
           sentAt: entry.sent_at
         }
-        await addChatBubble(sessionId, message, targetId);
+        await chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId!);
       }
     } else
       console.error("Failed to fetch messages for conversation ID:", conversationId);
@@ -72,6 +73,6 @@ export async function openChat(user: User, chatClient: ChatClient) {
     recipientName.textContent = user.username;
     const conversationId = await fetchConversationId(currentSessionId, user.userId);
     if (!conversationId) return;
-    displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId()!);
+    displayMessageHistory(conversationId, chatClient);
     chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }

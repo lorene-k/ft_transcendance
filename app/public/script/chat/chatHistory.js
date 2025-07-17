@@ -1,7 +1,6 @@
-import { loadTemplate, addChatBubble } from "./chatBubbles.js";
 async function openFirstConv(chatClient) {
     const convContainer = document.getElementById("conversation-container");
-    const chatWindow = await loadTemplate("/chat/chat-window.html");
+    const chatWindow = await chatClient.getBubbleHandler().loadTemplate("/chat/chat-window.html");
     if (!chatWindow || !convContainer)
         return;
     const p = document.getElementById("conv-placeholder");
@@ -46,7 +45,9 @@ async function fetchMessageHistory(conversationId) {
         return (null);
     }
 }
-async function displayMessageHistory(conversationId, sessionId, targetId) {
+async function displayMessageHistory(conversationId, chatClient) {
+    const sessionId = chatClient.getSessionId();
+    const targetId = chatClient.getUserManager().getTargetId();
     const messages = await fetchMessageHistory(conversationId);
     if (messages) {
         for (const entry of messages) {
@@ -55,7 +56,7 @@ async function displayMessageHistory(conversationId, sessionId, targetId) {
                 senderId: entry.sender_id.toString(),
                 sentAt: entry.sent_at
             };
-            await addChatBubble(sessionId, message, targetId);
+            await chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId);
         }
     }
     else
@@ -74,6 +75,6 @@ export async function openChat(user, chatClient) {
     const conversationId = await fetchConversationId(currentSessionId, user.userId);
     if (!conversationId)
         return;
-    displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId());
+    displayMessageHistory(conversationId, chatClient);
     chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }

@@ -1,4 +1,3 @@
-import { loadTemplate, addChatBubble } from "./chatBubbles.js";
 export class ChatUI {
     constructor(chatClient) {
         this.chatClient = chatClient;
@@ -28,7 +27,8 @@ export class ChatUI {
         input.focus();
     }
     async displayChatBubble(sessionId, message) {
-        await addChatBubble(sessionId, message, this.chatClient.getUserManager().getTargetId());
+        const targetId = this.chatClient.getUserManager().getTargetId();
+        await this.chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId);
     }
     async updateConvPreviewUI(userId, targetName) {
         const allMessages = document.getElementById("all-messages");
@@ -40,7 +40,7 @@ export class ChatUI {
             allMessages.prepend(displayed);
         }
         else {
-            const card = await loadTemplate("/chat/conv-preview.html");
+            const card = await this.chatClient.getBubbleHandler().loadTemplate("/chat/conv-preview.html");
             if (!card)
                 return (null);
             card.setAttribute("data-user-id", userId);
