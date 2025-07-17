@@ -1,9 +1,9 @@
 import fp from "fastify-plugin";
-import { SocketManager } from "./chatSocketManager.js";
 import { handleMessages, getAllConversations } from "./chatMessages.js";
 import { handleRecovery } from "./chatRecovery.js";
-import { listUsers, notifyUsers } from "./chatUsers.js";
 import { handleBlocks } from "./chatBlocks.js";
+import getActiveUsers from "./chatUsers.js";
+import SocketManager from "./SocketManager.js";
 const chatPlugin = async (fastify) => {
     const chatNamespace = fastify.io.of("/chat");
     const socketManager = new SocketManager(fastify);
@@ -12,8 +12,7 @@ const chatPlugin = async (fastify) => {
         await socketManager.setSessionInfo(socket);
         socketManager.sendUserId(socket);
         handleMessages(fastify, socket, chatNamespace);
-        listUsers(socket, chatNamespace, socketManager);
-        notifyUsers(socket);
+        getActiveUsers(socket, chatNamespace, socketManager);
         getAllConversations(fastify, socket.session.userId, chatNamespace, socketManager);
         handleBlocks(socket, fastify);
         handleRecovery(socket, fastify, chatNamespace);

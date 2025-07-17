@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Socket, Namespace } from "socket.io";
-import { Message, currConvId } from "./chatMessages.js";
+import { currConvId } from "./chatMessages.js";
+import { Message } from "./chatTypes.js";
 
 export async function handleRecovery(socket: Socket, fastify: FastifyInstance, chatNamespace: Namespace) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG

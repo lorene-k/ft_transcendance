@@ -2,11 +2,14 @@ import { FastifyInstance, Session } from "fastify";
 import { Socket, Namespace } from "socket.io";
 import { parse } from "cookie";
 
-export class SocketManager {
+export default class SocketManager {
   private userSockets = new Map<number, Set<string>>();
   private socketToSession = new Map<string, number>();
+  private fastify: FastifyInstance;
 
-  constructor(private fastify: FastifyInstance) {}
+  constructor(instance: FastifyInstance) {
+    this.fastify = instance;
+  }
 
   getUserSockets() {
     return (this.userSockets);

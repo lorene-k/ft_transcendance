@@ -1,19 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
-import { SocketManager } from "./chatSocketManager.js";
 import { Socket, Namespace } from "socket.io";
+import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 import { checkBlockedTarget } from "./chatBlocks.js";
+import { Message } from "./chatTypes.js";
+import SocketManager from "./SocketManager.js";
 
-export interface Message {
-    senderId: number;
-    content: string;
-    senderUsername?: string;
-    targetId?: string;
-    clientOffset?: string;
-    serverOffset?: number;
-    sentAt?: Date;
-    convId?: number;
-}
 export let currConvId = 0;
 
 export async function getAllConversations(fastify: FastifyInstance, userId: number, chatNamespace: Namespace, socketManager: SocketManager) {

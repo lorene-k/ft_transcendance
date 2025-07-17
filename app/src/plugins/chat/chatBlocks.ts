@@ -1,10 +1,6 @@
 import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
-
-interface BlockedUser {
-  targetId: number;
-  block: boolean;
-}
+import { BlockedUser } from "./chatTypes.js";
 
 export async function checkBlockedTarget(senderId: number, targetId: number, fastify: FastifyInstance): Promise<boolean | null> {
    try {

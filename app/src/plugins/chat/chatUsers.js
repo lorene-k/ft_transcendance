@@ -1,4 +1,4 @@
-export function listUsers(socket, chatNamespace, socketManager) {
+function listUsers(socket, chatNamespace, socketManager) {
     const users = [];
     const userSockets = socketManager.getUserSockets();
     for (const [sessionId, socketIds] of userSockets) {
@@ -13,9 +13,13 @@ export function listUsers(socket, chatNamespace, socketManager) {
     }
     socket.emit("users", users);
 }
-export function notifyUsers(socket) {
+function notifyUsers(socket) {
     socket.broadcast.emit("User connected", {
         userId: socket.session.userId.toString(),
         username: socket.username,
     });
+}
+export default function getActiveUsers(socket, chatNamespace, socketManager) {
+    listUsers(socket, chatNamespace, socketManager);
+    notifyUsers(socket);
 }

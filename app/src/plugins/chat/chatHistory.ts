@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Message } from "./chatMessages.js";
+import { Message } from "./chatTypes.js";
 
 export async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
     return new Promise((resolve, reject) => {

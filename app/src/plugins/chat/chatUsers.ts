@@ -1,7 +1,7 @@
 import { Socket, Namespace} from "socket.io";
-import { SocketManager } from "./chatSocketManager.js";
+import SocketManager from "./SocketManager.js";
 
-export function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
+function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
     const users = [];
     const userSockets = socketManager.getUserSockets();
     for (const [sessionId, socketIds] of userSockets) {
@@ -17,9 +17,14 @@ export function listUsers(socket: Socket, chatNamespace: Namespace, socketManage
     socket.emit("users", users);
 }
 
-export function notifyUsers(socket: Socket) {
+function notifyUsers(socket: Socket) {
     socket.broadcast.emit("User connected", {
         userId: socket.session.userId.toString(),
         username: socket.username,
     });
+}
+
+export default function getActiveUsers(socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
+    listUsers(socket, chatNamespace, socketManager);
+    notifyUsers(socket);
 }

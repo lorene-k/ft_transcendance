@@ -1,9 +1,9 @@
 import { parse } from "cookie";
-export class SocketManager {
-    constructor(fastify) {
-        this.fastify = fastify;
+export default class SocketManager {
+    constructor(instance) {
         this.userSockets = new Map();
         this.socketToSession = new Map();
+        this.fastify = instance;
     }
     getUserSockets() {
         return (this.userSockets);
