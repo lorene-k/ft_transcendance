@@ -59,7 +59,7 @@ export async function handleMessages(fastify, socket, chatNamespace) {
             msg.serverOffset = await insertMessage(fastify, msg);
             if (!senderBlocked)
                 chatNamespace.to(msg.targetId).emit("message", msg);
-            chatNamespace.to(msg.senderId.toString()).emit("message", msg); // ! emit only to sender
+            chatNamespace.to(msg.senderId.toString()).emit("message", msg);
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         }
         catch (err) {

@@ -1,9 +1,19 @@
-import { currentSessionId, setSendListeners } from "./chat.js";
-import { addChatBubble, loadTemplate } from "./chatBubbles.js";
-import { handleOptions } from "./chatOptions.js";
-import { socket } from "./chat.js";
-import { checkBlockedTarget } from "./chatBlocks.js";
-// Get conversation ID
+import { loadTemplate, addChatBubble } from "./chatBubbles.js";
+// import { checkBlockedTarget } from "./chatBlocks.js";
+// import { handleOptions } from "./chatOptions.js";
+async function openFirstConv(chatClient) {
+    const convContainer = document.getElementById("conversation-container");
+    const chatWindow = await loadTemplate("/chat/chat-window.html");
+    if (!chatWindow || !convContainer)
+        return;
+    const p = document.getElementById("conv-placeholder");
+    if (p)
+        p.remove();
+    convContainer.appendChild(chatWindow);
+    const input = document.querySelector('textarea');
+    chatClient.setInputListeners();
+    // await handleOptions(chatClient.getSocket()); // !!!!!!!!!!!!!!!! ONGOING 
+}
 async function getConversationId(user1, user2) {
     try {
         const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
@@ -23,7 +33,6 @@ async function getConversationId(user1, user2) {
         return (null);
     }
 }
-// Get message history
 async function getMessageHistory(conversationId) {
     try {
         const res = await fetch(`/api/chat/${conversationId}/messages`);
@@ -39,40 +48,25 @@ async function getMessageHistory(conversationId) {
         return (null);
     }
 }
-// Load chat window
-async function openFirstConv() {
-    const convContainer = document.getElementById("conversation-container");
-    const chatWindow = await loadTemplate("/chat/chat-window.html");
-    if (!chatWindow || !convContainer)
-        return;
-    const p = document.getElementById("conv-placeholder");
-    if (p)
-        p.remove();
-    convContainer.appendChild(chatWindow);
-    const input = document.querySelector('textarea');
-    setSendListeners();
-    await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
-}
-// Display all messages
-async function displayMessageHistory(conversationId) {
+async function displayMessageHistory(conversationId, sessionId, targetId) {
     const messages = await getMessageHistory(conversationId);
     if (messages) {
         for (const entry of messages) {
             const message = {
                 content: entry.content,
-                senderId: entry.sender_id.toString(), // Ignore squiggles
-                sentAt: new Date(entry.sent_at)
+                senderId: entry.sender_id.toString(),
+                sentAt: entry.sent_at
             };
-            await addChatBubble(currentSessionId, message);
+            await addChatBubble(sessionId, message, targetId);
         }
     }
     else
         console.error("Failed to fetch messages for conversation ID:", conversationId);
 }
-// Open conversation
-export async function openChat(user) {
+export async function openChat(user, chatClient) {
+    const currentSessionId = chatClient.getSessionId();
     if (!document.getElementById("chat-window"))
-        await openFirstConv();
+        await openFirstConv(chatClient);
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName)
@@ -82,10 +76,6 @@ export async function openChat(user) {
     const conversationId = await getConversationId(currentSessionId, user.userId);
     if (!conversationId)
         return;
-    displayMessageHistory(conversationId);
-    checkBlockedTarget();
+    displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId());
+    // checkBlockedTarget();
 }
-// TODO - ADD DATES 
-// TODO - Load profile picture
-// ? Cache Last Messages
-// ? GET /api/chat/:conversationId/messages?since=123

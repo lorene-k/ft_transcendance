@@ -44,7 +44,7 @@ export function blockOrUnblockUser(socket) {
     const isBlocked = checkBlockedTarget();
     socket.emit("blockUser", { targetId: parseInt(targetId), block: !isBlocked }, (response) => {
         if (!response)
-            console.error("No response received from server."); // ! DEBUG - solve server ack pb
+            console.error("No response received from server."); // ! solve server ack pb
         else
             console.log("Response from server: ", response.status);
     });

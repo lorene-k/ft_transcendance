@@ -1,54 +1,10 @@
-import { P } from "pino";
-import { currentSessionId, setSendListeners } from "./chat.js";
-import { addChatBubble, loadTemplate } from "./chatBubbles.js";
-import { User } from "./chatUsers.js";
-import { handleOptions } from "./chatOptions.js";
-import { socket } from "./chat.js";
-import { checkBlockedTarget } from "./chatBlocks.js";
+import { loadTemplate, addChatBubble } from "./chatBubbles.js";
+import { Message, User } from "./chatTypes.js";
+import { ChatClient } from "./ChatClient.js";
+// import { checkBlockedTarget } from "./chatBlocks.js";
+// import { handleOptions } from "./chatOptions.js";
 
-export interface Message {
-  content: string;
-  senderId: string;
-  sentAt: Date;
-}
-
-// Get conversation ID
-async function getConversationId(user1: string, user2: string): Promise<number | null> {
-  try {
-    const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
-    const data = await res.json();
-    if (res.status === 404) {
-      console.log(data.message);
-      return (null);
-    } else if (res.status === 500) {
-      console.error(data.message);
-      return (null);
-    }
-    return (data.id);
-  } catch (err) {
-    console.error("Failed to fetch or parse JSON:", err);
-    return (null);
-  }
-}
-
-// Get message history
-async function getMessageHistory(conversationId: number): Promise<Message[] | null> {
-  try {
-    const res = await fetch(`/api/chat/${conversationId}/messages`);
-    const data = await res.json();
-    if (res.status === 500) {
-      console.error(data.message);
-      return (null);
-    }
-    return (data);
-  } catch (err) {
-    console.error("Failed to fetch or parse JSON:", err);
-    return (null);
-  }
-}
-
-// Load chat window
-async function openFirstConv() {
+async function openFirstConv(chatClient: ChatClient) {
     const convContainer = document.getElementById("conversation-container");
     const chatWindow = await loadTemplate("/chat/chat-window.html");
     if (!chatWindow || !convContainer) return;
@@ -56,29 +12,61 @@ async function openFirstConv() {
     if (p) p.remove();
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
-    setSendListeners();
-    await handleOptions(socket); // !!!!!!!!!!!!!!!! ONGOING 
+    chatClient.setInputListeners();
+    // await handleOptions(chatClient.getSocket()); // !!!!!!!!!!!!!!!! ONGOING 
 }
 
-// Display all messages
-async function displayMessageHistory(conversationId: number) {
-  const messages = await getMessageHistory(conversationId);
-  if (messages) {
-    for (const entry of messages as any) {
-      const message: Message = {
-        content: entry.content,
-        senderId: entry.sender_id.toString(), // Ignore squiggles
-        sentAt: new Date(entry.sent_at)
+async function getConversationId(user1: string, user2: string): Promise<number | null> {
+    try {
+      const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
+      const data = await res.json();
+      if (res.status === 404) {
+        console.log(data.message);
+        return (null);
+      } else if (res.status === 500) {
+        console.error(data.message);
+        return (null);
       }
-      await addChatBubble(currentSessionId, message);
+      return (data.id);
+    } catch (err) {
+      console.error("Failed to fetch or parse JSON:", err);
+      return (null);
     }
-  } else
-    console.error("Failed to fetch messages for conversation ID:", conversationId);
-}
+  }
 
-// Open conversation
-export async function openChat(user: User) {
-    if (!document.getElementById("chat-window")) await openFirstConv();
+  async function getMessageHistory(conversationId: number): Promise<Message[] | null> {
+    try {
+      const res = await fetch(`/api/chat/${conversationId}/messages`);
+      const data = await res.json();
+      if (res.status === 500) {
+        console.error(data.message);
+        return (null);
+      }
+      return (data);
+    } catch (err) {
+      console.error("Failed to fetch or parse JSON:", err);
+      return (null);
+    }
+  }
+
+  async function displayMessageHistory(conversationId: number, sessionId: string, targetId: string) {
+    const messages = await getMessageHistory(conversationId);
+    if (messages) {
+      for (const entry of messages as any) {
+        const message: Message = {
+          content: entry.content,
+          senderId: entry.sender_id.toString(),
+          sentAt: entry.sent_at
+        }
+        await addChatBubble(sessionId, message, targetId);
+      }
+    } else
+      console.error("Failed to fetch messages for conversation ID:", conversationId);
+  }
+
+export async function openChat(user: User, chatClient: ChatClient) {
+  const currentSessionId = chatClient.getSessionId();
+    if (!document.getElementById("chat-window")) await openFirstConv(chatClient);
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName) return;
@@ -86,12 +74,6 @@ export async function openChat(user: User) {
     recipientName.textContent = user.username;
     const conversationId = await getConversationId(currentSessionId, user.userId);
     if (!conversationId) return;
-    displayMessageHistory(conversationId);
-    checkBlockedTarget();
+    displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId()!);
+    // checkBlockedTarget();
 }
-
-// TODO - ADD DATES 
-// TODO - Load profile picture
-
-// ? Cache Last Messages
-// ? GET /api/chat/:conversationId/messages?since=123

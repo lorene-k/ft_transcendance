@@ -10,7 +10,7 @@ export class SocketManager {
 
   getUserSockets() {
     return (this.userSockets);
-  }
+}
 
   getSocketToSession() {
     return (this.socketToSession);
