@@ -1,4 +1,4 @@
-import { openChat } from "./chatHistory.js";
+import { HistoryManager } from "./HistoryManager.js";
 export class UserManager {
     constructor(chatClient) {
         this.activeUsers = [];
@@ -9,6 +9,7 @@ export class UserManager {
         this.chatClient = chatClient;
         this.socket = chatClient.getSocket();
         this.chatUI = chatClient.getChatUI();
+        this.historyManager = new HistoryManager(chatClient);
         this.initUserListeners();
     }
     getTargetId() {
@@ -51,7 +52,7 @@ export class UserManager {
             this.targetId = user.userId;
             // console.log("Target set to:", targetId); // ! DEBUG
             this.convId = this.targetToConvId.get(this.targetId);
-            openChat(user, this.chatClient);
+            this.historyManager.openChat(user);
         });
         userList.appendChild(li);
     }
@@ -107,7 +108,7 @@ export class UserManager {
             this.targetId = userId;
             // console.log("Target set to:", this.targetId); // ! DEBUG
             this.convId = this.targetToConvId.get(this.targetId);
-            openChat({ userId: userId, username: targetName, self: false }, this.chatClient);
+            this.historyManager.openChat({ userId: userId, username: targetName, self: false });
         });
         allMessages.prepend(card);
     }

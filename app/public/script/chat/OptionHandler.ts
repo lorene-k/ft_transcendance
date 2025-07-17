@@ -2,18 +2,21 @@ import { ChatClient } from "./ChatClient.js";
 import { BlockManager } from "./BlockManager.js";
 
 export class OptionHandler {
+  private chatClient: ChatClient;
   private blockManager: BlockManager | null = null;
 
-  constructor() {}
+  constructor(chatClient: ChatClient) {
+    this.chatClient = chatClient;
+  }
 
   getBlockManager() {
     return (this.blockManager!);
   }
 
-  initDropdownListeners(chatClient: ChatClient) {
+  initDropdownListeners() {
     const optionsIcon = document.getElementById("options-icon") as HTMLElement;
     const optionsMenu = document.getElementById("options-menu") as HTMLElement;
-    this.blockManager = new BlockManager(chatClient);
+    this.blockManager = new BlockManager(this.chatClient);
       
     const toggleDropdown = (show: boolean) => {
       if (show) {
@@ -50,7 +53,7 @@ export class OptionHandler {
           //   inviteToGame();
           //   break;
           case "block-user":
-            this.blockManager!.blockOrUnblockUser(chatClient); // ! BLOCK
+            this.blockManager!.blockOrUnblockUser(this.chatClient); // ! BLOCK
             break;
         }
         toggleDropdown(false);

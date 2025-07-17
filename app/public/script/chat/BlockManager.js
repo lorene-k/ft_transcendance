@@ -50,10 +50,9 @@ export class BlockManager {
         const targetId = this.chatClient.getUserManager().getTargetId();
         this.targetBlocked = this.checkBlockedTarget();
         socket.emit("blockUser", { targetId: parseInt(targetId), block: !this.targetBlocked }, (response) => {
-            if (!response)
-                console.error("No response received from server."); // ! solve server ack pb
-            else
+            if (response)
                 console.log("Response from server: ", response.status);
+            // else console.error("No response received from server."); // ! solve server ack pb
         });
         if (!this.targetBlocked)
             this.blockedUsers.push(targetId);

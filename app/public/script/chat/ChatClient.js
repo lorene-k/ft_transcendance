@@ -18,7 +18,7 @@ export class ChatClient {
         });
         this.chatUI = new ChatUI(this);
         this.userManager = new UserManager(this);
-        this.OptionHandler = new OptionHandler();
+        this.OptionHandler = new OptionHandler(this);
         this.bubbleHandler = new BubbleHandler();
         this.initSocketListeners();
     }
@@ -83,10 +83,10 @@ export class ChatClient {
         const clientOffset = `${this.sessionId}-${Date.now()}-${this.counter++}`; // OR USE getRandomValues() to generate a unique offset
         const targetId = this.userManager.getTargetId();
         const convId = this.userManager.getConvId();
-        this.socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: convId }, // ! change to response any ?
+        this.socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: convId }, // ! change to response: any ?
         (response) => {
             if (!response) {
-                console.error("No response received from server.");
+                // console.error("No response received from server.");
                 return;
             }
             if (response.serverOffset)
