@@ -3,8 +3,6 @@ export class BlockManager {
         this.blockedUsers = [];
         this.targetBlocked = false;
         this.chatClient = chatClient;
-        this.blockedBtn = document.querySelector('[data-action="block-user"]');
-        this.blockedMsg = document.getElementById("blocked-msg");
         this.fetchBlockedUsers();
     }
     async fetchBlockedUsers() {
@@ -27,13 +25,17 @@ export class BlockManager {
         }
     }
     toggleBlockedMsg() {
+        const blockedBtn = document.querySelector('[data-action="block-user"]');
+        const blockedMsg = document.getElementById("blocked-msg");
+        if (!blockedBtn || !blockedMsg)
+            return;
         if (this.targetBlocked) {
-            this.blockedMsg.classList.remove("hidden");
-            this.blockedBtn.textContent = "Unblock user";
+            blockedMsg.classList.remove("hidden");
+            blockedBtn.textContent = "Unblock user";
         }
         else if (!this.targetBlocked) {
-            this.blockedMsg.classList.add("hidden");
-            this.blockedBtn.textContent = "Block user";
+            blockedMsg.classList.add("hidden");
+            blockedBtn.textContent = "Block user";
         }
     }
     checkBlockedTarget() {

@@ -11,7 +11,7 @@ async function openFirstConv(chatClient: ChatClient) {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     chatClient.setInputListeners();
-    // chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
+    chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
 }
 
 async function fetchConversationId(user1: string, user2: string): Promise<number | null> {
@@ -64,9 +64,7 @@ async function fetchConversationId(user1: string, user2: string): Promise<number
 
 export async function openChat(user: User, chatClient: ChatClient) {
   const currentSessionId = chatClient.getSessionId();
-    if (!document.getElementById("chat-window")) {
-      const optionHandler = await openFirstConv(chatClient);
-    }
+    if (!document.getElementById("chat-window")) await openFirstConv(chatClient);
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName) return;
@@ -75,5 +73,5 @@ export async function openChat(user: User, chatClient: ChatClient) {
     const conversationId = await fetchConversationId(currentSessionId, user.userId);
     if (!conversationId) return;
     displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId()!);
-    // chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
+    chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }

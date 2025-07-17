@@ -4,13 +4,9 @@ export class BlockManager {
     private blockedUsers: string[] = [];
     private targetBlocked: boolean = false;
     private chatClient: ChatClient;
-    private blockedBtn: HTMLElement;
-    private blockedMsg: HTMLElement;
 
     constructor(chatClient: ChatClient) {
         this.chatClient = chatClient;
-        this.blockedBtn = document.querySelector('[data-action="block-user"]') as HTMLElement;
-        this.blockedMsg = document.getElementById("blocked-msg") as HTMLElement;
         this.fetchBlockedUsers();
     }
 
@@ -34,12 +30,15 @@ export class BlockManager {
     }
 
     private toggleBlockedMsg() {
+        const blockedBtn = document.querySelector('[data-action="block-user"]') as HTMLElement;
+        const blockedMsg = document.getElementById("blocked-msg") as HTMLElement;
+        if (!blockedBtn || !blockedMsg) return;
         if (this.targetBlocked) {
-            this.blockedMsg.classList.remove("hidden");
-            this.blockedBtn.textContent = "Unblock user";
+            blockedMsg.classList.remove("hidden");
+            blockedBtn.textContent = "Unblock user";
         } else if (!this.targetBlocked) {
-            this.blockedMsg.classList.add("hidden");
-            this.blockedBtn.textContent = "Block user";
+            blockedMsg.classList.add("hidden");
+            blockedBtn.textContent = "Block user";
         }
     }
     

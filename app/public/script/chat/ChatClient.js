@@ -18,7 +18,7 @@ export class ChatClient {
         });
         this.chatUI = new ChatUI(this);
         this.userManager = new UserManager(this);
-        this.OptionHandler = new OptionHandler(this);
+        this.OptionHandler = new OptionHandler();
         this.initSocketListeners();
     }
     getSessionId() {
@@ -53,7 +53,7 @@ export class ChatClient {
                 const otherUserId = isSent ? this.userManager.getTargetId() : senderId;
                 const otherUsername = this.userManager.getTargetUsername(otherUserId, senderUsername, isSent);
                 if (!otherUserId || !otherUsername) {
-                    console.error("Invalid user ID or username received in message event."); // !!! PB - FIX
+                    console.error("Invalid user ID or username received in message event.");
                     return;
                 }
                 this.socket.auth.serverOffset = serverOffset;

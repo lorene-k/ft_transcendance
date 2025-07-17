@@ -10,7 +10,7 @@ async function openFirstConv(chatClient) {
     convContainer.appendChild(chatWindow);
     const input = document.querySelector('textarea');
     chatClient.setInputListeners();
-    // chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
+    chatClient.getOptionHandler().initDropdownListeners(chatClient); // ! ONGOING
 }
 async function fetchConversationId(user1, user2) {
     try {
@@ -63,9 +63,8 @@ async function displayMessageHistory(conversationId, sessionId, targetId) {
 }
 export async function openChat(user, chatClient) {
     const currentSessionId = chatClient.getSessionId();
-    if (!document.getElementById("chat-window")) {
-        const optionHandler = await openFirstConv(chatClient);
-    }
+    if (!document.getElementById("chat-window"))
+        await openFirstConv(chatClient);
     const chatBox = document.getElementById("conversation-box");
     const recipientName = document.getElementById("recipient-name");
     if (!chatBox || !recipientName)
@@ -76,5 +75,5 @@ export async function openChat(user, chatClient) {
     if (!conversationId)
         return;
     displayMessageHistory(conversationId, chatClient.getSessionId(), chatClient.getUserManager().getTargetId());
-    // chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
+    chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
 }
