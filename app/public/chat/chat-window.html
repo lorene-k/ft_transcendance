@@ -8,7 +8,7 @@
 
   <!-- Dropdown menu -->
   <div class="absolute z-10 right-0">
-    <svg id="options-icon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 cursor-pointer ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg id="options-icon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-600 cursor-pointer ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v.01M12 12v.01M12 18v.01" />
     </svg>
     <div id="options-menu" class="dropdown-menu-style opacity-0 scale-20 pointer-events-none">
@@ -19,11 +19,11 @@
   </div>
 
   <!-- Conversation container -->
-  <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4 px-4"></div>
+  <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4 px-4 no-scrollbar"></div>
 
   <!-- Input section -->
-  <div class="basis-[10%] flex flex-row rounded-md gap-2">
-    <textarea id="msg-input" rows="1" class="box-style resize-none w-4/5" placeholder="Type message..."></textarea>
+  <div class="basis-[8%] flex flex-row rounded-md gap-2">
+    <textarea id="msg-input" rows="1" class="box-style resize-none w-4/5 no-scrollbar focus:border-none focus:outline-none text-white" placeholder="Type message..."></textarea>
     <button id="send-btn" class="button-style w-1/5">Send</button>
   </div>
 </div>

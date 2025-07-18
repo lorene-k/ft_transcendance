@@ -19,6 +19,7 @@
     --color-gray-500: oklch(55.1% 0.027 264.364);
     --color-gray-600: oklch(44.6% 0.03 256.802);
     --color-gray-700: oklch(37.3% 0.034 259.733);
+    --color-gray-800: oklch(27.8% 0.033 256.848);
     --color-gray-900: oklch(21% 0.034 264.665);
     --color-black: #000;
     --color-white: #fff;
@@ -336,6 +337,9 @@
   .flex-grow {
     flex-grow: 1;
   }
+  .basis-\[8\%\] {
+    flex-basis: 8%;
+  }
   .basis-\[10\%\] {
     flex-basis: 10%;
   }
@@ -447,16 +451,9 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
-  .border-2 {
-    border-style: var(--tw-border-style);
-    border-width: 2px;
-  }
   .border-b {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
-  }
-  .border-blue-600 {
-    border-color: var(--color-blue-600);
   }
   .border-gray-300 {
     border-color: var(--color-gray-300);
@@ -475,6 +472,9 @@
   }
   .bg-gray-200 {
     background-color: var(--color-gray-200);
+  }
+  .bg-gray-900 {
+    background-color: var(--color-gray-900);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -561,9 +561,6 @@
   .text-blue-600 {
     color: var(--color-blue-600);
   }
-  .text-gray-300 {
-    color: var(--color-gray-300);
-  }
   .text-gray-500 {
     color: var(--color-gray-500);
   }
@@ -628,6 +625,13 @@
       }
     }
   }
+  .hover\:bg-gray-500 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-gray-500);
+      }
+    }
+  }
   .hover\:text-blue-500 {
     &:hover {
       @media (hover: hover) {
@@ -640,6 +644,12 @@
       @media (hover: hover) {
         color: var(--color-gray-700);
       }
+    }
+  }
+  .focus\:border-none {
+    &:focus {
+      --tw-border-style: none;
+      border-style: none;
     }
   }
   .focus\:ring-2 {
@@ -683,20 +693,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-gray-100);
+    background-color: var(--color-gray-900);
   }
   .title-style {
     font-size: var(--text-lg);
     line-height: var(--tw-leading, var(--text-lg--line-height));
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
-    color: var(--color-blue-600);
-  }
-  .line-chat {
-    margin-block: calc(var(--spacing) * 6);
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
-    outline-color: var(--color-gray-400);
+    color: var(--color-blue-500);
   }
   .chat-card {
     margin-bottom: calc(var(--spacing) * 4);
@@ -704,23 +708,21 @@
     flex-direction: column;
     gap: calc(var(--spacing) * 3);
     border-radius: var(--radius-xl);
-    background-color: var(--color-white);
+    background-color: var(--color-gray-800);
     padding: calc(var(--spacing) * 4);
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .box-style {
     border-radius: var(--radius-xl);
-    border-style: var(--tw-border-style);
-    border-width: 2px;
-    border-color: var(--color-blue-600);
+    background-color: var(--color-gray-600);
     padding: calc(var(--spacing) * 2);
   }
   .button-style {
     border-radius: var(--radius-xl);
     background-color: var(--color-blue-600);
-    --tw-font-weight: var(--font-weight-bold);
-    font-weight: var(--font-weight-bold);
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
     color: var(--color-white);
     &:hover {
       @media (hover: hover) {
@@ -733,20 +735,26 @@
       }
     }
   }
+  .line-style {
+    margin-top: calc(var(--spacing) * 1);
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
+    outline-color: var(--color-gray-600);
+  }
   .chat-time {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
     --tw-font-weight: var(--font-weight-normal);
     font-weight: var(--font-weight-normal);
-    color: var(--color-gray-500);
+    color: var(--color-gray-400);
   }
   .chat-date {
     text-align: center;
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
-    --tw-font-weight: var(--font-weight-normal);
-    font-weight: var(--font-weight-normal);
-    color: var(--color-gray-500);
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-400);
   }
   .chat-bubble-header {
     display: flex;
@@ -764,7 +772,7 @@
     min-width: calc(var(--spacing) * 40);
     transform-origin: top right;
     border-radius: var(--radius-xl);
-    background-color: var(--color-gray-100);
+    background-color: var(--color-gray-900);
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, visibility, content-visibility, overlay, pointer-events;
@@ -786,12 +794,28 @@
     line-height: var(--tw-leading, var(--text-sm--line-height));
     --tw-font-weight: var(--font-weight-normal);
     font-weight: var(--font-weight-normal);
-    color: var(--color-gray-900);
+    color: var(--color-white);
     &:hover {
       @media (hover: hover) {
-        background-color: var(--color-blue-200);
+        color: var(--color-blue-500);
       }
     }
+  }
+  .text-style {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-white);
+  }
+}
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 @layer base, components, utilities;

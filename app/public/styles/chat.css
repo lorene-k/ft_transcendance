@@ -4,35 +4,35 @@
   }
 
   .center-frame-chat {
-    @apply bg-gray-100 min-h-screen flex flex-col items-center justify-center;
+    @apply bg-gray-900 min-h-screen flex flex-col items-center justify-center;
   }
 
   .title-style {
-      @apply text-lg font-bold text-blue-600;
-  }
-
-  .line-chat {
-    @apply my-6 outline-1 outline-gray-400;
+      @apply text-lg font-bold text-blue-500;
   }
 
   .chat-card {
-    @apply flex flex-col gap-3 mb-4 bg-white p-4 shadow-sm rounded-xl;
+    @apply flex flex-col gap-3 mb-4 bg-gray-800 p-4 shadow-sm rounded-xl;
   }
 
   .box-style {
-    @apply border-2 rounded-xl border-blue-600 p-2;
+    @apply rounded-xl bg-gray-600 p-2;
   }
 
   .button-style {
-    @apply rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 hover:cursor-pointer;
+    @apply rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 hover:cursor-pointer;
+  }
+
+  .line-style {
+    @apply outline-1 outline-gray-600 mt-1;
   }
 
   .chat-time {
-    @apply text-sm font-normal text-gray-500;
+    @apply text-sm font-normal text-gray-400;
   }
 
   .chat-date {
-    @apply text-sm font-normal text-gray-500 text-center;
+    @apply text-sm font-medium text-gray-400 text-center;
   }
 
   .chat-bubble-header {
@@ -40,10 +40,24 @@
   }
 
   .dropdown-menu-style {
-    @apply mr-5 w-40 min-w-40 bg-gray-100 rounded-xl shadow-sm transition ease-out duration-150 origin-top-right;
+    @apply mr-5 w-40 min-w-40 bg-gray-900 rounded-xl shadow-sm transition ease-out duration-150 origin-top-right;
   }
 
   .dropdown-item-style {
-    @apply text-sm font-normal text-gray-900 rounded-xl hover:bg-blue-200 block w-full text-left p-2 cursor-pointer;
+    @apply text-sm font-normal text-white rounded-xl hover:text-blue-500 block w-full text-left p-2 cursor-pointer;
+  }
+
+  .text-style {
+    @apply text-sm font-medium text-white;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

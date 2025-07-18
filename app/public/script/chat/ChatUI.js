@@ -24,7 +24,7 @@ export default class ChatUI {
             return;
         this.chatClient.sendMessage(input.value);
         input.value = "";
-        input.focus();
+        // input.focus();
     }
     async displayChatBubble(sessionId, message) {
         const targetId = this.chatClient.getUserManager().getTargetId();

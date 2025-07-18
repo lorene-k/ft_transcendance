@@ -31,7 +31,7 @@ export default class ChatUI {
     if (!input.value.trim()) return;
     this.chatClient.sendMessage(input.value);
     input.value = "";
-    input.focus();
+    // input.focus();
   }
     
   async displayChatBubble(sessionId: string, message: Message) {
