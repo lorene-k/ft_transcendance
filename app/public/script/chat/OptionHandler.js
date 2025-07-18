@@ -1,7 +1,9 @@
 import BlockManager from "./BlockManager.js";
+import InviteManager from "./InviteManager.js";
 export default class OptionHandler {
     constructor(chatClient) {
         this.blockManager = null;
+        this.inviteManager = null;
         this.chatClient = chatClient;
     }
     getBlockManager() {
@@ -11,6 +13,7 @@ export default class OptionHandler {
         const optionsIcon = document.getElementById("options-icon");
         const optionsMenu = document.getElementById("options-menu");
         this.blockManager = new BlockManager(this.chatClient);
+        this.inviteManager = new InviteManager(this.chatClient);
         const toggleDropdown = (show) => {
             if (show) {
                 optionsMenu.classList.remove("opacity-0", "scale-20", "pointer-events-none");
@@ -41,11 +44,11 @@ export default class OptionHandler {
                 // case "add-friend":
                 //   addFriend();
                 //   break;
-                // case "invite-game":
-                //   inviteToGame();
-                //   break;
+                case "invite-game":
+                    this.inviteManager.inviteToGame();
+                    break;
                 case "block-user":
-                    this.blockManager.blockOrUnblockUser(this.chatClient); // ! BLOCK
+                    this.blockManager.blockOrUnblockUser(this.chatClient);
                     break;
             }
             toggleDropdown(false);

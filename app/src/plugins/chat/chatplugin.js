@@ -1,9 +1,10 @@
 import fp from "fastify-plugin";
 import { handleMessages, getAllConversations } from "./chatMessages.js";
-import { handleRecovery } from "./chatRecovery.js";
 import { handleBlocks } from "./chatBlocks.js";
+import handleRecovery from "./chatRecovery.js";
 import getActiveUsers from "./chatUsers.js";
 import SocketManager from "./SocketManager.js";
+import handleGameInvites from "./gameInvites.js"; // Import the game invite handler
 const chatPlugin = async (fastify) => {
     const chatNamespace = fastify.io.of("/chat");
     const socketManager = new SocketManager(fastify);
@@ -15,6 +16,7 @@ const chatPlugin = async (fastify) => {
         getActiveUsers(socket, chatNamespace, socketManager);
         getAllConversations(fastify, socket.session.userId, chatNamespace, socketManager);
         handleBlocks(socket, fastify);
+        handleGameInvites(socket, chatNamespace);
         handleRecovery(socket, fastify, chatNamespace);
         socketManager.handleDisconnect(socket);
     });

@@ -3,7 +3,7 @@ import { Socket, Namespace } from "socket.io";
 import { currConvId } from "./chatMessages.js";
 import { Message } from "./chatTypes.js";
 
-export async function handleRecovery(socket: Socket, fastify: FastifyInstance, chatNamespace: Namespace) {
+export default async function handleRecovery(socket: Socket, fastify: FastifyInstance, chatNamespace: Namespace) {
     // console.log("Recovery triggered. Socket recovered:", socket.recovered);  // ! DEBUG
     // console.log("Fetching messages after offset:", socket.handshake.auth.serverOffset);  // ! DEBUG
     if (!socket.recovered) {
