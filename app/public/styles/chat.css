@@ -11,8 +11,8 @@
       @apply text-lg font-bold text-blue-600;
   }
 
-  .line-chat {
-    @apply my-6 outline-1 outline-gray-400;
+  .line-style {
+    @apply outline-1 outline-gray-100;
   }
 
   .chat-card {
@@ -20,11 +20,11 @@
   }
 
   .box-style {
-    @apply border-2 rounded-xl border-blue-600 p-2;
+    @apply rounded-xl bg-gray-100 p-2 shadow-inner;
   }
 
   .button-style {
-    @apply rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 hover:cursor-pointer;
+    @apply rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 hover:cursor-pointer;
   }
 
   .chat-time {
@@ -45,5 +45,36 @@
 
   .dropdown-item-style {
     @apply text-sm font-normal text-gray-900 rounded-xl hover:bg-blue-200 block w-full text-left p-2 cursor-pointer;
+  }
+
+  .text-style {
+    @apply text-sm font-medium text-black;
+  }
+}
+
+@layer utilities {
+
+  .custom-scrollbar {
+    &::-webkit-scrollbar {
+      width: 0.5rem;
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: 9999px;
+      background-color: theme('colors.gray.100');
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 9999px;
+      background-color: theme('colors.gray.300');
+    }
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
