@@ -17,6 +17,14 @@ new Chart(ctx, {
                 beginAtZero: true
             }
         }
+    },
+    plugins: {
+        legend: {
+            display: false
+        },
+        tooltip: {
+            enabled: false
+        }
     }
 });
 export {};

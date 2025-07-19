@@ -20,7 +20,16 @@ if (!ctx) console.error('Canvas bar-chart element not found'); // ! DEBUG
           beginAtZero: true
         }
       }
-    }
+    },
+
+	plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          enabled: false
+        }
+      }
   });
 
 /* 
