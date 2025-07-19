@@ -1,7 +1,11 @@
-INSTALLED
+INSTALLED (npm install)
+- --save-dev @types/socket.io
 - socket.io-client
+- chart.js
+- canvas
 
 ADDED
+- tables in schema.sql
 - chat.css
 - /public/chat/
 - /public/assets/
@@ -16,6 +20,8 @@ EDITED
 - schema.sql (in users : username must be unique)
 - store.ts (l.26) - added this : " if (typeof session.cookie.expires === 'string') session.cookie.expires = new Date(session.cookie.expires); "
 - custom.d.ts
+- navbar.html
+- !! remove body class in index
 
 --------------------------------------------------
 TO DO
