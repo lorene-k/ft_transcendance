@@ -5,7 +5,7 @@ import fs from "fs";
 export class Database extends sqlite3.Database {
     async fetch_all(query, params = []) {
         return new Promise((resolve, reject) => {
-            this.prepare(query).all(...params, (err, rows) => {
+            this.prepare(query).all(params, (err, rows) => {
                 if (err) {
                     console.error(err);
                     reject(err);
@@ -16,7 +16,7 @@ export class Database extends sqlite3.Database {
     }
     async fetch_one(query, params = []) {
         return new Promise((resolve, reject) => {
-            this.prepare(query).get(...params, (err, row) => {
+            this.prepare(query).get(params, (err, row) => {
                 if (err) {
                     console.error(err);
                     reject(err);

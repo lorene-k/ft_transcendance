@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fs from "fs";
+import { REPL_MODE_SLOPPY } from "repl";
 
 interface GameRow {
     id: string;
@@ -10,39 +11,17 @@ interface GameRow {
     winner: string;
 }
 
-export async function navbar(
-    fastify: FastifyInstance,
-    request: FastifyRequest,
-    html: string,
-) {
-    const username = await fastify.database.fetch_one(
-        "SELECT username from user where id = ?",
-        [request.session.userId],
-    );
-    const isAuth = request.session.authenticated;
-    // Inject dynamic buttons
-    const rendered = html.replace(
-        `<!-- Navigation -->`,
-        isAuth
-            ? fs
-                  .readFileSync("./public/navbar/logged.html", "utf8")
-                  .replace("USERNAME", username.username)
-            : fs.readFileSync("./public/navbar/default.html", "utf8"),
-    );
-    return rendered;
+export async function navbar(request: FastifyRequest, reply: FastifyReply) {
+    if (request.session.authenticated)
+        return reply.sendFile('/navbar/logged.html');
+    else {
+        return reply.sendFile('/navbar/default.html');
+    }
 }
 
 export function getRoot(fastify: FastifyInstance) {
     return async function (request: FastifyRequest, reply: FastifyReply) {
-        let html = fs.readFileSync("./public/index.html", "utf8");
-        const isAuth = request.session.authenticated;
-        const username = await fastify.database.fetch_one(
-            "SELECT username from user where id = ?",
-            [request.session.userId],
-        );
-        // Inject dynamic buttons
-        html = await navbar(fastify, request, html);
-        return reply.header("Content-Type", "text/html").send(html);
+        return reply.sendFile("index.html");
     };
 }
 
@@ -76,7 +55,7 @@ export function getAccount(fastify: FastifyInstance) {
                 .replace("<!-- HISTORY -->", match_history);
             return reply
                 .header("Content-Type", "text/html")
-                .send(await navbar(fastify, request, html));
+                .send(html);
         }
     };
 }
@@ -87,26 +66,16 @@ export function getGame(fastify: FastifyInstance) {
     };
 }
 
-export function getChat(fastify: FastifyInstance) {
-    return async function (request: FastifyRequest, reply: FastifyReply) {
-        if (!request.session.authenticated) {
-            return reply.redirect("/");
-        }
-        const html = fs.readFileSync("./public/chat/chat.html").toString();
-        return reply
-            .header("Content-Type", "text/html")
-            .send(await navbar(fastify, request, html));
+export function getChat() {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      if (!request.session.authenticated) return reply.redirect("/");
+    return reply.sendFile("chat/chat.html");
     };
 }
 
-export function getDashboard(fastify: FastifyInstance) {
-    return async function (request: FastifyRequest, reply: FastifyReply) {
-        if (!request.session.authenticated) {
-            return reply.redirect("/");
-        }
-        const html = fs.readFileSync("./public/dashboards/user-dashboard.html").toString();
-        return reply
-            .header("Content-Type", "text/html")
-            .send(await navbar(fastify, request, html));
+export function getDashboard() {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      if (!request.session.authenticated) return reply.redirect("/");
+    return reply.sendFile("dashboards/user-dashboard.html");
     };
 }

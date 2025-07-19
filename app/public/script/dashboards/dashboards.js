@@ -1,33 +1,34 @@
-const ctx = document.getElementById('bar-chart');
-if (!ctx)
-    console.error('Canvas bar-chart element not found'); // ! DEBUG
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                borderWidth: 1
-            }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
+export default function display_dashboard() {
+    const ctx = document.getElementById('bar-chart');
+    if (!ctx)
+        console.error('Canvas bar-chart element not found'); // ! DEBUG
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderWidth: 1
+                }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                enabled: false
             }
         }
-    },
-    plugins: {
-        legend: {
-            display: false
-        },
-        tooltip: {
-            enabled: false
-        }
-    }
-});
-export {};
+    });
+}
 /*
 1. USER DASHBOARD
 - Total games played

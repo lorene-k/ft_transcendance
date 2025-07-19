@@ -3,13 +3,13 @@ import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
 import root from "./routes/root.js";
 import dbPlugin from "./plugins/dbplugin.js";
-import chatPlugin from "./plugins/chat/chatplugin.js";
 import formbody from "@fastify/formbody";
 import fastifySession from "@fastify/session";
 import fastifyCookie from "@fastify/cookie";
 import Store from "./db/store.js";
 import fastifyIO from "fastify-socket.io";
 import fastifySocketIO from "fastify-socket.io";
+import chatPlugin from "./plugins/chat/chatplugin.js";
 
 const __dirname = import.meta.dirname;
 
@@ -18,13 +18,11 @@ const server = fastify({
         level: "error",
     },
 });
-
 // PLUGINS (register plugins first or problems)
 let db = server.register(dbPlugin);
 server.register(formbody);
-await server.register(fastifyCookie);
+server.register(fastifyCookie);
 await db; // db needed for session
-
 await server.register(fastifySession, {
     cookieName: "sessionId",
     //TODO: secret should be in .ENV file
@@ -32,11 +30,9 @@ await server.register(fastifySession, {
     cookie: { maxAge: 1800000, secure: "auto" },
     store: new Store.SessionStore(server.database, server.log),
 });
-
 server.decorate("sessionStore", new Store.SessionStore(server.database, server.log));
 await server.register(fastifySocketIO.default, { connectionStateRecovery: {} });
 await server.register(chatPlugin);
-
 server.register(fastifyStatic, {
     root: path.join(__dirname, "..", "public"),
     prefix: "/",
@@ -44,7 +40,7 @@ server.register(fastifyStatic, {
 
 // --------------------------
 
-//all user endpoints here
+//all user endpoint here
 server.register(root.routes);
 
 //all api routes (and hooks ?) here

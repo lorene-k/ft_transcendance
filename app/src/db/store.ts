@@ -49,6 +49,7 @@ class SessionStore extends EventEmitter {
             expires: string;
             session: string;
         }
+
         this.logger.info("get required for %s", sessionId)
         try {
             this.getSession.get(sessionId, (err: any, row: SessionRow | undefined) => {

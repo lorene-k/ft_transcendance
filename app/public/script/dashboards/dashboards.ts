@@ -1,9 +1,10 @@
 
 declare const Chart: any;
 
-const ctx = document.getElementById('bar-chart') as HTMLCanvasElement | null;
+export default function display_dashboard() {
+  const ctx = document.getElementById('bar-chart') as HTMLCanvasElement | null;
 
-if (!ctx) console.error('Canvas bar-chart element not found'); // ! DEBUG
+  if (!ctx) console.error('Canvas bar-chart element not found'); // ! DEBUG
   new Chart(ctx!, {
     type: 'bar',
     data: {
@@ -21,8 +22,8 @@ if (!ctx) console.error('Canvas bar-chart element not found'); // ! DEBUG
         }
       }
     },
-
-	plugins: {
+  
+  plugins: {
         legend: {
           display: false
         },
@@ -31,7 +32,7 @@ if (!ctx) console.error('Canvas bar-chart element not found'); // ! DEBUG
         }
       }
   });
-
+}
 /* 
 1. USER DASHBOARD
 - Total games played

@@ -1,23 +1,14 @@
 import fs from "fs";
-export async function navbar(fastify, request, html) {
-    const username = await fastify.database.fetch_one("SELECT username from user where id = ?", [request.session.userId]);
-    const isAuth = request.session.authenticated;
-    // Inject dynamic buttons
-    const rendered = html.replace(`<!-- Navigation -->`, isAuth
-        ? fs
-            .readFileSync("./public/navbar/logged.html", "utf8")
-            .replace("USERNAME", username.username)
-        : fs.readFileSync("./public/navbar/default.html", "utf8"));
-    return rendered;
+export async function navbar(request, reply) {
+    if (request.session.authenticated)
+        return reply.sendFile('/navbar/logged.html');
+    else {
+        return reply.sendFile('/navbar/default.html');
+    }
 }
 export function getRoot(fastify) {
     return async function (request, reply) {
-        let html = fs.readFileSync("./public/index.html", "utf8");
-        const isAuth = request.session.authenticated;
-        const username = await fastify.database.fetch_one("SELECT username from user where id = ?", [request.session.userId]);
-        // Inject dynamic buttons
-        html = await navbar(fastify, request, html);
-        return reply.header("Content-Type", "text/html").send(html);
+        return reply.sendFile("index.html");
     };
 }
 export function getAccount(fastify) {
@@ -51,7 +42,7 @@ export function getAccount(fastify) {
                 .replace("<!-- HISTORY -->", match_history);
             return reply
                 .header("Content-Type", "text/html")
-                .send(await navbar(fastify, request, html));
+                .send(html);
         }
     };
 }
@@ -60,25 +51,17 @@ export function getGame(fastify) {
         return reply.sendFile("pong.html");
     };
 }
-export function getChat(fastify) {
-    return async function (request, reply) {
-        if (!request.session.authenticated) {
+export function getChat() {
+    return async (request, reply) => {
+        if (!request.session.authenticated)
             return reply.redirect("/");
-        }
-        const html = fs.readFileSync("./public/chat/chat.html").toString();
-        return reply
-            .header("Content-Type", "text/html")
-            .send(await navbar(fastify, request, html));
+        return reply.sendFile("chat/chat.html");
     };
 }
-export function getDashboard(fastify) {
-    return async function (request, reply) {
-        if (!request.session.authenticated) {
+export function getDashboard() {
+    return async (request, reply) => {
+        if (!request.session.authenticated)
             return reply.redirect("/");
-        }
-        const html = fs.readFileSync("./public/dashboards/user-dashboard.html").toString();
-        return reply
-            .header("Content-Type", "text/html")
-            .send(await navbar(fastify, request, html));
+        return reply.sendFile("dashboards/user-dashboard.html");
     };
 }

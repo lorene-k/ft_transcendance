@@ -27,22 +27,34 @@ export function register(fastify: FastifyInstance) {
                 console.error(err)
             }
             else {
-                fastify.database.prepare(insertuser).all([username, email, hash], (err: Error) => console.error(err?.message))
+                fastify.database.prepare(insertuser).all([username, email, hash], (err: Error) => {
+                    fastify.log.error(err?.message);
+                    return reply.send({ "registered": false, "reason": err?.message })
+                })
                 fastify.log.info("new user entry:\nusername:%s, email:%s, password:%s", username, email, hash)
             }
         })
-        return reply.redirect("/")
+        return reply.send({ "registered": true })
     }
 }
 
 export function login(fastify: FastifyInstance) {
     return async function (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) {
         const { username, password } = request.body;
+        if (!username || !password) {
+            return reply.send({
+                "logged": false,
+                "reason": "parsing error, no username or password",
+            });
+        }
         fastify.log.info("request login for: %s, with password %s", username, password);
         const rows = await fastify.database.fetch_all('SELECT id, password FROM user WHERE username = ?', [username])
         if (!rows || rows.length === 0) {
             fastify.log.error('query returned empty');
-            return reply.redirect('/');
+            return reply.send({
+                "logged": false,
+                "reason": "username unknown",
+            });
         }
         else {
             const user = rows[0]
@@ -52,9 +64,14 @@ export function login(fastify: FastifyInstance) {
                 request.session.userId = user.id;
             }
             else {
-                fastify.log.info("wrong password");
+                return reply.send({
+                    "logged": false,
+                    "reason": "wrong password",
+                });
             }
-            return reply.redirect("/");
+            return reply.send({
+                "logged": true,
+            });
         }
     }
 }
@@ -63,7 +80,7 @@ export function logout(FastifyInstance: FastifyInstance) {
     return async function (request: FastifyRequest, reply: FastifyReply) {
         request.session.authenticated = false;
         request.session.destroy(err => {
-            return reply.redirect("/");
+            return reply.send({ "logout": true });
         })
     }
 }

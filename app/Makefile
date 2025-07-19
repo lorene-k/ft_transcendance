@@ -1,8 +1,8 @@
 # ------------  RULES  ------------------------------------------------------ #
-all:			tail comp
+all:	tail comp
 
 tail:
-				npx tailwindcss -i public/styles/tailwind.css -o public/styles/compiled.css
+	npx tailwindcss -i public/styles/tailwind.css -o public/styles/compiled.css
 
 comp:
-				npm run dev
+	npm run dev

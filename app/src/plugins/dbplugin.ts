@@ -3,11 +3,12 @@ import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import sqlite3 from "sqlite3";
 import path from "path";
 import fs from "fs";
+import { int } from "@babylonjs/core";
 
 export class Database extends sqlite3.Database {
     async fetch_all(query: string, params: any[] = []) {
         return new Promise<any[]>((resolve, reject) => {
-            this.prepare(query).all(...params, (err: Error, rows: string[]) => {
+            this.prepare(query).all(params, (err: Error, rows: string[]) => {
                 if (err) {
                     console.error(err);
                     reject(err);
@@ -19,7 +20,7 @@ export class Database extends sqlite3.Database {
 
     async fetch_one(query: string, params: any[] = []) {
         return new Promise<any>((resolve, reject) => {
-            this.prepare(query).get(...params, (err: Error, row: any) => {
+            this.prepare(query).get(params, (err: Error, row: any) => {
                 if (err) {
                     console.error(err);
                     reject(err);
@@ -28,6 +29,7 @@ export class Database extends sqlite3.Database {
             });
         });
     }
+
 }
 
 //TODO: extend class database to a custom class SQLiteStore, bind it with fastity/session (save session and cookie in db instead of memory)

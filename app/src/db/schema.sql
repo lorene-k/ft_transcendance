@@ -5,8 +5,8 @@ PRAGMA foreign_keys = ON;
 -- ------------------------------
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT UNIQUE,
+    username TEXT NOT NULL,
+    email TEXT,
     password TEXT,
     created_at DATE NOT NULL,
     last_login_at DATETIME,
@@ -80,16 +80,3 @@ CREATE TABLE IF NOT EXISTS blocks (
     FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
 );
-
--- -- ------------------------------
--- -- Table: friends
--- -- ------------------------------
--- CREATE TABLE IF NOT EXISTS friends (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER NOT NULL,
---     friend_id INTEGER NOT NULL,
---     request_status TEXT NOT NULL CHECK (request_status IN ('pending', 'accepted')),
---     UNIQUE(user_id, friend_id),
---     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
---     FOREIGN KEY (friend_id) REFERENCES user(id) ON DELETE CASCADE
--- );
