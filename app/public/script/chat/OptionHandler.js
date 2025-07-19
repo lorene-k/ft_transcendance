@@ -41,9 +41,6 @@ export default class OptionHandler {
             if (!action)
                 return;
             switch (action) {
-                // case "add-friend":
-                //   addFriend();
-                //   break;
                 case "invite-game":
                     this.inviteManager.inviteToGame();
                     break;

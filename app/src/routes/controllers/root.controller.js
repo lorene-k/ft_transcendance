@@ -71,3 +71,14 @@ export function getChat(fastify) {
             .send(await navbar(fastify, request, html));
     };
 }
+export function getDashboard(fastify) {
+    return async function (request, reply) {
+        if (!request.session.authenticated) {
+            return reply.redirect("/");
+        }
+        const html = fs.readFileSync("./public/dashboards/user-dashboard.html").toString();
+        return reply
+            .header("Content-Type", "text/html")
+            .send(await navbar(fastify, request, html));
+    };
+}

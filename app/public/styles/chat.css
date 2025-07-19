@@ -8,7 +8,7 @@
   }
 
   .title-style {
-      @apply text-lg font-bold text-blue-600;
+      @apply text-lg font-bold text-gray-800;
   }
 
   .line-style {
@@ -24,7 +24,7 @@
   }
 
   .button-style {
-    @apply rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 hover:cursor-pointer;
+    @apply rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-900 hover:cursor-pointer;
   }
 
   .chat-time {

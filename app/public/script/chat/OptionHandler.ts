@@ -49,9 +49,6 @@ export default class OptionHandler {
         const action = target.dataset.action;
         if (!action) return;    
         switch(action) {
-          // case "add-friend":
-          //   addFriend();
-          //   break;
           case "invite-game":
             this.inviteManager!.inviteToGame();
             break;

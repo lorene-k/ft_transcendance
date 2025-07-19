@@ -12,7 +12,6 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v.01M12 12v.01M12 18v.01" />
     </svg>
     <div id="options-menu" class="dropdown-menu-style opacity-0 scale-20 pointer-events-none">
-      <button data-action="add-friend" class="dropdown-item-style">Add friend</button>
       <button data-action="invite-game" class="dropdown-item-style">Invite to game</button>
       <button data-action="block-user" class="dropdown-item-style">Block user</button>
     </div>
@@ -23,7 +22,7 @@
 
   <!-- Input section -->
   <div class="basis-[10%] flex flex-row rounded-md gap-2">
-    <textarea id="msg-input" rows="1" class="box-style resize-none w-4/5 no-scrollbar" placeholder="Type message..."></textarea>
+    <textarea id="msg-input" rows="1" class="box-style resize-none w-4/5 no-scrollbar focus:outline-none focus:border-none" placeholder="Type message..."></textarea>
     <button id="send-btn" class="button-style w-1/5">Send</button>
   </div>
 </div>

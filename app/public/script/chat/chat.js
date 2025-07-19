@@ -9,4 +9,3 @@ document.addEventListener("DOMContentLoaded", initChat);
 // TODO - game invites
 // TODO - add profile picture
 // TODO - add link to profile
-// ?? Handle friend requests

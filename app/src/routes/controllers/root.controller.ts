@@ -98,3 +98,15 @@ export function getChat(fastify: FastifyInstance) {
             .send(await navbar(fastify, request, html));
     };
 }
+
+export function getDashboard(fastify: FastifyInstance) {
+    return async function (request: FastifyRequest, reply: FastifyReply) {
+        if (!request.session.authenticated) {
+            return reply.redirect("/");
+        }
+        const html = fs.readFileSync("./public/dashboards/user-dashboard.html").toString();
+        return reply
+            .header("Content-Type", "text/html")
+            .send(await navbar(fastify, request, html));
+    };
+}
