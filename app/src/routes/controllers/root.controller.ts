@@ -76,6 +76,6 @@ export function getChat() {
 export function getDashboard() {
     return async (request: FastifyRequest, reply: FastifyReply) => {
       if (!request.session.authenticated) return reply.redirect("/");
-    return reply.sendFile("dashboards/user-dashboard.html");
+    return reply.sendFile("dashboard/dashboard-view.html");
     };
 }

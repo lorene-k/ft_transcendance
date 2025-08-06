@@ -13,32 +13,13 @@ export default class HistoryManager {
         convContainer.appendChild(chatWindow);
         const input = document.querySelector('textarea');
         this.chatClient.setInputListeners();
-        this.chatClient.getOptionHandler().initDropdownListeners(); // ! ONGOING
+        this.chatClient.getOptionHandler().initDropdownListeners();
     }
-    async fetchConversationId(user1, user2) {
+    async fetchMessageHistory(targetId) {
         try {
-            const res = await fetch(`/api/chat/conversation?userA=${user1}&userB=${user2}`);
+            const res = await fetch(`/api/chat/messages?target=${targetId}`);
             const data = await res.json();
-            if (res.status === 404) {
-                console.log(data.message);
-                return (null);
-            }
-            else if (res.status === 500) {
-                console.error(data.message);
-                return (null);
-            }
-            return (data.id);
-        }
-        catch (err) {
-            console.error("Failed to fetch or parse JSON:", err);
-            return (null);
-        }
-    }
-    async fetchMessageHistory(conversationId) {
-        try {
-            const res = await fetch(`/api/chat/${conversationId}/messages`);
-            const data = await res.json();
-            if (res.status === 500) {
+            if (res.status === 500 || res.status === 404) {
                 console.error(data.message);
                 return (null);
             }
@@ -49,10 +30,8 @@ export default class HistoryManager {
             return (null);
         }
     }
-    async displayMessageHistory(conversationId) {
-        const sessionId = this.chatClient.getSessionId();
-        const targetId = this.chatClient.getUserManager().getTargetId();
-        const messages = await this.fetchMessageHistory(conversationId);
+    async displayMessageHistory(targetId) {
+        const messages = await this.fetchMessageHistory(targetId);
         if (messages) {
             for (const entry of messages) {
                 const message = {
@@ -60,14 +39,14 @@ export default class HistoryManager {
                     senderId: entry.sender_id.toString(),
                     sentAt: entry.sent_at
                 };
-                await this.chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId);
+                const isSent = message.senderId === targetId;
+                await this.chatClient.getBubbleHandler().addChatBubble(isSent, message, targetId);
             }
         }
         else
-            console.error("Failed to fetch messages for conversation ID:", conversationId);
+            console.error("Failed to fetch messages for conversation with target: ", targetId);
     }
     async openChat(user) {
-        const currentSessionId = this.chatClient.getSessionId();
         if (!document.getElementById("chat-window"))
             await this.openFirstConv();
         const chatBox = document.getElementById("conversation-box");
@@ -76,10 +55,7 @@ export default class HistoryManager {
             return;
         chatBox.innerHTML = "";
         recipientName.textContent = user.username;
-        const conversationId = await this.fetchConversationId(currentSessionId, user.userId);
-        if (!conversationId)
-            return;
-        this.displayMessageHistory(conversationId);
+        this.displayMessageHistory(user.userId); // ! FIX user self !!!!!!!!!!!!!!!!!
         this.chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
     }
 }

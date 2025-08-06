@@ -1,5 +1,5 @@
 import ChatClient from "./chat/ChatClient.js";
-import display_dashboard from "./dashboards/dashboards.js";
+import DashboardManager from "./dashboard/dashboard.js";
 function am_i_on_the_page(page) {
     console.log(window.location.href.substring(window.location.href.indexOf('#') + 1));
     return (window.location.href.substring(window.location.href.indexOf('#') + 1) === page);
@@ -76,8 +76,9 @@ export async function navbar() {
                     }
                 }
                 // ---- Dashboard button listener ----
-                else if (target.id === "dashboard" && !am_i_on_the_page("Dashboard")) {
+                else if (target.id === "dashboard" && !am_i_on_the_page("dashboard")) {
                     try {
+                        console.log("dashboard");
                         const response = await fetch("/dashboard", {
                             method: "GET",
                             credentials: "include"
@@ -87,15 +88,18 @@ export async function navbar() {
                         if (old) {
                             old.innerHTML = "";
                             old.outerHTML = main;
-                            display_dashboard();
+                            const dashboardManager = new DashboardManager();
+                            if (dashboardManager)
+                                dashboardManager.displayDashboard();
                         }
                         else
                             console.error("main not found");
-                        history.pushState(null, "", window.location.href.substring(0, window.location.href.indexOf('#')) + "#account"); // TODO: need more thought
+                        history.pushState(null, "", window.location.href.substring(0, window.location.href.indexOf('#')) + "#dashboard"); // TODO: need more thought
                     }
                     catch (err) {
                         console.error("Logout failed", err);
                     }
+                    // ---- Chat button listener ----
                 }
                 else if (target.id === "chat" && !am_i_on_the_page("chat")) {
                     try {

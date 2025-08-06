@@ -4,10 +4,24 @@ export default class OptionHandler {
     constructor(chatClient) {
         this.blockManager = null;
         this.inviteManager = null;
+        this.tournamentText = null;
+        this.tournamentSection = null;
         this.chatClient = chatClient;
+        this.tournamentText = document.getElementById("tournament-text");
+        this.tournamentSection = document.getElementById("tournament-section");
+        this.initTournamentListener();
     }
     getBlockManager() {
         return (this.blockManager);
+    }
+    initTournamentListener() {
+        // Listen for tournaments notifs - emitted from game namespace to chat namespace
+        // ! Add player names (or add join tournament btn)
+        this.chatClient.getSocket().on("newTournament", (players) => {
+            this.tournamentText.textContent = `New tournament starting with players: ${players.join(", ")}`;
+            this.tournamentSection.classList.remove("hidden");
+            console.log("Players in tournament:", players); // ! DEBUG
+        });
     }
     initDropdownListeners() {
         const optionsIcon = document.getElementById("options-icon");

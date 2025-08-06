@@ -6,13 +6,28 @@ export default class OptionHandler {
   private chatClient: ChatClient;
   private blockManager: BlockManager | null = null;
   private inviteManager: InviteManager | null = null;
+  private tournamentText: HTMLElement | null = null;
+  private tournamentSection: HTMLElement | null = null;
 
   constructor(chatClient: ChatClient) {
     this.chatClient = chatClient;
+    this.tournamentText = document.getElementById("tournament-text");
+    this.tournamentSection = document.getElementById("tournament-section");
+    this.initTournamentListener();
   }
 
   getBlockManager() {
     return (this.blockManager!);
+  }
+
+  private initTournamentListener() {
+    // Listen for tournaments notifs - emitted from game namespace to chat namespace
+    // ! Add player names (or add join tournament btn)
+    this.chatClient.getSocket().on("newTournament", (players: string[]) => {
+      this.tournamentText!.textContent = `New tournament starting with players: ${players.join(", ")}`;
+      this.tournamentSection!.classList.remove("hidden");
+      console.log("Players in tournament:", players); // ! DEBUG
+    });
   }
 
   initDropdownListeners() {

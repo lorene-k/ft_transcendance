@@ -8,6 +8,10 @@
 	}
 
 	.grid-style {
-		@apply rounded-xl bg-white border-2 border-gray-100 p-4;
+		@apply rounded-xl bg-white border-3 border-gray-100 p-4 flex flex-col h-full;
+	}
+
+	.stat-style {
+		@apply flex justify-center items-center gap-4 p-4 h-full;
 	}
 }

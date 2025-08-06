@@ -11,6 +11,7 @@ function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: Sock
           users.push({
               userId: sessionId.toString(),
               username: sock.username,
+              self: sock.session.userId === socket.session.userId
           });
         }
     }

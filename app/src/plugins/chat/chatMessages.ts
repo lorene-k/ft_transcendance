@@ -46,9 +46,9 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
     }
 }
 
-async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
+async function insertMessage(fastify: FastifyInstance, msg: Message, socket: Socket): Promise<number> {
     try {
-        const messageId = await runInsertMessage(fastify, msg);
+        const messageId = await runInsertMessage(fastify, msg, socket);
         // console.log(`Message inserted with ID: ${messageId}, content: ${msg.content}`); // ! DEBUG
         return (messageId);
     } catch (err) {
@@ -60,15 +60,19 @@ async function insertMessage(fastify: FastifyInstance, msg: Message): Promise<nu
 export async function handleMessages(fastify: FastifyInstance, socket: Socket, chatNamespace: Namespace) {
     socket.on("message", async (msg: Message, callback) => {
         try {
-            msg.senderId = socket.session.userId.toString();
+            msg.senderId = socket.session.userId;
+            msg.senderUsername = socket.username; // !! Useless ?
             const senderBlocked = await checkBlockedTarget(msg.senderId, parseInt(msg.targetId!), fastify);
-            msg.senderUsername = socket.username;
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
             if (conversationId === -1) return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
-            msg.serverOffset = await insertMessage(fastify, msg);
+            msg.serverOffset = await insertMessage(fastify, msg, socket);
+            msg.isSent = false;
             if (!senderBlocked) chatNamespace.to(msg.targetId!).emit("message", msg);
+            // console.log("TO TARGET message :", msg); // ! DEBUG 
+            msg.isSent = true;
             chatNamespace.to(msg.senderId.toString()).emit("message", msg);
+            //   console.log("TO CURRENT message :", msg); // ! DEBUG 
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         } catch (err: any) {
             if (err.errno === "SQLITE_CONSTRAINT") callback({ status: "duplicate" });

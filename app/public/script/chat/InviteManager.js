@@ -3,30 +3,41 @@ export default class InviteHandler {
         this.targetInvited = false;
         this.chatClient = chatClient;
         this.socket = chatClient.getSocket();
-        this.initInviteListener();
+        this.initInviteListeners();
     }
-    initInviteListener() {
-        this.socket.on("inviteToGame", (inviterUsername) => {
-            this.showInvitePopup(inviterUsername);
-            console.log(`Invitation received from user ${inviterUsername}`); // ! DEBUG
+    initInviteListeners() {
+        this.socket.on("inviteToGame", (inviterUsername, inviterId) => {
+            this.showInvitePopup(inviterUsername, inviterId);
+            console.log(`Invitation received from user ${inviterUsername}`); // DEBUG
+        });
+        this.socket.on("getResponse", (invitedId, accepted) => {
+            // ! EAF - Redirect to game if accepted
+            if (!accepted)
+                this.toggleInviteMsg();
+            console.log(`Invitation accepted : ${accepted} by ${invitedId}`); // DEBUG
         });
     }
-    initPopupListeners() {
+    initPopupListeners(inviterId) {
         const closeBtn = document.getElementById("close-popup-btn");
         const playBtn = document.getElementById("play-btn");
         const popup = document.getElementById("game-invite-popup");
+        const targetId = this.chatClient.getUserManager().getTargetId();
         if (!closeBtn || !playBtn || !popup)
             return;
         closeBtn.addEventListener("click", () => {
             popup.remove();
+            this.socket.emit("respondToGameInvite", inviterId, false);
         });
         playBtn.addEventListener("click", () => {
             popup.remove();
-            console.log("Play game button clicked"); // ! DEBUG - Join game here
+            this.socket.emit("respondToGameInvite", inviterId, true);
+            console.log("Play game button clicked"); // DEBUG
         });
     }
-    async showInvitePopup(inviterUsername) {
-        const mainDiv = document.getElementById("main-div");
+    async showInvitePopup(inviterUsername, inviterId) {
+        const mainDiv = document.getElementById("main_content");
+        if (!mainDiv)
+            console.error("Main content div not found.");
         const popup = await this.chatClient.getBubbleHandler().loadTemplate("/chat/chat-popup.html");
         if (!mainDiv || !popup)
             return;
@@ -34,8 +45,8 @@ export default class InviteHandler {
         const inviterName = document.getElementById("inviter-name");
         if (!inviterName)
             return;
-        inviterName.textContent = inviterUsername; // ! CHECK ORDER
-        this.initPopupListeners();
+        inviterName.textContent = inviterUsername;
+        this.initPopupListeners(inviterId);
     }
     toggleInviteMsg() {
         const btn = document.querySelector('[data-action="invite-game"]');
@@ -57,5 +68,3 @@ export default class InviteHandler {
         this.toggleInviteMsg();
     }
 }
-// TODO - join game when button clicked
-// ! Only active users can receive invites

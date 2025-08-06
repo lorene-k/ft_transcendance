@@ -13,6 +13,7 @@ export default async function handleRecovery(socket, fastify, chatNamespace) {
            ORDER BY id ASC`, [currConvId, socket.handshake.auth.serverOffset || 0]);
             for (const entry of messages) {
                 const msg = {
+                    isSent: entry.sender_id === socket.session.userId,
                     senderId: entry.sender_id,
                     content: entry.content,
                     sentAt: entry.sent_at,

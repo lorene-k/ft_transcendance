@@ -8,6 +8,7 @@ function listUsers(socket, chatNamespace, socketManager) {
             users.push({
                 userId: sessionId.toString(),
                 username: sock.username,
+                self: sock.session.userId === socket.session.userId
             });
         }
     }

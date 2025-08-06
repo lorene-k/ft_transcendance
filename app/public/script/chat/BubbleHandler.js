@@ -20,7 +20,6 @@ export default class BubbleHandler {
         const dateElem = bubble?.querySelector(".chat-date");
         const headerElem = bubble?.querySelector(".chat-bubble-header");
         const msgTimeDate = this.getTimeString(message.sentAt);
-        const msgDate = msgTimeDate.slice(5, 10);
         const isSameSender = message.senderId === this.lastSenderId;
         const isSameTarget = targetId === this.lastTargetId;
         const isSameMinute = message.sentAt === this.lastMsgTime;
@@ -47,8 +46,7 @@ export default class BubbleHandler {
             console.error("Failed to fetch html:", e);
         }
     }
-    async addChatBubble(currentSessionId, message, targetId) {
-        const isSent = message.senderId === currentSessionId;
+    async addChatBubble(isSent, message, targetId) {
         const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
         const bubble = await this.loadTemplate(templatePath);
         if (!bubble) {

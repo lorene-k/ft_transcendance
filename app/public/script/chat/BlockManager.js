@@ -7,14 +7,10 @@ export default class BlockManager {
     }
     async fetchBlockedUsers() {
         try {
-            const res = await fetch(`/api/chat/blocked?blocker=${this.chatClient.getSessionId()}`);
+            const res = await fetch(`/api/chat/blocked`);
             const data = await res.json();
-            if (res.status === 404) {
+            if (res.status === 404 || res.status === 500) {
                 console.log(data.message);
-                return;
-            }
-            if (res.status === 500) {
-                console.error(data.message);
                 return;
             }
             this.blockedUsers = data.map(u => u.blocked_id.toString());

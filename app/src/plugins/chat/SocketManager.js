@@ -44,12 +44,6 @@ export default class SocketManager {
         this.userSockets.get(sessionId).add(socket.id);
         this.socketToSession.set(socket.id, sessionId);
     }
-    sendUserId(socket) {
-        socket.emit("session", {
-            sessionId: socket.session.userId.toString(),
-            username: socket.username,
-        });
-    }
     handleDisconnect(socket) {
         socket.on("disconnect", () => {
             const userId = this.socketToSession.get(socket.id);

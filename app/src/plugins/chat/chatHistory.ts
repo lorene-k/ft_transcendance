@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { Socket } from "socket.io";
 import { Message } from "./chatTypes.js";
 
 export async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
@@ -16,12 +17,13 @@ export async function runInsertConversation(fastify: FastifyInstance, user1: num
     });
 }
 
-export function runInsertMessage(fastify: FastifyInstance, msg: Message): Promise<number> {
+export function runInsertMessage(fastify: FastifyInstance, msg: Message, socket: Socket): Promise<number> {
   return new Promise((resolve, reject) => {
+    const senderId = msg.isSent ? socket.session.userId : msg.targetId;
     fastify.database.run(
       `INSERT INTO messages (conversation_id, sender_id, content, client_offset)
       VALUES (?, ?, ?, ?)`,
-      [msg.convId, msg.senderId, msg.content, msg.clientOffset],
+      [msg.convId, senderId, msg.content, msg.clientOffset],
       function (this: any, err: Error | null) {
         if (err) {
           console.error("Error inserting message:", err.message);

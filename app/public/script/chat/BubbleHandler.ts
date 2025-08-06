@@ -25,7 +25,6 @@ export default class BubbleHandler {
       const headerElem = bubble?.querySelector(".chat-bubble-header");
 
       const  msgTimeDate = this.getTimeString(message.sentAt);
-      const  msgDate = msgTimeDate.slice(5, 10);
 
       const isSameSender = message.senderId === this.lastSenderId;
       const isSameTarget = targetId === this.lastTargetId;
@@ -53,8 +52,7 @@ export default class BubbleHandler {
         }
     }
     
-    async addChatBubble(currentSessionId: string, message: Message, targetId: string) { // !!! FIX - Avoid loading templates multiple times
-      const isSent = message.senderId === currentSessionId;
+    async addChatBubble(isSent: boolean, message: Message, targetId: string) { // !!! FIX - Avoid loading templates multiple times
       const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
       const bubble = await this.loadTemplate(templatePath);
       if (!bubble) {

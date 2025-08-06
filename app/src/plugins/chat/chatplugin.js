@@ -11,7 +11,6 @@ const chatPlugin = async (fastify) => {
     socketManager.authenticate(chatNamespace);
     chatNamespace.on("connection", async (socket) => {
         await socketManager.setSessionInfo(socket);
-        socketManager.sendUserId(socket);
         handleMessages(fastify, socket, chatNamespace);
         getActiveUsers(socket, chatNamespace, socketManager);
         getAllConversations(fastify, socket.session.userId, chatNamespace, socketManager);

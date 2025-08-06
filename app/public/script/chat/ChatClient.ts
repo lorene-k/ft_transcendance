@@ -8,7 +8,6 @@ declare const io: any;
 
 export default class ChatClient {
   private socket: any;
-  private sessionId = "";
   private counter = 0;
   private chatUI: ChatUI;
   private userManager: UserManager;
@@ -31,10 +30,6 @@ export default class ChatClient {
     this.OptionHandler = new OptionHandler(this);
     this.bubbleHandler = new BubbleHandler();
     this.initSocketListeners();
-  }
-
-  getSessionId() {
-    return (this.sessionId);
   }
   
   getSocket() {
@@ -62,33 +57,27 @@ export default class ChatClient {
   }
 
   private initSocketListeners() {
-    // Get current user info
-    this.socket.on("session", ({ sessionId, username } :
-      { sessionId: string, username: string }) => {
-      this.sessionId = sessionId;
-      this.socket.auth.username = username; // ! Useless ?
-    });
-
     // Listen for messages
-    this.socket.on("message", async ({ senderId, senderUsername, content, serverOffset } :
-      { senderId: string; senderUsername: string, content: string, serverOffset: number }) => {
+    this.socket.on("message", async ({ targetId, senderId, senderUsername, content, serverOffset, isSent } :
+      { targetId: string; senderId: string, senderUsername: string, content: string, serverOffset: number, isSent: boolean }) => {
         try {
-          // console.log("Received message :", content); // ! DEBUG
-          const isSent = senderId === this.sessionId;
-          const otherUserId = isSent ? this.userManager.getTargetId() : senderId;
-          const otherUsername = this.userManager.getTargetUsername(otherUserId!, senderUsername, isSent);
-          if (!otherUserId || !otherUsername) {
+          const otherUsername = this.userManager.getTargetUsername(targetId!, senderUsername, isSent);
+          if (!otherUsername) {
             console.error("Invalid user ID or username received in message event.");
             return;
           }
           this.socket.auth.serverOffset = serverOffset;
-          this.userManager.updateConvPreview(otherUserId, otherUsername);
+          if (isSent) this.userManager.updateConvPreview(targetId, otherUsername); // ! OR USE OTHER USER ID ??
+          else this.userManager.updateConvPreview(senderId, otherUsername);
           const message: Message = {
             content: content,
+            targetId: targetId,
             senderId: senderId,
+            senderUsername: senderUsername,
+            isSent: isSent,
             sentAt: (new Date()).toISOString().slice(0,21)
           }
-          await this.bubbleHandler.addChatBubble(this.sessionId, message, this.userManager.getTargetId()!);
+          await this.bubbleHandler.addChatBubble(isSent, message, this.userManager.getTargetId()!);
         } catch (e) {
           console.error("Error processing message received from server:", e);
         }
@@ -102,7 +91,7 @@ export default class ChatClient {
 
   // Send message
   sendMessage(msg: string) {
-    const clientOffset = `${this.sessionId}-${Date.now()}-${this.counter++}`; // OR USE getRandomValues() to generate a unique offset
+    const clientOffset = `${Date.now()}-${this.counter++}`; // OR USE getRandomValues() to generate a unique offset
     const targetId = this.userManager.getTargetId();
     const convId = this.userManager.getConvId();
     this.socket.emit("message", { targetId: targetId, content: msg, clientOffset: clientOffset, convId: convId }, // ! change to response: any ?

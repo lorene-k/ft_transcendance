@@ -22,6 +22,7 @@ export default async function handleRecovery(socket: Socket, fastify: FastifyIns
           );
         for (const entry of messages) {
           const msg: Message = {
+          isSent: entry.sender_id === socket.session.userId,
           senderId: entry.sender_id,
           content: entry.content,
           sentAt: entry.sent_at,

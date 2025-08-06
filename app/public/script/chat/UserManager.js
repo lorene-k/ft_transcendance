@@ -6,7 +6,6 @@ export default class UserManager {
         this.targetId = null;
         this.convId = null;
         this.targetToConvId = new Map();
-        this.chatClient = chatClient;
         this.socket = chatClient.getSocket();
         this.chatUI = chatClient.getChatUI();
         this.historyManager = new HistoryManager(chatClient);
@@ -20,11 +19,6 @@ export default class UserManager {
     }
     initUserListeners() {
         this.socket.on("users", (newUsers) => {
-            newUsers.forEach((user) => {
-                // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
-                if (user.userId === this.chatClient.getSessionId())
-                    user.self = true;
-            });
             newUsers = newUsers.sort((a, b) => {
                 if (a.self)
                     return -1;
@@ -80,9 +74,9 @@ export default class UserManager {
                 this.targetUsers.push({
                     userId: conv.otherUserId.toString(),
                     username: otherUsername,
+                    self: false
                 });
             }
-            // console.warn("targetUsers =", targetUsers); // ! DEBUG
         }
     } // ! ADD UPDATE CONVO PREVIEW
     getTargetUsername(otherUserId, senderUsername, isSent) {
@@ -106,7 +100,6 @@ export default class UserManager {
         const { card, allMessages } = res;
         card.addEventListener("click", () => {
             this.targetId = userId;
-            // console.log("Target set to:", this.targetId); // ! DEBUG
             this.convId = this.targetToConvId.get(this.targetId);
             this.historyManager.openChat({ userId: userId, username: targetName, self: false });
         });

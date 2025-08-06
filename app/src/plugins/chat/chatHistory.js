@@ -9,10 +9,11 @@ export async function runInsertConversation(fastify, user1, user2) {
         });
     });
 }
-export function runInsertMessage(fastify, msg) {
+export function runInsertMessage(fastify, msg, socket) {
     return new Promise((resolve, reject) => {
+        const senderId = msg.isSent ? socket.session.userId : msg.targetId;
         fastify.database.run(`INSERT INTO messages (conversation_id, sender_id, content, client_offset)
-      VALUES (?, ?, ?, ?)`, [msg.convId, msg.senderId, msg.content, msg.clientOffset], function (err) {
+      VALUES (?, ?, ?, ?)`, [msg.convId, senderId, msg.content, msg.clientOffset], function (err) {
             if (err) {
                 console.error("Error inserting message:", err.message);
                 return (reject(err));

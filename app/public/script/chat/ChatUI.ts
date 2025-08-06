@@ -1,4 +1,3 @@
-import { Message } from "./chatTypes.js";
 import ChatClient from "./ChatClient.js";
 
 export default class ChatUI {
@@ -32,23 +31,18 @@ export default class ChatUI {
     this.chatClient.sendMessage(input.value);
     input.value = "";
   }
-    
-  async displayChatBubble(sessionId: string, message: Message) {
-    const targetId = this.chatClient.getUserManager().getTargetId();
-      await this.chatClient.getBubbleHandler().addChatBubble(sessionId, message, targetId!);
-    }
 
-  async updateConvPreviewUI(userId: string, targetName: string) {
+  async updateConvPreviewUI(targetId: string, targetName: string) {
     const allMessages = document.getElementById("all-messages");
     if (!allMessages) return (null);
-    const displayed = allMessages.querySelector(`[data-user-id="${userId}"]`);
+    const displayed = allMessages.querySelector(`[data-user-id="${targetId}"]`);
     if (displayed) {
       displayed.classList.add("transition-all", "duration-300");
       allMessages.prepend(displayed);
     } else {
       const card = await this.chatClient.getBubbleHandler().loadTemplate("/chat/conv-preview.html");
       if (!card) return (null);
-      card.setAttribute("data-user-id", userId);
+      card.setAttribute("data-user-id", targetId);
       const name = card.querySelector("p");
       if (name) name.textContent = targetName;
       return { card, allMessages };

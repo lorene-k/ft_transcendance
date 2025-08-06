@@ -1,4 +1,5 @@
 export interface Message {
+    isSent?: boolean;
     senderId: number;
     content: string;
     senderUsername?: string;

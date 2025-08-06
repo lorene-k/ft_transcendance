@@ -10,12 +10,10 @@ export default class UserManager {
   private convId: number | null = null;
   private targetToConvId = new Map<string, number>();
   private socket: any;
-  private chatClient: ChatClient;
   private chatUI: ChatUI;
   private historyManager: HistoryManager;
   
   constructor(chatClient: ChatClient) {
-    this.chatClient = chatClient;
     this.socket = chatClient.getSocket();
     this.chatUI = chatClient.getChatUI();
     this.historyManager = new HistoryManager(chatClient);
@@ -32,10 +30,6 @@ export default class UserManager {
 
   initUserListeners() {
     this.socket.on("users", (newUsers: User[]) => {
-      newUsers.forEach((user) => {
-        // console.log(`User connected: ${user.username} (${user.userId})`); // ! DEBUG
-        if (user.userId === this.chatClient.getSessionId()) user.self = true;
-      });
       newUsers = newUsers.sort((a, b) => {
         if (a.self) return -1;
         if (b.self) return 1;
@@ -88,12 +82,12 @@ export default class UserManager {
           this.targetUsers.push({
             userId: conv.otherUserId.toString(),
             username: otherUsername,
+            self: false
           });
         }
-        // console.warn("targetUsers =", targetUsers); // ! DEBUG
       }
     } // ! ADD UPDATE CONVO PREVIEW
-        
+
 
   getTargetUsername(otherUserId: string, senderUsername: string, isSent: boolean): string { // ! WHY IS ID A NUMBER ?
     if (isSent) {
@@ -106,13 +100,12 @@ export default class UserManager {
     return ("Unknown User");
   }
 
-   async updateConvPreview(userId: string, targetName: string) {
+   async updateConvPreview(userId: string, targetName: string) { // !!!!!!! PASS TARGET ID HERE - NOT SENDER ID
       const res = await this.chatUI.updateConvPreviewUI(userId, targetName);
       if (!res) return;
       const { card, allMessages } = res;
       card.addEventListener("click", () => {
           this.targetId = userId;
-          // console.log("Target set to:", this.targetId); // ! DEBUG
           this.convId = this.targetToConvId.get(this.targetId)!;
           this.historyManager.openChat({ userId: userId, username: targetName, self: false });
         });
