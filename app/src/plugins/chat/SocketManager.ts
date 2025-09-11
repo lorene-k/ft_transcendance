@@ -1,6 +1,7 @@
 import { FastifyInstance, Session } from "fastify";
 import { Socket, Namespace } from "socket.io";
 import { parse } from "cookie";
+import { checkSessionExpiry } from "./chatplugin.js";
 
 export default class SocketManager {
   private userSockets = new Map<number, Set<string>>();
@@ -26,7 +27,7 @@ export default class SocketManager {
       if (!signedSessionId) return (next(new Error("No session Id found")));
       const sessionId = signedSessionId.split(".")[0];
 
-      this.fastify.sessionStore.get(sessionId, (err: Error | null, session: Session) => {
+      this.fastify.sessionStore.get(sessionId, (err: Error | null, session: Session | null | undefined) => {
         if (err || !session || !session.authenticated) {
           return (next(new Error("Unauthorized connection")));
         }
@@ -47,6 +48,7 @@ export default class SocketManager {
   }
 
   async setSessionInfo(socket: Socket) {
+    if (!checkSessionExpiry(socket)) return;
     const sessionId = socket.session.userId;
     socket.username = await this.getUsername(sessionId);
     socket.join(sessionId.toString());
@@ -57,7 +59,11 @@ export default class SocketManager {
   }
 
   handleDisconnect(socket: Socket) {
+    if (!checkSessionExpiry(socket)) return;
     socket.on("disconnect", () => {
+    socket.broadcast.emit("user disconnected", {
+        userId: socket.session.userId.toString(),
+    });
     const userId = this.socketToSession.get(socket.id);
     if (userId) {
       const socketSet = this.userSockets.get(userId);

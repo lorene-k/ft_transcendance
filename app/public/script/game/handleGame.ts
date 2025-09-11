@@ -2,6 +2,10 @@
 //import * as GUI from 'babylonjs-gui';
 /// <reference types="babylonjs" />
 /// <reference types="babylonjs-gui" />
+
+const player1ScoreDisplay = document.getElementById('player1ScoreDisplay') as HTMLDivElement;
+const player2ScoreDisplay = document.getElementById('player2ScoreDisplay') as HTMLDivElement;
+
 export {};
 
 export class GameManager {
@@ -10,171 +14,85 @@ export class GameManager {
     floor: BABYLON.GroundMesh;
     player1Score: number = 0;
     player2Score: number = 0;
+    player1Name: string = "Player 1";
+    player2Name: string = "Player 2";
 
     leftZone!: BABYLON.Mesh;
     rightZone!: BABYLON.Mesh;
     sideLeftZone!: BABYLON.Mesh;
     sideRightZone!: BABYLON.Mesh;
+    socket: any;
+    private socketListeners: string[] = [];
 
-    scoreText: BABYLON.GUI.TextBlock;
 
-    constructor(scene: BABYLON.Scene, pingPongBall: BABYLON.AbstractMesh, floor: BABYLON.AbstractMesh) {
+    constructor(scene: BABYLON.Scene, pingPongBall: BABYLON.AbstractMesh, floor: BABYLON.AbstractMesh, socket:any) {
         this.scene = scene;
         this.ball = pingPongBall as BABYLON.Mesh;
         this.floor = floor as BABYLON.GroundMesh;
-        this.scoreText = new BABYLON.GUI.TextBlock();
-        this.scoreText.text = "Score: 0";
+        this.socket = socket;
+  
 
-        // Limiter la vitesse de la balle
-        scene.onBeforeRenderObservable.add(() => {
-            const maxSpeed = 13;
-            if (this.ball.physicsImpostor) {
-                const velocity = this.ball.physicsImpostor.getLinearVelocity();
-                if (velocity && velocity.length() > maxSpeed) {
-                    const newVelocity = velocity.normalize().scale(maxSpeed);
-                    this.ball.physicsImpostor!.setLinearVelocity(newVelocity);
-                }
-            }
-        });
-
-        this._createLimits();
-        this._createGUI();
+        // scene.onBeforeRenderObservable.add(() => {
+        //     const maxSpeed = 13;
+        //     if (this.ball.physicsImpostor) {
+        //         const velocity = this.ball.physicsImpostor.getLinearVelocity();
+        //         if (velocity && velocity.length() > maxSpeed) {
+        //             const newVelocity = velocity.normalize().scale(maxSpeed);
+        //             this.ball.physicsImpostor!.setLinearVelocity(newVelocity);
+        //         }
+        //     }
+        // });
         this._initBallSuperviseur();
     }
 
-    private _createLimits(): void {
-        const box = this.floor.getBoundingInfo().boundingBox;
-        const width = box.maximum.x - box.minimum.x;
-        const length = box.maximum.z - box.minimum.z;
-        const center = this.floor.position;
-
-        const zoneThickness = 0.2;
-        const extraMargin = 0.5;
-        const yPos = center.y + zoneThickness / 2;
-
-        // Helpers
-        const createInvisibleMat = (name: string): BABYLON.StandardMaterial => {
-            const mat = new BABYLON.StandardMaterial(name, this.scene);
-            mat.alpha = 0;
-            return mat;
-        };
-
-        const createZone = (
-            name: string,
-            options: { width: number, height: number, depth: number },
-            position: BABYLON.Vector3,
-            material: BABYLON.StandardMaterial
-        ): BABYLON.Mesh => {
-            const zone = BABYLON.MeshBuilder.CreateBox(name, options, this.scene);
-            zone.position = position;
-            zone.material = material;
-            zone.isPickable = false;
-            return zone;
-        };
-
-        const matLeft = createInvisibleMat("matLeft");
-        const matRight = createInvisibleMat("matRight");
-        const matSideLeft = createInvisibleMat("matSideLeft");
-        const matSideRight = createInvisibleMat("matSideRight");
-
-        this.leftZone = createZone(
-            "leftZone",
-            { width: width + 2 * extraMargin, height: zoneThickness, depth: 1 },
-            new BABYLON.Vector3(center.x, yPos, center.z - length / 2 - 0.5),
-            matLeft
-        );
-
-        this.rightZone = this.leftZone.clone("rightZone");
-        this.rightZone.position.z = center.z + length / 2 + 0.5;
-        this.rightZone.material = matRight;
-
-        this.sideLeftZone = createZone(
-            "sideLeftZone",
-            { width: 1, height: zoneThickness, depth: length + 2 * extraMargin },
-            new BABYLON.Vector3(center.x - width / 2 - 0.5, yPos, center.z),
-            matSideLeft
-        );
-
-        this.sideRightZone = this.sideLeftZone.clone("sideRightZone");
-        this.sideRightZone.position.x = center.x + width / 2 + 0.5;
-        this.sideRightZone.material = matSideRight;
+    destroy(): void {
+        this.socketListeners.forEach(eventName => {
+            this.socket.off(eventName);
+        });
+        this.socketListeners = [];
+        this.player1Score = 0;
+        this.player2Score = 0;
+        this._updateUI();
+        
+        console.log("GameManager nettoyé");
     }
 
     private _initBallSuperviseur(): void {
-        this.scene.registerBeforeRender(() => {
-            if (this.ball.intersectsMesh(this.leftZone, false)) {
-                this._handlePointLoss('player2');
-            } else if (this.ball.intersectsMesh(this.rightZone, false)) {
-                this._handlePointLoss('player1');
-            } else if (this.ball.intersectsMesh(this.sideLeftZone, false)) {
-                this._handlePointLoss('player2');
-            } else if (this.ball.intersectsMesh(this.sideRightZone, false)) {
-                this._handlePointLoss('player1');
-            }
-        });
+        this.socketListeners.push("updateScore");
+         this.socketListeners.push("playerInfo");
+        
+        this.socket.on("updateScore", (data: { winner: 'player1' | 'player2', player1Score: number, player2Score: number, ball: BABYLON.Vector3 }) => {
+    this.player1Score = data.player1Score;
+    this.player2Score = data.player2Score;
+    this.ball.position = data.ball;
+    if (data.winner === "player1" || data.winner === "player2") {
+        this._handlePoint(data.winner);
+    } else {
+        console.warn("Valeur inattendue pour winner :", data.winner);
     }
-
-    private _handlePointLoss(losingPlayer: 'player1' | 'player2'): void {
-        let winner: 'player1' | 'player2';
-        if (losingPlayer === 'player1') {
-            this.player2Score++;
-            winner = 'player2';
-        } else {
-            this.player1Score++;
-            winner = 'player1';
-        }
-
+});
+    }
+    
+    private _handlePoint(winner: 'player1' | 'player2'): void {
+        (this.ball as any).physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
+        (this.ball as any).physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
         this._updateUI();
-        this._resetBall(winner);
     }
 
-    private _createGUI(): void {
-        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-        this.scoreText = new BABYLON.GUI.TextBlock();
-        this.scoreText.text = "Joueur 1: 0 | Joueur 2: 0";
-        this.scoreText.color = "white";
-        this.scoreText.fontFamily = "Verdana";
-        this.scoreText.fontSize = 24;
 
-        this.scoreText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.scoreText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        private _updateUI(): void {
 
-        this.scoreText.left = "10px";
-        this.scoreText.top = "10px";
-
-        advancedTexture.addControl(this.scoreText);
-    }
-
-    private _updateUI(): void {
-        this.scoreText.text = `Joueur 1: ${this.player1Score} | Joueur 2: ${this.player2Score}`;
-    }
-
-    private _resetBall(winner: 'player1' | 'player2'): void {
-        const tableBox = this.floor.getBoundingInfo().boundingBox;
-        const tableWidth = tableBox.maximum.x - tableBox.minimum.x;
-        const tableCenter = this.floor.position;
-        const ballHeight = tableBox.maximum.y + 0.5;
-
-        const xOffset = tableWidth / 2 - 2;
-
-        let x: number;
-        let serveDir: number;
-
-        if (winner === 'player1') {
-            x = tableCenter.x + xOffset;
-            serveDir = -1;
-        } else {
-            x = tableCenter.x - xOffset;
-            serveDir = 1;
+        // Mettre à jour les scores
+        const player1ScoreElement = document.getElementById('player1Score');
+        const player2ScoreElement = document.getElementById('player2Score');
+        
+        if (player1ScoreElement) {
+            player1ScoreElement.textContent = this.player1Score.toString();
         }
-
-        const z = tableCenter.z;
-
-        this.ball.position.set(x, ballHeight, z);
-
-        // Réinitialisation de la physique
-        this.ball.physicsImpostor!.setLinearVelocity(BABYLON.Vector3.Zero());
-        this.ball.physicsImpostor!.setAngularVelocity(BABYLON.Vector3.Zero());
+        if (player2ScoreElement) {
+            player2ScoreElement.textContent = this.player2Score.toString();
+        }
     }
+
 }

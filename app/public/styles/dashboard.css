@@ -4,7 +4,7 @@
 	}
 
 	.selected-button-style {
-		@apply rounded-xl bg-blue-900 text-white font-medium;
+		@apply rounded-lg bg-blue-900 text-white font-medium pointer-events-none;
 	}
 
 	.grid-style {
@@ -13,5 +13,18 @@
 
 	.stat-style {
 		@apply flex justify-center items-center gap-4 p-4 h-full;
+	}
+
+	.dashboard-tab-line {
+		@apply flex gap-2 justify-between px-4 py-2 text-sm text-gray-700;
+	}
+
+	.dashboard-entry {
+		@apply w-1/6 text-left;
+	}
+
+	.fade-effect {
+		@apply before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-10 before:pointer-events-none before:bg-gradient-to-b before:from-gray-100 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+		after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-10 after:pointer-events-none after:bg-gradient-to-t after:from-gray-100 after:to-transparent after:opacity-0 after:transition-opacity after:duration-300;
 	}
 }

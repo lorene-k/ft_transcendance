@@ -1,32 +1,34 @@
-import { userStats } from "./dashboard.js";
+import { UserStats } from "./dashboard.js";
 import { centerTextPlugin, setChartDefaults } from "./chartUtils.js";
+import { stat, Stats } from "fs";
 
 declare const Chart: any;
 
 // *************************************************************** Pie chart */
 function renderPieChart(winRate: number) {
+	if (winRate == null) winRate = 0;
 	Chart.register(centerTextPlugin);
 	const ctx = document.getElementById('pie-chart') as HTMLCanvasElement | null;
 	if (!ctx) return;
 	new Chart(ctx!, {
-	  type: "doughnut",
-	  data: {
-		datasets: [{
-			data: [winRate, 100 - winRate],
-			backgroundColor: ["#8DC5FF", "#1C388E"],
-			borderWidth: 0
-		}]
-	  },
-	  options: {
-		centerText: `${winRate}%`,
-	  }
+		type: "doughnut",
+		data: {
+			datasets: [{
+				data: [winRate, 100 - winRate],
+				backgroundColor: ["#8DC5FF", "#1C388E"],
+				borderWidth: 0
+			}]
+		},
+		options: {
+			centerText: `${winRate}%`,
+		}
 	});
 }
 
 // *************************************************************** Bar chart */
 function renderBarChart(gamesPerDay: { [date: string]: number }) {
 	const ctx = document.getElementById('bar-chart') as HTMLCanvasElement | null;
-	if (!ctx) return;	
+	if (!ctx) return;
 
 	const dates = Object.keys(gamesPerDay).sort();
 	const labels = dates.map(date => date.slice(5));
@@ -34,34 +36,34 @@ function renderBarChart(gamesPerDay: { [date: string]: number }) {
 
 	new Chart(ctx, {
 		type: "bar",
-	    data: {
-	      labels,
-	      datasets: [{
-	        data,
-	        backgroundColor: "#8DC5FF",
-	        borderWidth: 1
-	      }]
-	    },
-	    options: {
-	    	scales: {
+		data: {
+			labels,
+			datasets: [{
+				data,
+				backgroundColor: "#8DC5FF",
+				borderWidth: 1
+			}]
+		},
+		options: {
+			scales: {
 				x: {
 					grid: {
 						display: false,
 						drawBorder: true
 					},
-	        	},
-	        	y: {
+				},
+				y: {
 					grid: {
 						display: false,
 						drawBorder: true
 					},
-	        		beginAtZero: true,
-	        		ticks: {
-	        			stepSize: 1,
-	        		}
-	        	}
-	      	},
-	    }
+					beginAtZero: true,
+					ticks: {
+						stepSize: 1,
+					}
+				}
+			},
+		}
 	});
 }
 
@@ -69,24 +71,24 @@ function renderBarChart(gamesPerDay: { [date: string]: number }) {
 function renderLineChart(winRateOverTime: { date: string; winRate: number }[]) {
 	const ctx = document.getElementById('line-chart') as HTMLCanvasElement | null;
 	if (!ctx) return;
-  
+
 	const labels = winRateOverTime.map(item => item.date.slice(5));
 	const data = winRateOverTime.map(item => item.winRate);
-  
+
 	new Chart(ctx, {
-	  type: "line",
-	  data: {
-		labels: labels,
-		datasets: [{
-		  data: data,
-		  borderColor: "#8DC5FF",
-		  fill: false,
-		  tension: 0.4,
-		  pointRadius: 4,
-		  pointHoverRadius: 6,
-		  borderWidth: 3,
-		}]
-	  },
+		type: "line",
+		data: {
+			labels: labels,
+			datasets: [{
+				data: data,
+				borderColor: "#8DC5FF",
+				fill: false,
+				tension: 0.4,
+				pointRadius: 4,
+				pointHoverRadius: 6,
+				borderWidth: 3,
+			}]
+		},
 		options: {
 			responsive: true,
 			scales: {
@@ -126,9 +128,9 @@ function renderLineChart(winRateOverTime: { date: string; winRate: number }[]) {
 }
 
 // ************************************************************ All charts */
-export default function renderCharts(stats: userStats) {
+export default function renderCharts(stats: UserStats | null) {
 	setChartDefaults();
-	renderPieChart(stats.winRate);
-	renderBarChart(stats.gamesPerDay);
-	renderLineChart(stats.winRateOverTime);
+	renderPieChart(stats!.winRate);
+	renderBarChart(stats!.gamesPerDay);
+	renderLineChart(stats!.winRateOverTime);
 }

@@ -19,11 +19,10 @@ export default class BubbleHandler {
       return (`${year}-${month}-${day}-${hours}:${minutes}`);
     }
     
-    private updateBubbleHeader(bubble: Element, message: Message, targetId: string) {
+    private updateBubbleHeader(bubble: HTMLElement, message: Message, targetId: string) {
       const timeElem = bubble?.querySelector(".chat-time");
       const dateElem = bubble?.querySelector(".chat-date");
       const headerElem = bubble?.querySelector(".chat-bubble-header");
-
       const  msgTimeDate = this.getTimeString(message.sentAt);
 
       const isSameSender = message.senderId === this.lastSenderId;
@@ -40,25 +39,11 @@ export default class BubbleHandler {
       this.lastTargetId = targetId!;
     }
 
-    async loadTemplate(templatePath : string) {
-        try {
-        const res = await fetch(templatePath);
-        const html = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        return (doc.body.firstElementChild);
-        } catch (e) {
-            console.error("Failed to fetch html:", e);
-        }
-    }
-    
-    async addChatBubble(isSent: boolean, message: Message, targetId: string) { // !!! FIX - Avoid loading templates multiple times
-      const templatePath = isSent ? "/chat/sent-bubble.html" : "/chat/received-bubble.html";
-      const bubble = await this.loadTemplate(templatePath);
-      if (!bubble) {
-        console.error("Failed to load chat bubble template:", templatePath);
-        return;
-      }
+    async addChatBubble(isSent: boolean, message: Message, targetId: string) {
+      const templateId = isSent ? "sent-bubble-template" : "received-bubble-template";
+      const template = document.getElementById(templateId) as HTMLTemplateElement;
+      if (!template) return;
+      const bubble = template.content.cloneNode(true) as HTMLElement;
       this.updateBubbleHeader(bubble, message, targetId);
       const textElem = bubble?.querySelector("p");
       if (textElem) textElem.textContent = message.content;
@@ -67,5 +52,4 @@ export default class BubbleHandler {
       conversation.appendChild(bubble);
       conversation.scrollTop = conversation.scrollHeight;
     }
-    
 }

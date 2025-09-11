@@ -1,7 +1,9 @@
 import { Socket, Namespace} from "socket.io";
 import SocketManager from "./SocketManager.js";
+import { checkSessionExpiry } from "./chatplugin.js";
 
-function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
+export function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
+    if (!checkSessionExpiry(socket)) return;
     const users = [];
     const userSockets = socketManager.getUserSockets();
     for (const [sessionId, socketIds] of userSockets) {
@@ -19,9 +21,11 @@ function listUsers(socket: Socket, chatNamespace: Namespace, socketManager: Sock
 }
 
 function notifyUsers(socket: Socket) {
-    socket.broadcast.emit("User connected", {
+    if (!checkSessionExpiry(socket)) return;
+    socket.broadcast.emit("user connected", {
         userId: socket.session.userId.toString(),
         username: socket.username,
+        self: false
     });
 }
 

@@ -21,7 +21,6 @@ export function getMessages(fastify: FastifyInstance) {
         ORDER BY m.id ASC`,
         [user1, user2]
       );
-      if (!messages || messages.length === 0) return reply.status(404).send({ message: "No messages found" });
       reply.send(messages);
     } catch (err) {
       console.error("Failed to fetch messages", err);
@@ -39,8 +38,6 @@ export function getBlocked(fastify: FastifyInstance) {
         `SELECT blocked_id FROM blocks WHERE blocker_id = ?`,
         [blockerId]
       );
-      if (!blockedUsers) return (reply.status(404).send({ message: "No blocked users" }));
-      // console.log("Blocked users:", blockedUsers); // ! DEBUG
       return (reply.send(blockedUsers));
     } catch (err) {
       console.error("Failed to fetch blocked users", err);

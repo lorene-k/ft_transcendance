@@ -1,0 +1,19 @@
+1) => Se log pour recuperer le cookie
+ "LOGIN username mdp"
+
+
+2) => se connecter à la websocket
+ => CALL handle_game api
+ "POST /api/handle-game {"mode": "local"}
+
+
+3) => envoyer des events websocket
+    //tirer
+    "WS {"event":"keyPressed","data":{"key":"p","position":{"x":-16,"y":1.5,"z":0}}}"
+
+    //deplacer a gauche/droite
+    WS {"event":"keyPressed","data":{"key":"o","position":{"x":-16,"y":1.5,"z":0}}}
+    WS {"event":"keyPressed","data":{"key":"l","position":{"x":-16,"y":1.5,"z":0}}}
+
+
+

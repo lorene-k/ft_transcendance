@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { BlockedUser } from "./chatTypes.js";
+import { checkSessionExpiry } from "./chatplugin.js";
 
 export async function checkBlockedTarget(senderId: number, targetId: number, fastify: FastifyInstance): Promise<boolean | null> {
    try {
@@ -8,7 +9,6 @@ export async function checkBlockedTarget(senderId: number, targetId: number, fas
             `SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?`,
             [targetId, senderId]
         );
-        // console.log(`${senderId} blocked by ${targetId} isBlocked = ${isBlocked ? true : false}`); // ! DEBUG
         return (isBlocked ? true : false);
    } catch (err) {
          console.error("Error checking blocked target:", err);
@@ -47,21 +47,17 @@ async function runDeleteBlock(fastify: FastifyInstance, blockerId: number, block
 }
 
 export function handleBlocks(socket: Socket, fastify: FastifyInstance) {
-    socket.on("blockUser", async (blocked: BlockedUser, callback) => {
+  if (!checkSessionExpiry(socket)) return;
+    socket.on("blockUser", async (blocked: BlockedUser, ack) => {
         try {
           const targetId = blocked.targetId;
-            if (blocked.block) {
+            if (blocked.block)
                 await runInsertBlock(fastify, socket.session.userId, targetId);
-                return callback({ status: "blocked" });
-                // console.log(`User ${socket.session.userId} blocked user ${targetId}, block ID: ${blockId}`); // ! DEBUG
-            } else if (!blocked.block) {
-              await runDeleteBlock(fastify, socket.session.userId, targetId);
-                return callback({ status: "unblocked" });
-                // console.log(`User ${socket.session.userId} unblocked user ${targetId}, result: ${res}`); // ! DEBUG
-            }
+            else if (!blocked.block) await runDeleteBlock(fastify, socket.session.userId, targetId);
+            if (ack) ack({ success: true });
         } catch (err: any) {
             console.error("Error handling blockUser event:", err);
-            callback({ status: "error"});
+            if (ack) ack({ success: false });
         }
     });
 }

@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
-interface Game {
+interface RawData {
   id_player1: number;
   id_player2: number;
   score_player_1: number;
@@ -10,20 +10,37 @@ interface Game {
   winner: number;
   username_player1: string;
   username_player2: string;
+  mode: string;
+  match_duration: number;
+
 }
 
-interface Stats {
+interface UserStats {
   totalGames: number;
   winRate: number;
   currentWinStreak: number;
   longestWinStreak: number;
   totalGoalsScored: number;
-  gamesPerDay: { [date: string]: number }; // index signature type (bar chart)
-  winRateOverTime: { date: string; winRate: number }[]; // object array (line chart)
+  gamesPerDay: { [date: string]: number }; 
+  winRateOverTime: { date: string; winRate: number }[]; 
 }
 
-// !!!!!!!!!!!!!!!!! REFACTOR
-function setStats(allGames: Game[]): Stats {
+interface GameStats {
+  opponent: string;
+  date: string;
+  winner: boolean;
+  currScore: number;
+  oppScore: number;
+  mode?: string;
+  duration?: string;
+}
+
+interface AllStats {
+  gameStats: GameStats[];
+  userStats: UserStats;
+}
+
+function setUserStats(allGames: RawData[]): UserStats {
   let totalWins, currWinStreak, longestWinStreak, totalGoals;
   totalWins = currWinStreak = longestWinStreak = totalGoals = 0;
   const gamesPerDay: { [date: string]: number } = {};
@@ -45,15 +62,12 @@ function setStats(allGames: Game[]): Stats {
     }
   }
   if (currWinStreak > longestWinStreak) longestWinStreak = currWinStreak;
-  const winRateOverTime: { date: string; winRate: number }[] = Object.entries(dailyWins)
-    .map(([date, { wins, total }]) => ({
-      date,
-      winRate: parseFloat(((wins * 100) / total).toFixed(2)),
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const stats: Stats = {
+  const winRateOverTime: { date: string; winRate: number }[] = Object.entries(dailyWins).map(([date, { wins, total }]) => ({
+    date, winRate: parseFloat(((wins * 100) / total).toFixed(2))
+  })).sort((a, b) => a.date.localeCompare(b.date));
+  const stats: UserStats = {
     totalGames: allGames.length,
-    winRate: (totalWins * 100) / allGames.length,
+    winRate: Math.round((totalWins * 100) / allGames.length),
     currentWinStreak: currWinStreak,
     longestWinStreak: longestWinStreak,
     totalGoalsScored: totalGoals,
@@ -63,18 +77,36 @@ function setStats(allGames: Game[]): Stats {
   return (stats);
 }
 
+function setGameStats(allGames: RawData[], currentUserId: number): GameStats[] {
+  const gameStats: GameStats[] = allGames.map((game) => {
+    const isPlayer1 = game.id_player1 === currentUserId;
+    return {
+      opponent: isPlayer1 ? game.username_player2 : game.username_player1,
+      date: game.created_at.split(" ")[0],
+      mode: game.mode,                                                                   
+      winner: game.current_is_winner === 1,
+      currScore: isPlayer1 ? game.score_player_1 : game.score_player_2,
+      oppScore: isPlayer1 ? game.score_player_2 : game.score_player_1,
+      match_duration: game.match_duration,
+    }});
+  return (gameStats);
+}
+
 // GET /api/dashboard/stats
 export function getStats(fastify: FastifyInstance) {
   return async function (request: FastifyRequest, reply: FastifyReply) {
     try {
       const currentUserId = request.session.userId;
-      const allGames: Game[] = await fastify.database.fetch_all(
+      if (!request.session || !request.session.userId) return reply.status(401).send({ message: "Unauthorized" });
+      const allGames: RawData[] = await fastify.database.fetch_all(
         `SELECT
 				m.id AS game_id,
 				m.player_1 AS id_player1,
 				m.player_2 AS id_player2,
 				m.score_player_1,
 				m.score_player_2,
+        m.match_duration,
+        m.mode,
 				m.winner,
 				m.date AS created_at,
 				u1.username AS username_player1,
@@ -87,10 +119,16 @@ export function getStats(fastify: FastifyInstance) {
 				ORDER BY m.id ASC`,
         [currentUserId, currentUserId, currentUserId]
       );
-      if (!allGames)
-        return reply.status(404).send({ message: "No games played" });
-      const stats = setStats(allGames);
-      return (reply.send(stats));
+      if (!allGames || allGames.length === 0)
+        return reply.status(200).send({ message: "empty request" });
+      const userStats = setUserStats(allGames);
+      const gameStats = setGameStats(allGames, currentUserId!);
+      const allStats: AllStats = {
+        gameStats: gameStats,
+        userStats: userStats
+      }
+      console.log("STAT PLAYER: ", allStats);
+      return (reply.send(allStats));
     } catch (err) {
       console.error("Failed to fetch stats", err);
       reply.status(500).send({ error: "Database error" });

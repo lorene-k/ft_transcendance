@@ -1,0 +1,7 @@
+@types/babylonjs
+@types/bcrypt
+@types/node
+@types/pino
+@types/socket.io
+@types/cookie
+typescript

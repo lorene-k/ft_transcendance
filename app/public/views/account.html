@@ -1,0 +1,173 @@
+<main class="max-w-7xl mx-auto mt-16 bg-white shadow-md rounded-lg p-6 space-y-6 gap-6 top:40 grid grid-cols-2"
+    id="main_content">
+    <!-- User Info (Profile Picture + Name + Email) -->
+    <div class="col-span-1 flex flex-col items-center p-6 bg-gray-50 rounded-lg shadow-sm">
+        <!-- Profile Picture with Change Icon -->
+        <div class="relative w-24 h-24">
+            <img id="profile-picture" src="__imageURL__" alt="Profile Picture"
+                class="w-24 h-24 rounded-full object-cover border-2 border-blue-500 shadow-md">
+
+            <!-- Small Camera Icon Button -->
+            <label
+                class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 shadow-md">
+                <i class="fa fa-camera text-xs"></i>
+                <input type="file" id="profile-upload" accept="image/*" class="hidden">
+            </label>
+        </div>
+
+        <!-- Name -->
+        <div class="flex items-center mt-3 space-x-2">
+            <h1 class="text-lg font-bold text-gray-800 truncate" id="username">__USERNAME__</h1>
+            <button class="text-gray-500 hover:text-blue-600" id="change_username_button">
+                <i class="fa fa-pencil-alt text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Email -->
+        <div class="flex items-center space-x-2">
+            <p class="text-gray-500 text-sm truncate" id="email">__EMAIL__</p>
+            <button class=" text-gray-500 hover:text-blue-600" id="change_email_button">
+                <i class="fa fa-pencil-alt text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Change Password Button -->
+        <button id="change_pwd_button"
+            class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-blue-700 transition"
+            data-i18n="account.changePass">
+            Change Password
+        </button>
+    </div>
+
+    <!-- Main Content Grid: Recent Games + Stats -->
+    <!-- Stats (1/3 width) -->
+    <section class="">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2" data-i18n="account.stats">Stats</h2>
+        <div class="bg-gray-50 p-4 rounded-md shadow-sm space-y-2">
+            <div class="flex justify-between">
+                <span data-i18n="account.wins">Wins</span>
+                <span class="font-bold text-green-600">__WINS__</span>
+            </div>
+            <div class="flex justify-between">
+                <span data-i18n="account.losses">Losses</span>
+                <span class="font-bold text-red-500">__LOSSES__</span>
+            </div>
+            <div class="flex justify-between">
+                <span data-i18n="account.winrate">Winrate</span>
+                <span class="font-bold text-blue-600">__WINRATE__</span>
+            </div>
+        </div>
+    </section>
+    <!-- Recent Games (2/3 width) -->
+    <section class="col-span-2">
+        <h1 class="text-2xl font-bold mb-4" data-i18n="account.gList">Game list</h1>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 border-b border-gray-300 text-left" data-i18n="account.p1">Player 1</th>
+                        <th class="py-2 px-4 border-b border-gray-300 text-left" data-i18n="account.p2">Player 2</th>
+                        <th class="py-2 px-4 border-b border-gray-300 text-left" data-i18n="account.score">Score</th>
+                        <th class="py-2 px-4 border-b border-gray-300 text-left" data-i18n="account.winner">Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- HISTORY -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- change email  -->
+    <div id="EmailForm" class="fixed inset-0 bg-black/50 flex justify-center items-center hidden">
+        <form class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full space-y-6 relative">
+            <h2 class="text-2xl font-bold mb-4 text-center text-blue-600"></h2>
+            <div id="error_message" class="px-4 py-2 rounded-md text-sm text-center text-red-600">
+            </div>
+            <label for="email" class="block text-gray-700 font-semibold" data-i18n="account.email">email</label>
+            <input type="email" name="email" id="email" placeholder="..." required
+                class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div class="flex justify-between items-center">
+                <button type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                    data-i18n="account.changeEmail">
+                    change email
+                </button>
+                <button type="button" id="EmailcloseForm" class="text-gray-500 hover:text-gray-700 font-semibold"
+                    data-i18n="account.cancel">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- change username  -->
+    <div id="UsernameForm" class="fixed inset-0 bg-black/50 flex justify-center items-center hidden">
+        <form class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full space-y-6 relative">
+            <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Change Username</h2>
+            <div id="error_message" class="px-4 py-2 rounded-md text-sm text-center text-red-600"></div>
+            <input type="username" name="username" placeholder="..." required
+                class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div class="flex justify-between items-center">
+                <button type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                    data-i18n="account.changeName">
+                    change username
+                </button>
+                <button type="button" id="UsernamecloseForm" class="text-gray-500 hover:text-gray-700 font-semibold"
+                    data-i18n="account.cancel">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- change password  -->
+    <div id="PwdForm" class="fixed inset-0 bg-black/50 flex justify-center items-center hidden">
+        <form class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full space-y-6 relative">
+            <h2 class="text-2xl font-bold mb-4 text-center text-blue-600"></h2>
+            <div id="error_message" class="px-4 py-2 rounded-md text-sm text-center text-red-600"></div>
+            <!-- old password -->
+            <label for="password" class="block text-gray-700 font-semibold" data-i18n="account.oldPass">Old
+                Password</label>
+            <input type="password" name="Old password" id="oldPassword" placeholder="..." required
+                class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+            <!-- new password -->
+            <label for="password" class="block text-gray-700 font-semibold" data-i18n="account.newPass">new
+                Password</label>
+            <input type="password" name="password" id="newPassword" placeholder="..." required
+                class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+            <!-- confirm new password -->
+            <label for="confirmNewPassword" class="block text-gray-700 font-semibold" data-i18n="account.confirmPass">
+                Confirm New Password
+            </label>
+            <input type="password" name="confirm new password" id="confirmNewPassword" placeholder="..."
+                minlength="6" required
+                class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+            <div class="flex justify-between items-center">
+                <button type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                    data-i18n="account.changePass">
+                    Change Password
+                </button>
+                <button type="button" id="passwordCloseForm" class="text-gray-500 hover:text-gray-700 font-semibold"
+                    data-i18n="account.cancel">
+                    Cancel
+                </button>
+            </div>
+
+    </div>
+    </form>
+    </div>
+    <section class="col-span-2">
+        <h2 class="text-2xl font-bold mb-4 text-gray-700" data-i18n="account.friends">Friends</h2>
+        <div class="bg-gray-50 p-4 rounded-md shadow-sm">
+            <ul class="space-y-3" id="friends-list">
+                <!-- friends here -->
+            </ul>
+        </div>
+    </section>
+</main>

@@ -4,11 +4,14 @@ import { runInsertConversation, runInsertMessage } from "./chatHistory.js";
 import { checkBlockedTarget } from "./chatBlocks.js";
 import { Message } from "./chatTypes.js";
 import SocketManager from "./SocketManager.js";
+import { checkSessionExpiry } from "./chatplugin.js";
 
 export let currConvId = 0;
 
-export async function getAllConversations(fastify: FastifyInstance, userId: number, chatNamespace: Namespace, socketManager: SocketManager) {
+export async function getAllConversations(fastify: FastifyInstance, socket: Socket, chatNamespace: Namespace, socketManager: SocketManager) {
     try {
+        if (!checkSessionExpiry(socket)) return;
+        const userId = socket.session.userId;
         const convInfo: Record<number, string> = {};
         const conversations = await fastify.database.fetch_all(
         `SELECT id, 
@@ -20,7 +23,6 @@ export async function getAllConversations(fastify: FastifyInstance, userId: numb
           const username = await socketManager.getUsername(conv.otherUserId);
           if (username) convInfo[conv.otherUserId] = username;
         }
-        // console.log("All conversations:", conversations); // ! DEBUG - OK
         chatNamespace.to(userId.toString()).emit("allConversations", conversations, convInfo);
     } catch (err) {
         console.error("Failed to fetch conversations", err);
@@ -35,10 +37,8 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
           `SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`,
           [user1, user2]
         );
-        // if (conv) console.log("Get conversation: conv =", conv); // ! DEBUG
         if (conv) return (conv.id);
         const conversationId = await runInsertConversation(fastify, user1, user2);
-        // console.log(`Created new conversation between ${user1} and ${user2}, ID: ${conversationId}`); // ! DEBUG
         return (conversationId);
     } catch (err) {
         console.error("Failed to create or get conversation: ", err);
@@ -49,7 +49,6 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
 async function insertMessage(fastify: FastifyInstance, msg: Message, socket: Socket): Promise<number> {
     try {
         const messageId = await runInsertMessage(fastify, msg, socket);
-        // console.log(`Message inserted with ID: ${messageId}, content: ${msg.content}`); // ! DEBUG
         return (messageId);
     } catch (err) {
         console.error("Failed to insert message: ", err);
@@ -60,19 +59,18 @@ async function insertMessage(fastify: FastifyInstance, msg: Message, socket: Soc
 export async function handleMessages(fastify: FastifyInstance, socket: Socket, chatNamespace: Namespace) {
     socket.on("message", async (msg: Message, callback) => {
         try {
-            msg.senderId = socket.session.userId;
-            msg.senderUsername = socket.username; // !! Useless ?
-            const senderBlocked = await checkBlockedTarget(msg.senderId, parseInt(msg.targetId!), fastify);
+            if (!checkSessionExpiry(socket)) return;
+            msg.senderId = socket.session.userId.toString();
+            msg.senderUsername = socket.username;
+            const senderBlocked = await checkBlockedTarget(parseInt(msg.senderId), parseInt(msg.targetId!), fastify);
             const conversationId = await getOrCreateConversation(fastify, socket.session.userId, parseInt(msg.targetId!));
             if (conversationId === -1) return (callback({ status: "DBerror" }));
             msg.convId = currConvId = conversationId;
             msg.serverOffset = await insertMessage(fastify, msg, socket);
             msg.isSent = false;
-            if (!senderBlocked) chatNamespace.to(msg.targetId!).emit("message", msg);
-            // console.log("TO TARGET message :", msg); // ! DEBUG 
+            if (!senderBlocked && msg.targetId) chatNamespace.to(msg.targetId).emit("message", msg);
             msg.isSent = true;
-            chatNamespace.to(msg.senderId.toString()).emit("message", msg);
-            //   console.log("TO CURRENT message :", msg); // ! DEBUG 
+            if (msg.targetId) chatNamespace.to(msg.senderId).emit("message", msg);
             return callback({ status: "ok", serverOffset: msg.serverOffset });
         } catch (err: any) {
             if (err.errno === "SQLITE_CONSTRAINT") callback({ status: "duplicate" });

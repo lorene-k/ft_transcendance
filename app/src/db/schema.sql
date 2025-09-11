@@ -6,17 +6,32 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
     username TEXT NOT NULL UNIQUE,
-    email TEXT UNIQUE,
+    google_id TEXT UNIQUE,
+    email TEXT,
+    picture TEXT,
     password TEXT,
     created_at DATE NOT NULL,
     last_login_at DATETIME,
     CHECK (
         email LIKE '%_@_%._%' AND
-        LENGTH(email) - LENGTH(REPLACE(email, '@', '')) = 1 AND
-        SUBSTR(LOWER(email), 1, INSTR(email, '.') - 1) NOT GLOB '*[^@0-9a-z]*' AND
-        SUBSTR(LOWER(email), INSTR(email, '.') + 1) NOT GLOB '*[^a-z]*'
+        LENGTH(email) - LENGTH(REPLACE(email, '@', '')) = 1 -- AND
+        -- SUBSTR(LOWER(email), 1, INSTR(email, '.') - 1) NOT GLOB '*[^@0-9a-z]*' AND
+        -- SUBSTR(LOWER(email), INSTR(email, '.') + 1) NOT GLOB '*[^a-z]*'
     )
 );
+
+-- ------------------------------
+-- Default guest user
+-- ------------------------------
+INSERT INTO user
+            (username,
+            created_at)
+    SELECT 'guest',
+           date()
+    WHERE NOT EXISTS
+        (SELECT 1
+         FROM user
+         WHERE username = 'guest');
 
 -- ------------------------------
 -- Table: match
@@ -29,6 +44,8 @@ CREATE TABLE IF NOT EXISTS match (
     score_player_2 INTEGER NOT NULL,
     winner INTEGER NOT NULL,
     date DATETIME NOT NULL,
+    match_duration integer NOT NULL,
+    mode TEXT,
     FOREIGN KEY (player_1) REFERENCES user (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY (player_2) REFERENCES user (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY (winner) REFERENCES user (id) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -79,4 +96,27 @@ CREATE TABLE IF NOT EXISTS blocks (
     UNIQUE(blocker_id, blocked_id),
     FOREIGN KEY (blocker_id) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (blocked_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- ------------------------------
+-- Table: profile
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS profile(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT,
+    picture BLOB NOT NULL,
+    UNIQUE(user_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- ------------------------------
+-- Table: friends
+-- ------------------------------
+
+CREATE TABLE IF NOT EXISTS friends(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_1 INTEGER NOT NULL,
+    user_2 INTEGER NOT NULL,
+    FOREIGN KEY (user_1) REFERENCES user(id) ON DELETE CASCADE
 );

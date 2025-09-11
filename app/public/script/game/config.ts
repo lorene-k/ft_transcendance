@@ -1,13 +1,14 @@
-//import * as BABYLON from 'babylonjs';
+// Import retiré car Ammo.js est chargé globalement depuis le CDN
 // import Ammo from 'ammo.js';
+declare const Ammo: any;
 /// <reference types="babylonjs" />
 /// <reference types="babylonjs-gui" />
 
 
 export var setPhysicImpostor = function (pingPongBall: BABYLON.Mesh, ground: BABYLON.GroundMesh, groundMaterial: BABYLON.StandardMaterial, scene: BABYLON.Scene) {
         // Importation du moteur physique
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(
-            ground,
+        (ground as any).physicsImpostor = new BABYLON.PhysicsImpostor(
+            (ground as any),
             BABYLON.PhysicsImpostor.BoxImpostor,
             { mass: 0, restitution: 0.9 },
             scene
@@ -15,8 +16,8 @@ export var setPhysicImpostor = function (pingPongBall: BABYLON.Mesh, ground: BAB
     
         groundMaterial.alpha = 0.5;
     
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(
-            ground,
+        (ground as any).physicsImpostor = new BABYLON.PhysicsImpostor(
+            (ground as any),
             BABYLON.PhysicsImpostor.BoxImpostor,
             {mass: 0, restitution: 0.5},
             scene
@@ -24,8 +25,8 @@ export var setPhysicImpostor = function (pingPongBall: BABYLON.Mesh, ground: BAB
     
         ground.material = groundMaterial;
     
-        pingPongBall.physicsImpostor = new BABYLON.PhysicsImpostor(
-            pingPongBall,
+        (pingPongBall as any).physicsImpostor = new BABYLON.PhysicsImpostor(
+            (pingPongBall as any),
             BABYLON.PhysicsImpostor.SphereImpostor,
             { mass: 0.40, restitution: 0.9 },
             scene

@@ -1,0 +1,78 @@
+<main id="main_content" class="flex flex-col bg-gray-100 max-w-6xl mx-auto mt-8 h-[80vh]">
+
+ <!-- Buttons -->
+  <div class="flex flex-row h-20 items-center justify-center rounded-md gap-2">
+    <button id="dashboard-btn" class="selected-button-style dashboard-btn" data-i18n="dash.dash">User dashboard</button>
+    <button id="game-stats-btn" class="button-style dashboard-btn" data-i18n="dash.stat">Game stats</button>
+  </div>
+
+  <!-- Stat Views -->
+  <div id="dashboard-content" class="overflow-auto custom-scrollbar h-full w-full">
+
+    <!-- User dashboard -->
+    <div id="user-dashboard" class="h-full w-full p-4">
+      <div id="stats-wrapper" 
+          class="rounded-xl relative h-full w-full
+          before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-10 before:pointer-events-none before:bg-gradient-to-b before:from-gray-100 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300
+          after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-10 after:pointer-events-none after:bg-gradient-to-t after:from-gray-100 after:to-transparent after:opacity-0 after:transition-opacity after:duration-300">
+        <div id="stats-scroll" class="grid grid-cols-3 h-full w-full p-1 overflow-auto custom-scrollbar">
+          <!-- Row 1 -->
+            <!-- Total Games -->
+            <div class="grid-style col-span-1">
+              <p class="title-style" data-i18n="dash.gamePlayed">Total games played</p>
+              <div class="stat-style">
+                  <i class="fas fa-gamepad text-blue-300 text-5xl"></i>
+                  <div id="games-played" class="text-3xl font-bold text-gray-800"></div>
+              </div>
+            </div>
+          
+            <!-- Win rate : pie chart -->
+            <div class="grid-style col-span-1">
+              <p class="title-style" data-i18n="dash.rate">Win rate</p>
+              <canvas id="pie-chart" class="m-4"></canvas>
+            </div>
+          
+            <!-- Win streak -->
+            <div class="grid-style col-span-1">
+              <p class="title-style" data-i18n="dash.winStreak">Current win streak</p>
+                <div class="stat-style">
+                  <i class="fas fa-fire text-blue-300 text-5xl"></i>
+                  <div id="current-streak" class="text-3xl font-bold text-gray-800"></div>
+                </div>
+                <div id="longest-streak" class="text-sm font-semibold text-gray-500 text-center mt-4"></div>
+            </div>
+          
+          <!-- Row 2: Bar chart -->
+          <div class="grid-style col-span-3">
+            <p class="title-style" data-i18n="dash.dGamePlayed">Daily games played</p>
+            <canvas id="bar-chart" class="m-4"></canvas>
+          </div>
+        
+          <!-- Row 3: Line chart -->
+          <div class="grid-style col-span-3">
+            <p class="title-style" data-i18n="dash.wRate">Win rate over time</p>
+            <canvas id="line-chart" class="m-4"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game stats -->
+    <div id="game-stats" class="hidden absolute z-10 w-full flex-grow max-w-6xl p-4 flex justify-center">
+      <div class="flex flex-col bg-white rounded-xl shadow-sm w-full">
+        <div id="game-stats-entries" class="w-11/12 mx-auto">
+          <!-- Header -->
+          <div class="dashboard-tab-line font-semibold mx-auto">
+            <span class="dashboard-entry" data-i18n="dash.opponent">Opponent</span>
+            <span class="dashboard-entry" data-i18n="dash.date">Date</span>
+            <span class="dashboard-entry" data-i18n="dash.mode">Mode</span>
+            <span class="dashboard-entry" data-i18n="dash.result">Result</span>
+            <span class="dashboard-entry" data-i18n="dash.score">Score</span>
+            <span class="dashboard-entry" data-i18n="dash.duration">Duration</span>
+          </div>
+          <div class="line-style px-4 mb-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

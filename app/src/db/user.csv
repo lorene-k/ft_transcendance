@@ -1,0 +1,9 @@
+id,username,email,password,created_at,last_login_at
+1,lolo,lolo@lolo.fr,$2b$10$wD0C7sdkmZqA1NorU3ppCesYjcNyKOi9erWnLdPggXCwfcLyfo2Xy,2025-06-24,
+2,kaka,kaka@kaka.fr,$2b$10$R6TcgTel/yLZrd.xL.dR2uf1vhFSWFHG0L6treD5BuPULciTytqH.,2025-06-24,
+3,kaka,kaka@kaka.fr,$2b$10$gS9zstrT2w4mN0MQanjiT.aNy3besyR/GlYiKpW7109NUmnSdtsry,2025-06-25,
+4,test,test@test.fr,$2b$10$lDs.D3ppEsuek1mBXVmUluHfYyqKM1D7kCDa7.ACKyPic5ONMUDBS,2025-06-25,
+5,test,test@test.fr,$2b$10$jetK9I.ghKh69WXlqMLcE.s01msmie7dfhg7Bqg4c3HgxHHdfCuoK,2025-06-25,
+6,kaka,kaka@kaka.fr,$2b$10$sXp1I2QzlfA3TZqPlIH0ju0P9g3Xgz9NAOp9f..vdCXIemWqQGfOa,2025-06-25,
+7,lolodugetto,lolo@lolo.fr,$2b$10$8XeGvV3DB/ovMlJVEuoMsuMFLxnomGi42CPVnJvBFJbh5CMFs2iUO,2025-06-26,
+8,testregister,testregister@register.fr,$2b$10$jpPKU71skEf1ahZBw3CO0ehN1DhG2z/R5sG9oATgZc6iZ/m4Qgj4.,2025-07-06,

@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import sqlite3 from "sqlite3";
 import path from "path";
 import fs from "fs";
-import { int } from "@babylonjs/core";
+import { fileURLToPath } from "url"; // for math same in app.ts
 
 export class Database extends sqlite3.Database {
     async fetch_all(query: string, params: any[] = []) {
@@ -29,28 +29,26 @@ export class Database extends sqlite3.Database {
             });
         });
     }
-
 }
 
-//TODO: extend class database to a custom class SQLiteStore, bind it with fastity/session (save session and cookie in db instead of memory)
 export default fp(async function (
     fastify: FastifyInstance,
     options: FastifyPluginOptions,
 ) {
     const db = new Database("src/db/db.sqlite3");
-    const __dirname = import.meta.dirname;
-    const schema = fs.readFileSync(
-        path.join(__dirname, "../db/schema.sql"),
-        "utf8",
-    );
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename); // FOR MATH
+    const schemaPath = path.join(__dirname, '../db/schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf-8');
 
     db.exec(schema, (err) => {
         if (err) {
-            fastify.log.error("Error initializing DB:", err.message);
+            fastify.log.error(err, "Error initializing DB");
         } else {
             fastify.log.info("Database initialized successfully.");
         }
     });
-    // fastify.database == db
+
     fastify.decorate("database", db);
 });

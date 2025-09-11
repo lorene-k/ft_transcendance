@@ -1,18 +1,6 @@
 
 declare const Chart: any;
 
-export async function loadView(view: string) {
-	try {
-		const res = await fetch(view);
-		const html = await res.text();
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(html, "text/html");
-		return doc.body.firstElementChild;
-	} catch (e) {
-		console.error("Failed to fetch html:", e);
-	}
-}
-
 export function setChartDefaults() {
 	Chart.defaults.font = {
 	    size: 12,

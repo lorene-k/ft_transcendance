@@ -1,12 +1,50 @@
 //import * as BABYLON from 'babylonjs';
 import { AmmoJSPlugin } from "@babylonjs/core";
 import { setPhysicImpostor } from "./config.js";
-// depuis public/script/game/scene.js
-import type AmmoType from 'ammojs-typed';
-declare const Ammo: typeof AmmoType;
+import { IPhysicsEnginePlugin, IPhysicsEnginePluginV2 } from "babylonjs";
+// Déclaration globale pour Ammo.js
+declare const Ammo: any;
 
 /// <reference types="babylonjs" />
 /// <reference types="babylonjs-gui" />
+
+
+
+// TODO: recharger ammo plus clean
+async function initializePhysicsEngine(scene: BABYLON.Scene): Promise<boolean> {
+    try {
+        await loadAmmoFromCDN();
+        const ammoGlobal = (window as any).Ammo;
+        if (!ammoGlobal) throw new Error("Ammo.js n'est pas chargé");
+        // cast propre pour TS
+        const ammoPlugin = new BABYLON.AmmoJSPlugin(true, ammoGlobal) as unknown as BABYLON.IPhysicsEnginePluginV2;
+        scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), ammoPlugin);
+        return true;
+
+
+    } catch (error) {
+        console.error("Erreur lors du chargement d'Ammo.js:", error);
+        return false;
+    }
+}
+
+async function loadAmmoFromCDN(): Promise<void> {
+    const existingScripts = document.querySelectorAll('script[src*="ammo.js"]');
+    existingScripts.forEach(script => script.remove());
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.babylonjs.com/ammo.js';
+    document.head.appendChild(script);
+
+    await new Promise<void>((resolve, reject) => {
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Impossible de charger Ammo.js depuis CDN'));
+    });
+
+    await (window as any).Ammo();
+}
 
 async function loadPaddle(scene: BABYLON.Scene) {
     const paddleConfig = [
@@ -36,8 +74,6 @@ async function loadPaddle(scene: BABYLON.Scene) {
             container.rotationQuaternion = BABYLON.Quaternion.RotationAxis(config.rotationAxis, config.rotationAngle);
 
             const size = getCombinedBoundingSize(container);
-
-            // Hitbox invisible
             const hitbox = BABYLON.MeshBuilder.CreateBox(`${config.name}_hitbox`, {
                 width: size.x,
                 height: size.y,
@@ -46,19 +82,17 @@ async function loadPaddle(scene: BABYLON.Scene) {
 
             hitbox.isVisible = false;
 
-            // Syncro hitbot mesh raquette
-            hitbox.position = container.position.clone();
-            hitbox.rotationQuaternion = container.rotationQuaternion.clone();
-            hitbox.scaling = container.scaling.clone();
-
-            hitbox.physicsImpostor = new BABYLON.PhysicsImpostor(
+            (hitbox as any).physicsImpostor = new BABYLON.PhysicsImpostor(
                 hitbox,
                 BABYLON.PhysicsImpostor.BoxImpostor,
                 { mass: 0, restitution: 0.9 },
                 scene
             );
 
-            // Syncro les chagnement a chaque frame
+            hitbox.position = container.position.clone();
+            hitbox.rotationQuaternion = container.rotationQuaternion.clone();
+            hitbox.scaling = container.scaling.clone();
+
             scene.onBeforeRenderObservable.add(() => {
                 container.position.copyFrom(hitbox.position);
                 if (hitbox.rotationQuaternion) {
@@ -109,18 +143,21 @@ export async function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElem
     if (!camera)
         console.log("Camera not load");
 
+    scene.activeCamera = camera;
     camera.attachControl(canvas, true);
 
-    await Ammo;
-    const ammoPlugin = new BABYLON.AmmoJSPlugin(true, Ammo);
-    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), ammoPlugin);
+    // Initialiser le moteur physique - OBLIGATOIRE
+    const physicsInitialized = await initializePhysicsEngine(scene);
+    if (!physicsInitialized) {
+        throw new Error("Physic not load");
+    }
 
     var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
 
     var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 30, height: 20 }, scene);
     var groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
     var groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
-    groundMaterial.diffuseColor = new BABYLON.Color3(0.1, 0.6, 0.1); // vert foncé
+    groundMaterial.diffuseColor = new BABYLON.Color3(0.1, 0.6, 0.1);
     ground.material = groundMaterial;
 
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
@@ -140,3 +177,4 @@ export async function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElem
     await loadPaddle(scene);
     return scene;
 };
+

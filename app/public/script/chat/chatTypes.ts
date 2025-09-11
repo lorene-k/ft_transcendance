@@ -12,3 +12,10 @@ export interface Message {
   targetId?: string;
   senderUsername?: string;
 }
+
+export interface Invite {
+  inviterId: string;
+  inviterUsername: string;
+  invitedId: string;
+  timeoutId?: number;
+}

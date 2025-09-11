@@ -84,31 +84,31 @@ export function animateRightPaddle(paddle: BABYLON.Mesh, onComplete: any) {
     };
 }
 
-//TODO : faire comme les autres animations, ne pas pouvoir spammer le service
-export function serveBall(pingPongBall: BABYLON.Mesh, scene: BABYLON.Scene, onComplete: any) {
+// //TODO : serveball
+// export function serveBall(pingPongBall: BABYLON.Mesh, scene: BABYLON.Scene, onComplete: any) {
 
-    const velocityThreshold = 0.2;
+//     const velocityThreshold = 0.2;
 
-    if (pingPongBall.physicsImpostor) {
-        pingPongBall.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
-        pingPongBall.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
-    }
-    const forceDirection = new BABYLON.Vector3(0, 10, 0); // Légèrement vers la gauche (-X), bien vers le haut (+Y)
-    const forceMagnitude = 0.5; // Ajuste cette valeur pour plus ou moins de "puissance"
+//     if (pingPongBall._physicImpostor) {
+//         pingPongBall.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
+//         pingPongBall.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
+//     }
+//     const forceDirection = new BABYLON.Vector3(0, 10, 0);
+//     const forceMagnitude = 0.5; 
 
-    if (pingPongBall.physicsImpostor) {
-        pingPongBall.physicsImpostor.applyImpulse(
-            forceDirection.scale(forceMagnitude),
-            pingPongBall.physicsImpostor.getObjectCenter()
-        );
-    } else {
-        console.log("Physic impostor's ball don't find");
-    }
+//     if (pingPongBall.physicsImpostor) {
+//         pingPongBall.physicsImpostor.applyImpulse(
+//             forceDirection.scale(forceMagnitude),
+//             pingPongBall.physicsImpostor.getObjectCenter()
+//         );
+//     } else {
+//         console.log("Physic impostor's ball don't find");
+//     }
 
-    if (onComplete) {
-        onComplete();
-    }
+//     if (onComplete) {
+//         onComplete();
+//     }
 
-}
+// }
 
 

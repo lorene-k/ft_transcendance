@@ -1,0 +1,43 @@
+<nav class="bg-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+
+        <!-- Dropdown menu icon -->
+        <button id="menu-icon" class="flex md:hidden text-gray-700 focus:outline-none stroke-gray-600 m-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
+                viewBox="0 0 24 24" stroke="grey">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <!-- Logo -->
+        <div class="text-2xl font-extrabold text-blue-600 cursor-default">Transcendance</div>
+
+        <!-- Links -->
+        <div class="hidden md:flex space-x-8 text-gray-700 font-medium">
+            <button id="home" data-i18n="nav.home" class="hover:text-blue-500 transition">Home</button>
+            <button id="dashboard" data-i18n="nav.dashboard" class="hover:text-blue-500 transition">Dashboard</button>
+            <button id="chat" data-i18n="nav.chat" class="hover:text-blue-500 transition">Chat</button>
+            <button id="account" data-i18n="nav.account" class="hover:text-blue-500 transition">Account</button>
+            <button id="play" data-i18n="nav.play" class="hover:text-blue-500 transition">Play</button>
+        </div>
+
+        <!-- User section -->
+        <div>
+            <span class="text-gray-700 mr-4">PLACEHOLDER_USERNAME</span>
+            <button id="logout" data-i18n="nav.logout" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Dropdown menu links -->
+    <div id="dropdown-menu"
+    class="z-90 absolute md:hidden text-gray-700 bg-white shadow-md font-medium w-full max-h-0 overflow-hidden transition-all duration-200">
+        <div class="bg-white hover:bg-gray-100"><button id="dropdown-home" class="dropdown-menu-style">Home</button></div>
+        <div class="bg-white hover:bg-gray-100"><button id="dropdown-dashboard" class="dropdown-menu-style">Dashboard</button></div>
+        <div class="bg-white hover:bg-gray-100"><button id="dropdown-chat" class="dropdown-menu-style">Chat</button></div>
+        <div class="bg-white hover:bg-gray-100"><button id="dropdown-account" class="dropdown-menu-style">Account</button></div>
+        <div class="bg-white hover:bg-gray-100"><button id="dropdown-play" class="dropdown-menu-style">Play</button></div>
+    </div>
+</nav>

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
 import { Message } from "./chatTypes.js";
+import { checkSessionExpiry } from "./chatplugin.js";
 
 export async function runInsertConversation(fastify: FastifyInstance, user1: number, user2: number): Promise<number> {
     return new Promise((resolve, reject) => {
@@ -19,6 +20,7 @@ export async function runInsertConversation(fastify: FastifyInstance, user1: num
 
 export function runInsertMessage(fastify: FastifyInstance, msg: Message, socket: Socket): Promise<number> {
   return new Promise((resolve, reject) => {
+    if (!checkSessionExpiry(socket)) return;
     const senderId = msg.isSent ? socket.session.userId : msg.targetId;
     fastify.database.run(
       `INSERT INTO messages (conversation_id, sender_id, content, client_offset)

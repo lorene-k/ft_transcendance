@@ -1,5 +1,6 @@
-import { LoadImageConfiguration } from "@babylonjs/core";
+import { IOERR } from "sqlite3";
 import { navbar } from "./N_nav.js";
+import { initGoogle, googleInitialized } from "./google.js";
 
 async function register_value_check(formData: FormData): Promise<[boolean, string | null]> {
     const username = formData.get('username')?.toString().trim() || '';
@@ -25,7 +26,6 @@ async function register_value_check(formData: FormData): Promise<[boolean, strin
 async function register(event: SubmitEvent): Promise<[boolean, string | null]> {
     const form = event.target;
     if (!form) {
-        console.error("error: event target is missing")
         return [false, "Invalid form"]
     }
     const formData = new FormData(form as HTMLFormElement);
@@ -33,7 +33,6 @@ async function register(event: SubmitEvent): Promise<[boolean, string | null]> {
     const username = formData.get('username')?.toString();
     const email = formData.get('email')?.toString();
     const password = formData.get('password')?.toString();
-
 
     const response = fetch("/register", {
         method: 'POST',
@@ -56,13 +55,11 @@ async function register(event: SubmitEvent): Promise<[boolean, string | null]> {
 async function login(event: SubmitEvent): Promise<[boolean, string | null]> {
     const form = event.target;
     if (!form) {
-        console.error("error: event target is missing")
         return [false, "Invalid form"]
     }
     const formData = new FormData(form as HTMLFormElement);
 
     const username = formData.get('username')?.toString();
-    const email = formData.get('email')?.toString();
     const password = formData.get('password')?.toString();
 
     const response = fetch("/login", {
@@ -76,22 +73,49 @@ async function login(event: SubmitEvent): Promise<[boolean, string | null]> {
 
     var data = await response;
     if (data && data.logged == true)
-        return [true, null];
+        return [true, data.id];
     else {
         return [false, data.reason]
     }
-
 }
 
 export async function initForm() {
     const loginform = document.getElementById('LoginForm') as HTMLElement;
     const registerform = document.getElementById('RegisterForm') as HTMLElement;
-    function openLogin() {
+
+    async function openLogin() {
         loginform?.classList.remove('hidden');
+
+        const googleDiv = document.getElementById('googleSignInButton');
+        if (!googleDiv || googleDiv.hasChildNodes()) return;
+
+        await initGoogle();
+        if (window.google && googleInitialized) {
+            window.google.accounts.id.renderButton(
+                googleDiv,
+                { theme: 'outline', size: 'large' }
+            );
+        } else {
+            console.warn("Google not initialized yet");// test
+        }
     }
 
-    function openRegister() {
+    async function openRegister() {
         registerform?.classList.remove('hidden');
+
+        const googleDiv = document.getElementById('googleRegisterSignInButton');
+        if (!googleDiv || googleDiv.hasChildNodes()) return;
+
+        await initGoogle();
+
+        if (window.google && googleInitialized) {
+            const res = window.google.accounts.id.renderButton(
+                googleDiv,
+                { theme: 'outline', size: 'large' }
+            );
+        } else {
+            console.warn("Google not initialized yet");
+        }
     }
 
     function closeRForm() {
@@ -105,7 +129,10 @@ export async function initForm() {
     document.getElementById('openLogin')?.addEventListener('click', openLogin);
     document.getElementById('closeLForm')?.addEventListener('click', closeLForm);
     document.getElementById('openRegister')?.addEventListener('click', openRegister);
-    document.getElementById('closeRForm')?.addEventListener('click', closeRForm);
+    document.getElementById('closeRForm')?.addEventListener('click', (e) => {
+        e.preventDefault()
+        closeRForm()
+    });
 
     // ------------  REGISTER  ----------------
     registerform?.addEventListener('submit', async function (event) {
@@ -141,7 +168,7 @@ export async function initForm() {
         event.preventDefault();
         const res = await login(event)
         if (res[0]) {
-            await navbar();
+            await navbar(res[1]!);
             closeLForm();
         }
         else {

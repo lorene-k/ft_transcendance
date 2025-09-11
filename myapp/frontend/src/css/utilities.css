@@ -1,6 +1,0 @@
-/* @layer utilities {
-} */
-
-@utility btn-base {
-    @apply transform cursor-pointer rounded-full transition duration-150 hover:scale-110 active:scale-95;
-  }

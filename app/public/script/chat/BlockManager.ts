@@ -1,25 +1,30 @@
 import ChatClient from "./ChatClient.js";
+import UserManager from "./UserManager.js";
 
 export default class BlockManager {
     private blockedUsers: string[] = [];
     private targetBlocked: boolean = false;
-    private chatClient: ChatClient;
+    private userManager: UserManager | null = null;
+    private socket: any;
 
     constructor(chatClient: ChatClient) {
-        this.chatClient = chatClient;
+        this.socket = chatClient.getSocket();
         this.fetchBlockedUsers();
+    }
+
+    setUserManager(userManager: UserManager) {
+        this.userManager = userManager;
     }
 
     private async fetchBlockedUsers() {
         try {
             const res = await fetch(`/api/chat/blocked`);
             const data = await res.json();
-            if (res.status === 404 || res.status === 500) {
-              console.log(data.message);
-              return;
+            if (res.status === 500) {
+                console.error(data.message);
+                return (null);
             }
             this.blockedUsers = (data as { blocked_id: number }[]).map(u => u.blocked_id.toString());
-            // console.log("in getBlockedUsers - blockedUsers = ", blockedUsers); // ! DEBUG
         } catch (err) {
             console.error("Failed to fetch or parse JSON:", err);
         }
@@ -31,34 +36,53 @@ export default class BlockManager {
         if (!blockedBtn || !blockedMsg) return;
         if (this.targetBlocked) {
             blockedMsg.classList.remove("hidden");
-            blockedBtn.textContent = "Unblock user";
+            const savedLang = localStorage.getItem("lang");
+            switch (savedLang) {
+                case 'es':
+                    blockedBtn.textContent = `Desbloquear usuario`;
+                    break;
+                case 'fr':
+                    blockedBtn.textContent = `Débloquer l'utilisateur`;
+                    break;
+                default:
+                    blockedBtn.textContent = `Unblock user`;
+                    break;
+            }
+            // blockedBtn.textContent = "Unblock user";
         } else if (!this.targetBlocked) {
             blockedMsg.classList.add("hidden");
-            blockedBtn.textContent = "Block user";
+            const savedLang = localStorage.getItem("lang");
+            switch (savedLang) {
+                case 'es':
+                    blockedBtn.textContent = `Bloquear usuario`;
+                    break;
+                case 'fr':
+                    blockedBtn.textContent = `Débloquer l'utilisateur`;
+                    break;
+                default:
+                    blockedBtn.textContent = `Block user`;
+                    break;
+            }
+            // blockedBtn.textContent = "Block user";
         }
     }
-    
+
     checkBlockedTarget(): boolean {
-        const targetId = this.chatClient.getUserManager().getTargetId();
+        const targetId = this.userManager!.getTargetId();
         this.targetBlocked = this.blockedUsers.includes(targetId!);
-        // console.log("targetId = ", targetId, "isBlocked =", this.targetBlocked); // ! DEBUG
         this.toggleBlockedMsg();
         return (this.targetBlocked);
     }
-    
-    blockOrUnblockUser(chatClient: ChatClient) {
-        const socket = chatClient.getSocket();
-        const targetId = this.chatClient.getUserManager().getTargetId();
+
+    blockOrUnblockUser() {
+        const targetId = this.userManager!.getTargetId();
         this.targetBlocked = this.checkBlockedTarget();
-        socket.emit("blockUser", { targetId: parseInt(targetId!), block: !this.targetBlocked }, (response: { status: string }) => {
-            if (response) console.log("Response from server: ", response.status);
-            // else console.error("No response received from server."); // ! solve server ack pb
-        });
+        this.socket.emit("blockUser", { targetId: parseInt(targetId!), block: !this.targetBlocked },
+            (ack: { success: boolean }) => {
+                if (ack && ack.success) console.log("Server ack OK");
+            });
         if (!this.targetBlocked) this.blockedUsers.push(targetId!);
-        else {
-            const index = this.blockedUsers.indexOf(targetId!);
-            if (index !== -1) this.blockedUsers.splice(index, 1);
-        }
+        else this.blockedUsers = this.blockedUsers.filter(id => id !== targetId);
         this.checkBlockedTarget();
     }
 }

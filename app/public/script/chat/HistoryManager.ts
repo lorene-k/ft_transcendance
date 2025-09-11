@@ -1,31 +1,43 @@
 import { Message, User } from "./chatTypes.js";
 import ChatClient from "./ChatClient.js";
+import BubbleHandler from "./BubbleHandler.js";
+import ChatUI from "./ChatUI.js";
+import { applyTranslations } from "../../translate.js";
 
 export default class HistoryManager {
   private chatClient: ChatClient;
+  private bubbleHandler: BubbleHandler | null = null;
+  private chatUI: ChatUI | null = null;
+  private chatBox: HTMLElement | null = null;
+  private recipientName: HTMLElement | null = null;
+  private chatWindowPic: HTMLImageElement | null = null;
 
   constructor(chatClient: ChatClient) {
     this.chatClient = chatClient;
+    this.bubbleHandler = chatClient.getBubbleHandler();
+    this.chatUI = chatClient.getChatUI();
+    this.chatBox = document.getElementById("conversation-box");
+    this.recipientName = document.getElementById("recipient-name");
+    this.chatWindowPic = document.getElementById("chat-window-pic") as HTMLImageElement;
   }
 
   private async openFirstConv() {
-      const convContainer = document.getElementById("conversation-container");
-      const chatWindow = await this.chatClient.getBubbleHandler().loadTemplate("/chat/chat-window.html");
-      if (!chatWindow || !convContainer) return;
-      const p = document.getElementById("conv-placeholder");
-      if (p) p.remove();
-      convContainer.appendChild(chatWindow);
-      const input = document.querySelector('textarea');
-      this.chatClient.setInputListeners();
-      this.chatClient.getOptionHandler().initDropdownListeners();
+    const chatWindow = document.getElementById("chat-window");
+    if (chatWindow && !chatWindow.classList.contains("hidden")) return;
+    const convPlaceholder = document.getElementById("conv-placeholder");
+    const input = document.querySelector("textarea") as HTMLTextAreaElement;
+    if (!convPlaceholder || !chatWindow || !input) return;
+    convPlaceholder.remove();
+    chatWindow.classList.remove("hidden", "pointer-events-none");
+    input.focus();
   }
 
     private async fetchMessageHistory(targetId: string): Promise<Message[] | null> {
       try {
         const res = await fetch(`/api/chat/messages?target=${targetId}`);
         const data = await res.json();
-        if (res.status === 500 || res.status === 404) {
-          console.error(data.message);
+        if (res.status === 500) {
+          console.log(data.message);
           return (null);
         }
         return (data);
@@ -35,7 +47,7 @@ export default class HistoryManager {
       }
     }
 
-    private async displayMessageHistory(targetId: string) { // ! ADD IS SENT
+    private async displayMessageHistory(targetId: string) {
       const messages = await this.fetchMessageHistory(targetId);
       if (messages) {
         for (const entry of messages as any) {
@@ -45,20 +57,18 @@ export default class HistoryManager {
             sentAt: entry.sent_at
           }
           const isSent = message.senderId === targetId;
-          await this.chatClient.getBubbleHandler().addChatBubble(isSent, message, targetId!);
+          await this.bubbleHandler!.addChatBubble(isSent, message, targetId!);
         }
-      } else
-        console.error("Failed to fetch messages for conversation with target: ", targetId);
+      }
     }
 
-   async openChat(user: User) { // ! add isSent
-      if (!document.getElementById("chat-window")) await this.openFirstConv();
-      const chatBox = document.getElementById("conversation-box");
-      const recipientName = document.getElementById("recipient-name");
-      if (!chatBox || !recipientName) return;
-      chatBox.innerHTML = "";
-      recipientName.textContent = user.username;
-      this.displayMessageHistory(user.userId); // ! FIX user self !!!!!!!!!!!!!!!!!
-      this.chatClient.getOptionHandler().getBlockManager().checkBlockedTarget();
+   async openChat(user: User) {
+      this.openFirstConv();
+      this.chatBox!.innerHTML = "";
+      this.recipientName!.textContent = user.username;
+      this.chatWindowPic!.src = await this.chatUI!.loadImage(user.username);
+      this.displayMessageHistory(user.userId);
+      const userManager = this.chatClient.getUserManager();
+      if (userManager) userManager.getBlockManager()!.checkBlockedTarget();
   }
 }
