@@ -1,6 +1,24 @@
-build image:
-    docker build -f Dockerfile . -t transcendance:latest 
+# ft_transcendance
+A full-stack web application implementing an online Pong game.
+SPA built in Typescript with a Fastify backend and SQLite3 database.
+
+## Features
+- User Management: Authentication system, complete user account, friends list management  
+- 3D Graphics: Game rendered in 3D using Babylon.js  
+- Server-Side Pong: Game logic handled on the server
+- Remote Google Sign-In: OAuth2 integration for third-party authentication  
+- Multiple game modes : local, online, and tournament with matchmaking system
+- Live chat with message history, blocking, game invites, active users, user profile access, and friend requests  
+- Supports multiple modern browsers  
+- User and game statistics dashboards
+- Translated in 3 languages  
 
 
-run: 
-    docker run -it --rm -p 8080:8080 transcendance:latest /bin/bash
+## Tech Stack
+- Typescript
+- Tailwind CSS
+- Fastify/Node.js
+- SQLite3
+- Socket.io
+- Chart.js
+- Babylon.js
