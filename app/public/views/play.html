@@ -1,0 +1,111 @@
+<main id="main_content">
+
+    <!-- Section sélection du mode -->
+    <section id="gameModeSelection"
+        class="flex flex-col items-center justify-center min-h-screen px-6 space-y-16 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-yellow-400 select-none">
+
+        <h1 class="text-4xl sm:text-5xl text-yellow-400 text-center tracking-widest drop-shadow-lg"
+            data-i18n="play.mode">
+            Choisis ton mode de jeu
+        </h1>
+
+        <div class="flex flex-col sm:flex-row gap-10">
+            <button id="localButton"
+                class="px-8 py-5 bg-blue-700 hover:bg-blue-900 border-4 border-blue-400 rounded-lg shadow-lg transition text-lg sm:text-xl"
+                data-i18n="play.local">
+                🎮 Local
+            </button>
+            <button id="remoteButton"
+                class="px-8 py-5 bg-green-700 hover:bg-green-900 border-4 border-green-400 rounded-lg shadow-lg transition text-lg sm:text-xl"
+                data-i18n="play.online">
+                🌍 En ligne
+            </button>
+            <button id="tournamentButton"
+                class="px-8 py-5 bg-purple-700 hover:bg-purple-900 border-4 border-purple-400 rounded-lg shadow-lg transition text-lg sm:text-xl"
+                data-i18n="play.tournament">
+                🏆 Tournoi
+            </button>
+        </div>
+
+    </section>
+
+    <!-- Section attente match -->
+    <section id="waitingForMatch"
+        class="hidden fixed inset-0 bg-black/95 flex flex-col justify-center items-center z-50 text-yellow-400 font-[Press_Start_2P] text-center space-y-8 px-8">
+
+        <div class="w-24 h-24 rounded-full border-4 border-yellow-400 border-t-transparent animate-spin"></div>
+
+        <p id="matchStatus" class="text-xl sm:text-2xl tracking-wider drop-shadow-md" data-i18n="play.search">
+            Recherche d'un adversaire...
+        </p>
+
+        <p id="opponentName" class="... hidden tracking-wider">
+            <span data-i18n="play.found">⚔️ Adversaire trouvé :</span>
+            <span id="opponentNameValue" class="text-white"></span>
+        </p>
+
+        <button id="cancelQueue"
+            class="mt-4 px-8 py-3 bg-red-700 hover:bg-red-900 border-4 border-red-500 rounded-lg shadow-md text-sm sm:text-base transition"
+            data-i18n="play.cancel">
+            ⛔ Annuler
+        </button>
+    </section>
+
+    <!-- Section attente invitation -->
+    <section id="waitingForInvite"
+        class="hidden fixed inset-0 bg-black/95 flex flex-col justify-center items-center z-50 text-yellow-400 font-[Press_Start_2P] text-center space-y-8 px-8">
+
+        <div class="w-24 h-24 rounded-full border-4 border-blue-400 border-t-transparent animate-spin"></div>
+
+        <p class="text-2xl sm:text-3xl text-blue-300 tracking-wider drop-shadow-md" data-i18n="play.waiting">
+            En attente que l'invité rejoigne la partie...
+        </p>
+
+    </section>
+
+    <!-- Section finale tournoi -->
+    <section id="waitingForFinal"
+        class="hidden fixed inset-0 bg-gradient-to-br from-purple-900 via-black to-purple-800 flex flex-col justify-center items-center z-50 text-yellow-400 font-[Press_Start_2P] text-center space-y-12 px-8">
+
+        <!-- Animation victoire -->
+        <div class="relative">
+            <div class="text-6xl animate-bounce">🏆</div>
+            <div class="absolute -top-2 -right-2 text-2xl animate-pulse">✨</div>
+            <div class="absolute -bottom-2 -left-2 text-2xl animate-pulse">⭐</div>
+        </div>
+
+        <div class="text-center space-y-6">
+            <h2 class="text-2xl sm:text-3xl text-green-400 tracking-wider drop-shadow-lg animate-pulse"
+                data-i18n="play.congrats">
+                🎉 FÉLICITATIONS ! 🎉
+            </h2>
+            <p class="text-lg sm:text-xl tracking-wider" data-i18n="play.qualified">
+                Vous êtes qualifié pour la
+            </p>
+            <p class="text-3xl sm:text-4xl text-yellow-300 tracking-widest drop-shadow-lg animate-pulse"
+                data-i18n="play.final">
+                ⚔️ FINALE ⚔️
+            </p>
+        </div>
+
+        <!-- Animation attente -->
+        <div class="flex flex-col items-center space-y-6">
+            <div class="w-16 h-16 rounded-full border-4 border-purple-400 border-t-transparent animate-spin"></div>
+            <p class="text-base sm:text-lg text-purple-300 tracking-wider max-w-md" data-i18n="play.semiFinal">
+                En attente de la seconde demi-finale...
+            </p>
+            <p class="text-sm text-gray-400 tracking-wide" data-i18n="play.finalStart">
+                La finale commencera automatiquement
+            </p>
+        </div>
+
+        <!-- Bouton retour -->
+        <button id="returnToMenuFromFinal"
+            class="mt-8 px-6 py-3 bg-gray-700 hover:bg-gray-900 border-4 border-gray-500 rounded-lg shadow-md text-sm transition opacity-75"
+            data-i18n="play.backMenu">
+            🏠 Retour au menu
+        </button>
+
+    </section>
+
+</main>
