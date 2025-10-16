@@ -1,7 +1,7 @@
 #!/bin/bash
 cd /app
 
-# installation
+# Installation
 if [ ! -d "node_modules" ]; then
     xargs -a dep.txt npm install --no-fund --no-audit
     xargs -a dev_dep.txt npm install --save-dev --no-fund --no-audit

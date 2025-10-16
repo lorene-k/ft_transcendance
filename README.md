@@ -22,3 +22,13 @@ SPA built in Typescript with a Fastify backend and SQLite3 database.
 - Socket.io
 - Chart.js
 - Babylon.js
+
+
+## Usage
+```bash
+    git clone https://github.com/lorene-k/ft_transcendance.git
+    cd ft_transcendance
+    make
+```
+
+*(Project won't run without .env file)*

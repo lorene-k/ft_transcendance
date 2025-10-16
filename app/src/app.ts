@@ -10,22 +10,20 @@ import fastifyCookie from "@fastify/cookie";
 import Store from "./db/store.js";
 import fastifySocketIO from "fastify-socket.io";
 import chatPlugin from "./plugins/chat/chatplugin.js";
-import { fileURLToPath } from "url"; // FOR MATH
+import { fileURLToPath } from "url";
 import { GameManager } from "./game/gameManager.js";
 import { generateCerts } from './utils/generateCerts.js';
 import fs from 'fs';
 import Multipart from '@fastify/multipart';
 import friends from './utils/friends.js';
 
-
-// const __dirname = import.meta.dirname;
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename); // FOR MATH
+const __dirname = path.dirname(__filename);
 
 generateCerts();
 
 const server = fastify({
-    https: { // setting https protocol with autosign openssl certificate
+    https: {
         key: fs.readFileSync('./key.pem'),
         cert: fs.readFileSync('./cert.pem'),
     },
@@ -34,11 +32,10 @@ const server = fastify({
     },
 });
 
-// PLUGINS (register plugins first or problems)
 let db = server.register(dbPlugin);
 server.register(formbody);
 server.register(fastifyCookie);
-await db; // db needed for session
+await db;
 server.register(Multipart, {
     limits: {
         fileSize: 5 * 1024 * 1024,
@@ -46,6 +43,7 @@ server.register(Multipart, {
         fields: 10,
     },
 });
+
 const sessionStore = new Store.SessionStore(server.database, server.log);
 server.register(fastifySession, {
     secret: process.env.SESSION_SECRET as string,
@@ -57,7 +55,7 @@ server.register(fastifySession, {
     store: sessionStore,
 });
 
-server.decorate("sessionStore", new Store.SessionStore(server.database, server.log)); // roro comprend pas
+server.decorate("sessionStore", new Store.SessionStore(server.database, server.log));
 await server.register(fastifySocketIO.default, { connectionStateRecovery: {} });
 await server.register(chatPlugin);
 server.register(fastifyStatic, {
@@ -65,13 +63,13 @@ server.register(fastifyStatic, {
     prefix: "/",
 })
 
-//all user endpoint here
+// User endpoints
 server.register(root.routes);
 
-//all api routes (and hooks ?) here
+// API routes
 server.register(root.api);
 
-//all request linked to authentification (and sessions managment ?) here
+// Requests linked to authentification
 server.register(root.auth);
 
 const gm = GameManager.getInstance(server);

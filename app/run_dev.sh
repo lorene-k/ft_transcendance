@@ -1,8 +1,8 @@
 #!/bin/bash
-# little script to launch everything in watch mode (reload app and compile everything on change)
-# can be launch directly or with `npm run dev`
-set -euo pipefail
 
+# Launch project in watch mode (execute script or run with `npm run dev`)
+
+set -euo pipefail
 
 npx tsc --build --watch &
 tsc_pid=$!
@@ -18,5 +18,3 @@ node_pid=$!
 trap "kill $tsc_pid $tailwind_pid $node_pid" EXIT
 
 wait
-
-
