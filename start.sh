@@ -20,7 +20,5 @@ NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels \
     | grep -o '"public_url":"[^"]*"' \
     | sed 's/"public_url":"//;s/"$//')
 
-echo "URL de ngrok : $NGROK_URL"
-
 # Lancer le serveur Node.js
 exec "$@"

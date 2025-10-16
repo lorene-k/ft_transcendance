@@ -2,21 +2,16 @@
 import { AmmoJSPlugin } from "@babylonjs/core";
 import { setPhysicImpostor } from "./config.js";
 import { IPhysicsEnginePlugin, IPhysicsEnginePluginV2 } from "babylonjs";
-// Déclaration globale pour Ammo.js
 declare const Ammo: any;
 
 /// <reference types="babylonjs" />
 /// <reference types="babylonjs-gui" />
 
-
-
-// TODO: recharger ammo plus clean
 async function initializePhysicsEngine(scene: BABYLON.Scene): Promise<boolean> {
     try {
         await loadAmmoFromCDN();
         const ammoGlobal = (window as any).Ammo;
         if (!ammoGlobal) throw new Error("Ammo.js n'est pas chargé");
-        // cast propre pour TS
         const ammoPlugin = new BABYLON.AmmoJSPlugin(true, ammoGlobal) as unknown as BABYLON.IPhysicsEnginePluginV2;
         scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), ammoPlugin);
         return true;
@@ -66,7 +61,7 @@ async function loadPaddle(scene: BABYLON.Scene) {
         try {
             const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../../ressources/", "raquette.glb", scene);
 
-            const container = result.meshes[0]; // parent racine
+            const container = result.meshes[0];
             container.name = config.name;
             container.position = config.position.clone();
             container.scaling = new BABYLON.Vector3(2, 2, 2);
@@ -128,9 +123,6 @@ async function loadPaddle(scene: BABYLON.Scene) {
 // Fonction qui crée la scène
 export async function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     let scene = new BABYLON.Scene(engine);
-    if (!scene)
-        console.log("Scene not load");
-
     var camera = new BABYLON.ArcRotateCamera(
         "ArcCam",
         Math.PI / 2,
@@ -139,14 +131,10 @@ export async function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElem
         BABYLON.Vector3.Zero(),
         scene
     );
-
-    if (!camera)
-        console.log("Camera not load");
-
+    if (!scene || !camera) return;
     scene.activeCamera = camera;
     camera.attachControl(canvas, true);
 
-    // Initialiser le moteur physique - OBLIGATOIRE
     const physicsInitialized = await initializePhysicsEngine(scene);
     if (!physicsInitialized) {
         throw new Error("Physic not load");

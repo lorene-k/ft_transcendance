@@ -52,7 +52,6 @@ export class GameManager {
     private handleNewRoom(player1: Player, player2: Player) {
         const room = new Room("remote", player1, player2);
         this.rooms.push(room);
-        // Envoi immédiat du type de joueur et des usernames à chaque joueur
         if (player1.socket && player1.socket.connected) {
             player1.socket.emit('player_info', room.sendPlayerType(player1.session.userId));
         }
@@ -62,12 +61,7 @@ export class GameManager {
     }
 
     private handleTournamentCreated(players: Player[]) {
-        console.log(`🏆 Création d'un tournoi avec ${players.length} joueurs`);
-
-        // Creation d'un ID de tournoi unique
         const tournamentId = `tournament_${Date.now()}`;
-
-        // Initialiser les données du tournoi
         this.tournamentResults.set(tournamentId, {
             semifinals: [
                 { matchId: `${tournamentId}_semifinal_1`, winner: null },
@@ -77,7 +71,6 @@ export class GameManager {
             finaleCreated: false
         });
 
-        // Créer les matchs de demi-finales
         const match1 = new Room("tournament", players[0], players[1]);
         match1.tournamentId = tournamentId;
         match1.matchType = 'semifinal';
@@ -92,7 +85,6 @@ export class GameManager {
 
         this.rooms.push(match1, match2);
 
-        // send info aux joueurs
         if (players[0].socket && players[0].socket.connected) {
             players[0].socket.emit('player_info', match1.sendPlayerType(players[0].session.userId));
         }
@@ -105,11 +97,6 @@ export class GameManager {
         if (players[3].socket && players[3].socket.connected) {
             players[3].socket.emit('player_info', match2.sendPlayerType(players[3].session.userId));
         }
-        console.log(`Demi-finale 1: ${players[0].username} vs ${players[1].username}`);
-        console.log(`Demi-finale 2: ${players[2].username} vs ${players[3].username}`);
-
-        // Notifier les joueurs de leurs matches
-        // Match 1 (demi-finale 1)
         if (players[0].socket && players[1].socket && players[0].socket.connected && players[1].socket.connected) {
             players[0].socket.emit('match_found', {
                 opponent: players[1].username,
@@ -123,7 +110,6 @@ export class GameManager {
             });
         }
 
-        // Match 2 (demi-finale 2)
         if (players[2].socket && players[3].socket && players[2].socket.connected && players[3].socket.connected) {
             players[2].socket.emit('match_found', {
                 opponent: players[3].username,
@@ -156,12 +142,9 @@ export class GameManager {
         });
     }
 
-    //TODO: recuperer via sessionStore directement ?
     private configureSocketIO(server: FastifyInstance): void {
         server.ready().then(() => {
-            //const io = (server as any).io;
             server.io.on("connection", (socket) => {
-
                 const sessionId = this.extractSessionIdFromSocket(socket);
                 if (!sessionId) {
                     console.warn("Aucun cookie de session trouvé, connexion ignorée");
@@ -178,12 +161,10 @@ export class GameManager {
                         const userId = sessionData.userId;
                         if (!userId) {
                             console.warn("Session trouvée mais sans userId, déconnexion forcée");
-                            //deco de la socket
                             socket.disconnect();
                             return;
                         }
 
-                        // recup username dans la db
                         let username: string;
                         try {
                             username = await this.getUsername(userId);
@@ -191,11 +172,8 @@ export class GameManager {
                             console.warn("Impossible de récupérer le username");
                             username = sessionData.username || "undefined";
                         }
-                        // Gestion deconnection/ready to play du joueur
                         this.managePlayerConnection(userId, username, sessionData, socket);
-                        // Traiter les invitations en attente pour ce joueur
                         this.waitList.checkPendingInvites(String(userId));
-                        // listener du socket
                         this.setupSocketEvents(userId, socket);
                     })
                     .catch((error) => {
@@ -209,7 +187,6 @@ export class GameManager {
         const cookies = cookie.parse(socket.handshake.headers.cookie || "");
         const rawSessionId = cookies.sessionId;
         if (!rawSessionId) return null;
-
 
         return rawSessionId.startsWith("s:")
             ? rawSessionId.slice(2).split('.')[0]
@@ -237,12 +214,10 @@ export class GameManager {
         });
     }
 
-
     private managePlayerConnection(userId: number, username: string, sessionData: any, socket: any): void {
         let player = this.mapPlayer.get(userId);
 
         if (!player) {
-            // Nouveau joueur
             player = {
                 session: sessionData,
                 socket: socket,
@@ -251,7 +226,6 @@ export class GameManager {
                 role: null,
             };
             this.mapPlayer.set(userId, player);
-            console.log(`Nouveau joueur connecté : ${username} (${userId})`);
         } else {
             if (player.socket && player.socket.id !== socket.id) {
                 player.socket.disconnect(true);
@@ -260,13 +234,11 @@ export class GameManager {
             player.online = true;
             player.session = sessionData;
             player.username = username;
-            console.log(`Reconnexion du joueur : ${username} (${userId}) avec comme socket ${socket.id}`);
         }
     }
 
 
     private setupSocketEvents(userId: number, socket: any): void {
-
         socket.on("get_username", () => {
             this.sendUsername(userId, socket);
         });
@@ -277,14 +249,9 @@ export class GameManager {
             this.handleLeaveGame(userId);
         });
         socket.on("cancel_queue", () => {
-            const removedFromRemote = this.waitList.removePlayer(userId);
-
-            if (removedFromRemote) {
-            } else {
-            }
+            this.waitList.removePlayer(userId);
         });
         socket.on("leave_tournament", () => {
-            // Pour le mode tournoi seulement
             this.waitList.removePlayerFromTournament(userId);
         });
 
@@ -294,14 +261,12 @@ export class GameManager {
                 player.online = false;
                 player.socket = null;
                 this.waitList.removePlayerFromAll(userId);
-                // Ajout : gérer le cas où le joueur quitte en pleine partie
                 this.checkRoomsStatus();
                 this.handleLeaveGame(userId);
             }
         });
 
         socket.on("get_player_type", () => {
-            // Chercher la room du joueur
             const playerRoom = this.rooms.find(room => room.players.some(p => p.session.userId === userId));
             if (!playerRoom) {
                 if (socket && socket.connected)
@@ -352,22 +317,13 @@ export class GameManager {
         }
     }
 
-
-    // DEBUG
-    public listConnectedPlayers(): void {
-        this.mapPlayer.forEach((player, sessionKey) => {
-            if (player.socket)
-                console.log(`SessionKey: ${sessionKey}, username: ${player.username}, socket id: ${player.socket.id}`);
-        });
-    }
-
     public async addRoom(mode: string, userSession: FastifySessionObject): Promise<void>;
     public async addRoom(mode: string, userSession: FastifySessionObject, player1: string, player2: string): Promise<void>;
 
     public async addRoom(mode: string, userSession: FastifySessionObject, player1?: string, player2?: string): Promise<void> {
         const player = await this.socketPlayerMatch(userSession);
         if (!player) {
-            console.error("❌ Cannot find session with sessionID");
+            console.error("Cannot find session with sessionID");
             return;
         }
 
@@ -383,7 +339,6 @@ export class GameManager {
         }
 
         if (mode === "remote") {
-            this.listConnectedPlayers();
             this.waitList.addRemote(player);
         }
 
@@ -393,8 +348,6 @@ export class GameManager {
             }
         }
 
-
-        // Tournament 1. If the mode is tournament, add the player to the waitlist
         if (mode === "tournament") {
             this.waitList.addTournament(player);
         }
@@ -449,57 +402,30 @@ export class GameManager {
         }
     }
 
-    /*
-    je passe par checkMatchSatus et je vais appeler endMatch
-    🏁 Fin de match - Mode: local, MatchType: undefined, TournamentId: undefined
-    📤 Envoi match_ended normal pour kaka
-    coucou je passe ici
-    Match ajouté en base avec succès.
-    🧹 Nettoyage de GameLogic côté serveur (mode = local )
-    Déconnexion de kaka
-
-    je passe par checkMatchSatus et je vais appeler endMatch
-    🏁 Fin de match - Mode: local, MatchType: undefined, TournamentId: undefined
-    📤 Envoi match_ended normal pour kaka
-    Déconnexion de kaka
-    [LEAVE] Nettoyage room locale pour userId=2, joueur=kaka
-    🧹 Nettoyage de GameLogic côté serveur (mode = local )
-    */
-
-    // Gère la fin d'une demi-finale de tournoi
     private handleSemifinalResult(room: Room): void {
         const tournamentId = room.tournamentId!;
         const winner = room.winner;
 
-        console.log(`🏆 Demi-finale terminée - Tournoi: ${tournamentId}, Gagnant: ${winner.username}`);
-
-        // Récupérer ou créer les données du tournoi
         let tournamentData = this.tournamentResults.get(tournamentId);
         if (!tournamentData) {
             console.warn(`Données de tournoi introuvables pour ${tournamentId}`);
             return;
         }
 
-        // Marquer la demi-finale comme terminée avec son gagnant
         const semifinalIndex = tournamentData.semifinals.findIndex(sf => sf.matchId === room.id);
         if (semifinalIndex !== -1) {
             tournamentData.semifinals[semifinalIndex].winner = winner;
             tournamentData.finalists.push(winner);
-
         }
-
-        // Vérifier si les deux demi-finales sont terminées
 
         const completedSemifinals = tournamentData.semifinals.filter(sf => sf.winner !== null);
         if (completedSemifinals.length === 2 && !tournamentData.finaleCreated) {
-            console.log(`🏆 Création de la finale pour le tournoi ${tournamentId}`);
             this.createTournamentFinal(tournamentId, tournamentData.finalists);
             tournamentData.finaleCreated = true;
         }
         this.tournamentResults.set(tournamentId, tournamentData);
     }
 
-    // Création de la finale du tournoi
     private createTournamentFinal(tournamentId: string, finalists: Player[]): void {
         if (finalists.length !== 2) {
             finalists.forEach(player => {
@@ -527,8 +453,6 @@ export class GameManager {
             finalists[1].socket.emit('player_info', finalRoom.sendPlayerType(finalists[1].session.userId));
         }
 
-
-        // Notifier les finalistes
         if (finalists[0].socket && finalists[1].socket && finalists[0].socket.connected && finalists[1].socket.connected) {
             finalists[0].socket.emit('tournament_final', {
                 opponent: finalists[1].username,
@@ -539,8 +463,6 @@ export class GameManager {
                 message: 'C\'est la FINALE ! Bonne chance !'
             });
         }
-
-        console.log(`Finale créée: ${finalists[0].username} vs ${finalists[1].username}`);
     }
 
     private async addInfoDb(match: Room): Promise<void> {
@@ -566,17 +488,7 @@ export class GameManager {
                     [player1Id, player1Score, player2Id, player2Score, winnerId, dateMatch, matchDuration, mode],
                     function (err: Error | null) {
                         if (err) {
-                            console.log({
-                                player1Id,
-                                player2Id,
-                                player1Score,
-                                player2Score,
-                                winnerId,
-                                dateMatch,
-                                matchDuration,
-                                mode,
-                            });
-                            console.error("Erreur insertion match:", err.message);
+                            console.error("Error:", err.message);
                             reject(err);
                         } else {
                             resolve();
@@ -587,26 +499,17 @@ export class GameManager {
         }
     }
 
-    // Gerer la disconnection et nettoyage des fichiers
-
     private handleLeaveGame(userId: number): void {
         const player = this.mapPlayer.get(userId);
         if (!player) return;
-
-        // Chercher la room du joueur
         const playerRoom = this.rooms.find(room =>
             room.players.some(p => p.session.userId === userId)
         );
-
-        // Cas tournoi : gestion spéciale si un finaliste quitte
-        // 1. Cas classique : le joueur est dans une room de finale
         if (playerRoom && playerRoom.mode === "tournament" && playerRoom.tournamentId) {
             const tournamentId = playerRoom.tournamentId;
             const tournamentData = this.tournamentResults.get(tournamentId);
 
-            // Si le joueur quitte la finale
             if (playerRoom.matchType === 'final') {
-                // Notifier toutes les demi-finales du tournoi (même terminées)
                 const allSemifinalRooms = this.rooms.filter(r =>
                     r.tournamentId === tournamentId &&
                     r.matchType === 'semifinal'
@@ -622,7 +525,7 @@ export class GameManager {
                     });
                     semifinalRoom.forceEndMatch?.();
                 });
-                // Notifier l'autre finaliste
+
                 const otherFinalist = playerRoom.players.find(p => p.session.userId !== userId);
                 if (otherFinalist && otherFinalist.socket && otherFinalist.socket.connected) {
                     otherFinalist.socket.emit('opponent_left', {
@@ -630,13 +533,12 @@ export class GameManager {
                         reason: 'final_aborted'
                     });
                 }
-                // Supprimer toutes les rooms du tournoi
+
                 this.rooms = this.rooms.filter(r => r.tournamentId !== tournamentId);
                 this.tournamentResults.delete(tournamentId);
                 return;
             }
 
-            // // Si la finale a déjà été créée, ou si le joueur est finaliste en attente
             if (tournamentData && tournamentData.finaleCreated) {
                 tournamentData.finalists.forEach(finalist => {
                     if (finalist.socket && finalist.socket.connected) {
@@ -680,30 +582,9 @@ export class GameManager {
                 return;
             }
 
-            // Si le joueur est dans une demi-finale (avant la finale)
-            // if (tournamentData && !tournamentData.finaleCreated) {
-            //     const tournamentRooms = this.rooms.filter(r => r.tournamentId === tournamentId);
-            //     tournamentRooms.forEach(room => {
-            //         room.players.forEach(p => {
-            //             if (p.socket && p.socket.connected) {
-            //                 p.socket.emit('opponent_left', {
-            //                     message: "Le tournoi est annulé : un joueur a quitté ou s'est déconnecté.",
-            //                     reason: 'tournament_aborted'
-            //                 });
-            //             }
-            //         });
-            //         room.forceEndMatch?.();
-            //     });
-            //     // si y'a un finaliste qui attend
-            //     this.rooms = this.rooms.filter(r => r.tournamentId !== tournamentId); //TODO ; trouver une autre methode
-            //     this.tournamentResults.delete(tournamentId);
-            //     return;
-            // }
-            // Si le joueur est dans une demi-finale (avant la finale)
             if (tournamentData && !tournamentData.finaleCreated) {
                 const tournamentRooms = this.rooms.filter(r => r.tournamentId === tournamentId);
 
-                // Notifier les demi-finalistes restants
                 tournamentRooms.forEach(room => {
                     room.players.forEach(p => {
                         if (p.socket && p.socket.connected) {
@@ -716,7 +597,6 @@ export class GameManager {
                     room.forceEndMatch?.();
                 });
 
-                // 🔔 Notifier aussi le(s) finaliste(s) qui attend(ent) déjà
                 if (tournamentData.finalists) {
                     tournamentData.finalists.forEach(finalist => {
                         if (finalist.socket && finalist.socket.connected) {
@@ -728,7 +608,6 @@ export class GameManager {
                     });
                 }
 
-                // Nettoyage
                 this.rooms = this.rooms.filter(r => r.tournamentId !== tournamentId);
                 this.tournamentResults.delete(tournamentId);
                 return;
@@ -736,14 +615,11 @@ export class GameManager {
 
         }
 
-        // 2. Cas spécial : le joueur est dans la liste des finalistes mais pas dans la room de finale (finale pas encore créée)
-        // On parcourt tous les tournois pour voir si ce joueur est finaliste en attente
         for (const [tournamentId, tournamentData] of this.tournamentResults.entries()) {
             if (
                 tournamentData.finalists.some(p => p.session.userId === userId) &&
                 !tournamentData.finaleCreated
             ) {
-                // Notifier l'autre finaliste
                 const otherFinalist = tournamentData.finalists.find(p => p.session.userId !== userId);
                 if (otherFinalist && otherFinalist.socket && otherFinalist.socket.connected) {
                     otherFinalist.socket.emit('opponent_left', {
@@ -751,7 +627,6 @@ export class GameManager {
                         reason: 'final_aborted'
                     });
                 }
-                // Notifier toutes les demi-finales du tournoi
                 const allSemifinalRooms = this.rooms.filter(r =>
                     r.tournamentId === tournamentId &&
                     r.matchType === 'semifinal'
@@ -767,14 +642,12 @@ export class GameManager {
                     });
                     semifinalRoom.forceEndMatch?.();
                 });
-                // Supprimer toutes les rooms du tournoi
                 this.rooms = this.rooms.filter(r => r.tournamentId !== tournamentId);
                 this.tournamentResults.delete(tournamentId);
                 return;
             }
         }
 
-        // Cas remote classique
         if (playerRoom && playerRoom.mode === "remote") {
             const otherPlayer = playerRoom.players.find(p => p.session.userId !== userId);
             if (otherPlayer && otherPlayer.socket && otherPlayer.socket.connected) {
@@ -786,17 +659,12 @@ export class GameManager {
             playerRoom.forceEndMatch();
             this.rooms = this.rooms.filter(r => r !== playerRoom);
         }
-
-        // Cas local : nettoyage et suppression de la room locale
         if (playerRoom && playerRoom.mode === "local") {
             playerRoom.cleanupResources();
             this.rooms = this.rooms.filter(r => r !== playerRoom);
         }
-
         this.waitList.removePlayer(userId);
     }
-
-
 
 
     private ensureUsernameReady(userId: number): string | null {

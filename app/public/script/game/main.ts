@@ -24,10 +24,10 @@ function whichPlayer(socket: any): Promise<'player1' | 'player2' | 'local'> {
         const timeout = setTimeout(() => {
             resolve('local');
         }, 3000);
-        
+
         socket.on("playerType", (playerState: any) => {
             clearTimeout(timeout);
-            
+
             if (playerState === null || playerState === undefined || playerState === 'null') {
                 resolve('local');
             } else {
@@ -40,15 +40,14 @@ function whichPlayer(socket: any): Promise<'player1' | 'player2' | 'local'> {
 export async function initScene(socket: any) {
     socket.removeAllListeners('sceneUpdate');
     socket.removeAllListeners('animationUpdate');
-    
-    // const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+
     let canvas;
     const el = document.getElementById("renderCanvas");
-        if (el instanceof HTMLCanvasElement) {
-            canvas = el;
-        } else {
-        throw new Error("Element non trouvé ou pas un canvas");
-}
+    if (el instanceof HTMLCanvasElement) {
+        canvas = el;
+    } else {
+        throw new Error("Element not found.");
+    }
 
     const engine = new BABYLON.Engine(canvas, true);
     const scene = await createScene(engine, canvas);
@@ -59,12 +58,12 @@ export async function initScene(socket: any) {
 
     const ball = scene.getMeshByName("pingPongBall");
     const ground = scene.getMeshByName("ground");
-    
+
     if (!ball || !ground) {
-        throw new Error("Le mesh 'pingPongBall' ou 'ground' n'a pas été trouvé !");
+        throw new Error("'pingPongBall' or 'ground' mesh not found.");
     }
-    
-    
+
+
     const gameManager = new GameManager(scene, ball, ground, socket);
 
     engine.runRenderLoop(() => {
@@ -72,14 +71,12 @@ export async function initScene(socket: any) {
             scene.render();
         }
     });
-    
+
     updateData(playerInput, socket);
-    
+
     window.addEventListener("resize", () => {
         if (engine) {
             engine.resize();
         }
     });
-    
-    console.log("✅ Scène initialisée avec succès");
 }

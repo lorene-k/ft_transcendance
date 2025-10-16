@@ -1,4 +1,4 @@
-import { Socket, Namespace} from "socket.io";
+import { Socket, Namespace } from "socket.io";
 import SocketManager from "./SocketManager.js";
 import { checkSessionExpiry } from "./chatplugin.js";
 
@@ -10,11 +10,11 @@ export function listUsers(socket: Socket, chatNamespace: Namespace, socketManage
         const firstSocketId = socketIds.values().next().value;
         const sock = chatNamespace.sockets.get(firstSocketId!);
         if (sock) {
-          users.push({
-              userId: sessionId.toString(),
-              username: sock.username,
-              self: sock.session.userId === socket.session.userId
-          });
+            users.push({
+                userId: sessionId.toString(),
+                username: sock.username,
+                self: sock.session.userId === socket.session.userId
+            });
         }
     }
     socket.emit("users", users);

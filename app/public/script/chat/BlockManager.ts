@@ -48,7 +48,6 @@ export default class BlockManager {
                     blockedBtn.textContent = `Unblock user`;
                     break;
             }
-            // blockedBtn.textContent = "Unblock user";
         } else if (!this.targetBlocked) {
             blockedMsg.classList.add("hidden");
             const savedLang = localStorage.getItem("lang");
@@ -63,7 +62,6 @@ export default class BlockManager {
                     blockedBtn.textContent = `Block user`;
                     break;
             }
-            // blockedBtn.textContent = "Block user";
         }
     }
 

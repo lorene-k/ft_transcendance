@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { googleClient } from '../../utils/googleClient.js';
 
 export async function getGoogleClientId(_request: FastifyRequest, reply: FastifyReply) {
-  return reply.send({ clientId: process.env.GOOGLE_CLIENT_ID });
+    return reply.send({ clientId: process.env.GOOGLE_CLIENT_ID });
 }
 
 export async function handleGoogleAuth(request: FastifyRequest, reply: FastifyReply) {
@@ -55,7 +55,7 @@ export async function handleGoogleAuth(request: FastifyRequest, reply: FastifyRe
         request.session.authenticated = true;
         request.session.userId = user.id;
 
-        request.session.save(); // option 1
+        request.session.save();
         return reply.send({
             "logged": true,
             id: user.id,

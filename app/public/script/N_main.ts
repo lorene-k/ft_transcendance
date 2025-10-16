@@ -1,8 +1,6 @@
-import { PingPong } from "babylonjs/Maths/math.scalar.functions";
 import { initForm } from "./form.js";
 import { index_setup } from "./Index.js";
 import { move_to, navbar, footer } from "./N_nav.js";
-// import { setLanguage } from "../translate.js";
 import { applyTranslations, initI18n, setLanguage } from "../translate.js";
 
 await initI18n();
@@ -15,7 +13,6 @@ const navEntries = performance.getEntriesByType('navigation') as PerformanceNavi
 const pageAccessedByReload = navEntries.some(nav => nav.type === 'reload');
 
 window.addEventListener("DOMContentLoaded", async () => {
-    // Set select to current language // revoir
     const langSwitcher = document.getElementById("langSwitcher") as HTMLSelectElement;
     if (langSwitcher) {
         langSwitcher.value = localStorage.getItem("lang") || "en";

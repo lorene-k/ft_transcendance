@@ -3,11 +3,10 @@ import bcrypt from 'bcrypt';
 import { RequestFullscreen } from "babylonjs";
 const saltRounds = 10;
 
-// describe data from body request
 interface RegisterBody {
-    username: string; //username choisi par l'utilisateur
-    email: string; //email
-    password: string; //mdp
+    username: string;
+    email: string;
+    password: string;
 }
 
 interface LoginBody {
@@ -15,12 +14,9 @@ interface LoginBody {
     password: string;
 }
 
-//usual query
 const insertuser = 'INSERT INTO user (username, email, password, created_at) VALUES (?, ?, ?, date())'
 
 export function register(fastify: FastifyInstance) {
-    // add a new entry to the database user, at this point all checks for the credential
-    // used should have been done
     return async function (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) {
         const { username, email, password } = request.body;
         if (!username || !email || !password || password.length < 6)
@@ -51,7 +47,6 @@ export function login(fastify: FastifyInstance) {
             });
         }
         fastify.log.info("request login for: %s", username);
-        // fetch all = execute la requete SQL et retourne les données sous forme de tableau. Si aucun utilisateur n'est trouvé le tableau est vide
         const rows = await fastify.database.fetch_all('SELECT id, password FROM user WHERE username = ?', [username])
         if (!rows || rows.length === 0) {
             fastify.log.error('query returned empty');
@@ -60,7 +55,6 @@ export function login(fastify: FastifyInstance) {
                 "reason": "username unknown",
             });
         }
-        // comparaison du mot de passe fourni et celui stocké (hashé) dans la base données
         else {
             const user = rows[0]
             if (!user.password)
@@ -70,7 +64,6 @@ export function login(fastify: FastifyInstance) {
                 });
             if (await bcrypt.compare(password, user.password)) {
                 fastify.log.info("user %s logged", username);
-                // stockage des infos dans la session rataché a l'instance fastify
                 request.session.authenticated = true;
                 request.session.userId = user.id;
             }

@@ -12,7 +12,7 @@ export function account_setup(popup_id: number | null = null) {
 
             if (target.matches("button")) {
                 const li = target.closest("li")!;
-                const username = li.querySelector("span.font-medium")?.textContent.trim();
+                const username = li.querySelector("span.font-medium")?.textContent!.trim();
                 fetch(`/api/removefriend/${username}`)
                 li.remove();
 

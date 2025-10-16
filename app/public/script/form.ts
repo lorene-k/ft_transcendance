@@ -5,11 +5,9 @@ import { initGoogle, googleInitialized } from "./google.js";
 async function register_value_check(formData: FormData): Promise<[boolean, string | null]> {
     const username = formData.get('username')?.toString().trim() || '';
     const password = formData.get('password')?.toString() || '';
-    // Basic validation
     if (password.length < 6) {
         return [false, 'Password must be at least 6 characters'];
     }
-
     const response = fetch('/api/check-username', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,7 +94,7 @@ export async function initForm() {
                 { theme: 'outline', size: 'large' }
             );
         } else {
-            console.warn("Google not initialized yet");// test
+            console.warn("Google not initialized yet");
         }
     }
 
@@ -162,7 +160,7 @@ export async function initForm() {
 
     });
 
-    // ------------  login  ----------------
+    // ------------  LOGIN  ----------------
     loginform?.addEventListener('submit', async function (event) {
 
         event.preventDefault();

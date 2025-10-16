@@ -43,7 +43,6 @@ export default class GameModeManager {
 
     }
     // ========== LISTENERS  ==========
-
     private setupEventListeners() {
         const localButton = document.getElementById('localButton');
         const remoteButton = document.getElementById('remoteButton');
@@ -65,10 +64,8 @@ export default class GameModeManager {
     }
 
 
-    // ========== HANDLERS POUR LES MODES DE JEU ==========
-
+    // ========== Game mode handlers ==========
     private async handleLocalMode() {
-        console.log('Mode local sélectionné');
         this.currentMode = 'local';
         await this.notifyServer('local');
         showGame(this);
@@ -76,7 +73,6 @@ export default class GameModeManager {
     }
 
     private async handleRemoteMode() {
-        console.log('Mode remote sélectionné');
         this.currentMode = 'remote';
         await this.notifyServer('remote');
         showWaitlist(this);
@@ -84,7 +80,6 @@ export default class GameModeManager {
     }
 
     private async handleTournamentMode() {
-        console.log('Mode tournament sélectionné');
         this.currentMode = 'tournament';
         await this.notifyServer('tournament');
         showWaitlist(this);
@@ -92,17 +87,13 @@ export default class GameModeManager {
     }
 
     public async handleInviteMode(player1: string, player2: string) {
-        console.log('Mode Invite sélectionné');
         this.currentMode = 'invite';
-        console.log('Appel de showInviteWaitlist');
         await this.notifyServer('invite', player1, player2);
-        showInviteWaitlist(this); // Affiche une waitlist dédiée à l'invite
+        showInviteWaitlist(this);
     }
 
 
-    // ========== HANDLERS POUR LES ÉTATS DE JEU ==========
-
-
+    // ========== Game state handlers ==========
     handleQuitGame(returntoHome: boolean) {
         if (this.socket && this.socket.connected && !this.isQuiting) {
             this.socket.emit('leave_game');
@@ -113,21 +104,18 @@ export default class GameModeManager {
     }
 
     public returnToHomeScreen() {
-        console.log('Retour à l\'écran d\'accueil');
         this.hideWaitingForFinal();
         destroyEverything(this);
         move_to("home");
     }
 
-    // ========== NETTOYAGE ==========
-
+    // ========== Cleaning ==========
     public destroy() {
         if (this.pingInterval) {
             clearInterval(this.pingInterval);
             this.pingInterval = null;
         }
         if (this.socket) {
-            // Nettoyage complet des listeners
             this.socket.removeAllListeners();
             this.socket.disconnect();
         }
@@ -142,15 +130,13 @@ export default class GameModeManager {
         this.isInviteMode = false;
         this.player1 = "";
         this.player2 = "";
-        // Masquer la waitlist d'invitation si elle est affichée
         if ((window as any).gameManager === this) {
             (window as any).gameManager = null;
         }
-        console.log('GameModeManager détruit');
     }
 
 
-    // ========== LANCEMENT DU JEU ==========
+    // ========== Game launch ==========
 
     async initializeGame() {
         if (this.gameInitialized) {
@@ -172,7 +158,7 @@ export default class GameModeManager {
         }
     }
 
-    // ========== COMMUNICATION SERVEUR ==========
+    // ========== Server communication ==========
     private async notifyServer(mode: string, player1?: string, player2?: string) {
         try {
             let body;
@@ -193,14 +179,12 @@ export default class GameModeManager {
             });
 
         } catch (error) {
-            console.error('❌ Erreur lors de la requête:', error);
+            console.error('Error:', error);
         }
     }
-    // ========== WEBSOCKET EVENTS ==========
+    // ========== Socket events ==========
     private setupSocketListeners() {
-        // Listener pour recevoir le rôle et les usernames
         this.socket.on('player_info', (data: { playerType: string, player1_username: string, player2_username: string }) => {
-            //console.warn('je recois les infos: ', data);
             this.player_type = data.playerType;
             if (data.playerType === 'player1') {
                 this.my_username = data.player1_username;
@@ -223,14 +207,10 @@ export default class GameModeManager {
             this.handleMatchFound(data);
         });
 
-        // Ajout pour le mode invite :
         this.socket.on('invite_match_found', (data: { opponent: string }) => {
             this.opponent_username = data.opponent;
             this.handleMatchFound(data);
         });
-
-
-        //POP UP
 
         this.socket.on('match_ended', (data: {
             message: string,
@@ -242,21 +222,18 @@ export default class GameModeManager {
                 matchInfo: string
             }
         }) => {
-            console.log('Match ended:', data);
             this.handleMatchEnded(data);
         });
 
-        // POP UP
         this.socket.on('opponent_left', (data: { message: string, reason: string }) => {
             this.handleOpponentLeft(data);
         });
 
         this.socket.on('playerType', (playerType: any) => {
             (this as any).receivedPlayerType = playerType;
-            console.log("recu player type");
         });
 
-        // Événement pour la notification de finale de tournoi
+        // Final tournament notif
         this.socket.on('tournament_final', (data: {
             opponent: string,
             message: string
@@ -268,7 +245,7 @@ export default class GameModeManager {
             const rtt = Date.now() - start;
         });
 
-        // Mesure de latence
+        // Latency measure
         this.pingInterval = setInterval(() => {
             if (this.socket) {
                 const start = Date.now();
@@ -284,7 +261,6 @@ export default class GameModeManager {
         const opponentName = document.getElementById('opponentName');
         const opponentValue = document.getElementById('opponentNameValue');
 
-        // if (statusText) statusText.textContent = statusMessage;
         if (opponentName) opponentName.classList.remove('hidden');
         if (opponentValue) opponentValue.textContent = data.opponent;
 
@@ -294,8 +270,7 @@ export default class GameModeManager {
     }
 
 
-    // ========== GESTION DES ÉVÉNEMENTS DE MATCH ==========
-
+    // ========== Game event handling ==========
     private handleMatchEnded(data: {
         message: string,
         winner: string,
@@ -307,16 +282,13 @@ export default class GameModeManager {
         }
     }) {
 
-        // Si c'est une demi-finale de tournoi, afficher l'écran d'attente
         if (data.matchType === "tournament" && data.tournamentInfo?.matchType === "semifinal") {
-            // Afficher un écran d'attente de finale au lieu de retourner à l'accueil si je suis le gagnant
             if (data.winner === this.my_username) {
                 this.showWaitingForFinal();
                 return;
             }
         }
         this.isQuiting = true;
-        // ->
         const savedLang = localStorage.getItem("lang");
         switch (savedLang) {
             case 'es':
@@ -345,30 +317,22 @@ export default class GameModeManager {
                 alert(`An opponent has left the game/the tournament`);
                 break;
         }
-        //destroyEverything(this);
         this.returnToHomeScreen();
     }
 
     private handleTournamentFinal(data: { opponent: string, message: string }) {
-        // Cacher l'écran d'attente car la finale commence
         this.hideWaitingForFinal();
         this.handleMatchFound({ opponent: data.opponent });
     }
 
     private showWaitingForFinal() {
         this.currentState = 'waitlist';
-
-        // Cacher tous les autres éléments
         hideGame(this);
         hideModeSelection();
         hideWaitlist();
-
-        // Afficher l'écran d'attente de finale
         const waitingFinalDiv = document.getElementById('waitingForFinal');
         if (waitingFinalDiv) {
             waitingFinalDiv.style.display = 'flex';
-
-            // Configurer le bouton de retour au menu
             const returnButton = document.getElementById('returnToMenuFromFinal');
             if (returnButton) {
                 returnButton.onclick = () => {
@@ -396,12 +360,10 @@ export default class GameModeManager {
     }
 }
 
-
 function safeShowModeSelection(manager: GameModeManager) {
     if (manager.isInviteMode || manager.currentMode === 'invite') return;
     showModeSelection(manager);
 }
-
 
 function showRulesPopup() {
     if (document.getElementById('pongRulesPopup')) return;
@@ -465,7 +427,7 @@ function showRulesPopup() {
 const originalShowGame = showGame;
 function showGameWithRules(manager: any) {
     originalShowGame(manager);
-    setTimeout(showRulesPopup, 300); // Laisse le temps au DOM d'afficher le jeu
+    setTimeout(showRulesPopup, 300);
 }
-// Remplacer showGame globalement
+
 (window as any).showGame = showGameWithRules;

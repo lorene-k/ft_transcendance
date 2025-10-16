@@ -53,7 +53,6 @@ async function friend_overlay(html: string, fastify: FastifyInstance, request: F
 
 async function is_a_friend(fastify: FastifyInstance, self: number, other: number): Promise<Boolean> {
     const request = await fastify.database.fetch_one('SELECT id FROM friends WHERE user_1 = ? AND user_2 = ?', [self, other]);
-    console.log("is a friend: ", request)
     if (request)
         return true
     return false
@@ -159,7 +158,6 @@ async function fetchGooglePic(fastify: FastifyInstance, userId: number, reply: F
         `SELECT picture FROM user WHERE id = ? LIMIT 1`,
         [userId]
     );
-    console.log("Fetched picture URL from DB:", row?.picture); // test
     if (row?.picture && row.picture.trim() !== "") {
         try {
             const response = await fetch(row.picture);
@@ -182,12 +180,11 @@ export function removefriend(fastify: FastifyInstance) {
                                     SELECT id
                                     FROM user
                                     WHERE username = ?)`, [request.session.userId, username])
-        console.log(`removing for ${request.session.userId} friend: ${username}, `, response)
         return reply.send({ "status": "done" })
     }
 }
 
-export function getPP(fastify: FastifyInstance) { // set up the request url string
+export function getPP(fastify: FastifyInstance) {
     return async function (request: FastifyRequest<{ Params: param }>, reply: FastifyReply) {
         const { userId } = request.params;
         const user = new UserManager(userId, fastify)

@@ -5,7 +5,7 @@ cert.pem
 key.pem
 package-lock.json
 app/node_modules
-*/*.js
+app/**/*.js
 
 # macos
 .DS_Store

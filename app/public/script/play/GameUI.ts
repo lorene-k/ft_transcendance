@@ -20,7 +20,7 @@ export function createGameCanvas(gameModeManager: GameModeManager) {
     [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]
     `;
 
-    // Score Joueur 1
+    // Score Player 1
     const player1Score = document.createElement('div');
     player1Score.classList.add(
         "flex",              // display: flex
@@ -36,7 +36,7 @@ export function createGameCanvas(gameModeManager: GameModeManager) {
         "backdrop-blur"      // backdrop-filter: blur
     );
 
-    // Score Joueur 2
+    // Score Player 2
     const player2Score = document.createElement('div');
     player2Score.classList.add(
         "flex",             // display: flex
@@ -170,7 +170,6 @@ export function createGameControls(wrapper: HTMLDivElement, gameModeManager: Gam
     transition-all duration-200 ease-in-out
 `;
 
-    // Effets hover
     quitButton.addEventListener('mouseenter', () => {
         quitButton.classList.replace('bg-red-500', 'bg-red-600');
         quitButton.classList.add('scale-105');
@@ -186,7 +185,6 @@ export function createGameControls(wrapper: HTMLDivElement, gameModeManager: Gam
     wrapper.appendChild(quitButton);
 }
 export function updateScores(player1Name: string, player1Score: number, player2Name: string, player2Score: number) {
-    // Mettre à jour les noms des joueurs
     const player1NameElement = document.querySelector('#gameCanvasWrapper .player1-name');
     const player2NameElement = document.querySelector('#gameCanvasWrapper .player2-name');
     if (player1NameElement) {
@@ -195,7 +193,6 @@ export function updateScores(player1Name: string, player1Score: number, player2N
     if (player2NameElement) {
         player2NameElement.textContent = player2Name;
     }
-    // Mettre à jour les scores
     const player1ScoreElement = document.getElementById('player1Score');
     const player2ScoreElement = document.getElementById('player2Score');
     if (player1ScoreElement) {
@@ -216,7 +213,6 @@ export function hideWaitlist() {
 export function hideGame(gameModeManager: GameModeManager) {
     gameModeManager.gameInitialized = false;
     removeGameCanvas();
-    console.log('Nettoyage du jeu terminé');
 }
 export function hideModeSelection() {
     const selection = document.getElementById('gameModeSelection');
@@ -248,7 +244,7 @@ function setupCancelButton(gameModeManager: GameModeManager) {
                 if (gameModeManager.socket && gameModeManager.socket.connected)
                     gameModeManager.socket.emit('cancel_queue');
             }
-            gameModeManager.currentMode = null; // Reset du mode
+            gameModeManager.currentMode = null;
             showModeSelection(gameModeManager);
         });
     }
@@ -260,12 +256,12 @@ export function showModeSelection(gameModeManager: GameModeManager) {
     hideInviteWaitlist();
     const selection = document.getElementById('gameModeSelection');
     if (selection) {
-        selection.classList.remove('hidden'); // important
+        selection.classList.remove('hidden');
         selection.classList.add('flex');
     }
 }
 export function showGame(gameModeManager: GameModeManager) {
-    hideInviteWaitlist(); // Toujours en tout début
+    hideInviteWaitlist();
     gameModeManager.currentState = 'game';
     hideModeSelection();
     hideWaitlist();
@@ -284,12 +280,11 @@ export function showInviteWaitlist(gameModeManager: GameModeManager) {
     hideModeSelection();
     hideGame(gameModeManager);
     hideWaitlist();
-    hideInviteWaitlist(); // Pour éviter les doublons
+    hideInviteWaitlist();
     const inviteWaitlist = document.getElementById('waitingForInvite');
     if (inviteWaitlist) {
-        inviteWaitlist.classList.remove('hidden'); // rend l'élément visible
+        inviteWaitlist.classList.remove('hidden');
         inviteWaitlist.classList.add('flex');
-        // Setup bouton annuler
         const cancelBtn = document.getElementById('cancelInviteQueue');
         if (cancelBtn) {
             cancelBtn.onclick = () => {
@@ -301,7 +296,7 @@ export function showInviteWaitlist(gameModeManager: GameModeManager) {
         }
     }
     else {
-        console.warn('Div waitingForInvite manquant dans le HTML');
+        console.warn('waitingForInvite div missing in HTML.');
     }
 }
 

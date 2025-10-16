@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import sqlite3 from "sqlite3";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url"; // for math same in app.ts
+import { fileURLToPath } from "url";
 
 export class Database extends sqlite3.Database {
     async fetch_all(query: string, params: any[] = []) {
@@ -38,7 +38,7 @@ export default fp(async function (
     const db = new Database("src/db/db.sqlite3");
 
     const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename); // FOR MATH
+    const __dirname = path.dirname(__filename);
     const schemaPath = path.join(__dirname, '../db/schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf-8');
 

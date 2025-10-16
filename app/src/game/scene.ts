@@ -20,7 +20,6 @@ export class GameScene {
     canHitLeft: boolean;
     canHitRight: boolean;
     private constructor() {
-        // NullEngine = server-side Babylon sans rendu
         this.engine = new NullEngine();
         this.scene = new Scene(this.engine);
         this.leftAnimating = false;
@@ -34,15 +33,9 @@ export class GameScene {
         const players = [player1, player2];
 
         players.forEach((player, index) => {
-            //TODO: checker la validité du socket autrement
-            // if (!player?.socket || !player.socket.connected) {
-            //     console.warn(`Socket du joueur ${index + 1} est invalide ou déconnecté.`);
-            //     return;
-            // }
-
             if (this.mode === "local" && player.username === "guest")
-                return; // skip guest en local
-            if(player.socket && player.socket.connected)
+                return;
+            if (player.socket && player.socket.connected)
                 player.socket.emit(event, data);
         });
     }
@@ -53,8 +46,6 @@ export class GameScene {
         instance.camera = new FreeCamera("camera", new Vector3(0, 5, -10), instance.scene);
 
         await instance.initializePhysics();
-
-        console.log("Physics initialized, setting up scene...");
 
         instance.ground = MeshBuilder.CreateGround("ground", { width: 30, height: 20 }, instance.scene);
 
@@ -67,8 +58,6 @@ export class GameScene {
             { mass: 0.9, restitution: 0.9 },
             instance.scene
         );
-
-        console.log("Initial velocity:", instance.ball.physicsImpostor!.getLinearVelocity()?.toString());
 
 
         instance.leftPaddle = instance.createPaddle(
@@ -93,42 +82,9 @@ export class GameScene {
             { mass: 0, restitution: 0.5 },
             instance.scene
         );
-
-        // Les raquettes n'ont plus d'imposteur physique par défaut !
-
         instance.engine.runRenderLoop(() => {
             instance.scene.render();
         });
-
-        // let canHitLeft = false;
-        // let canHitRight = false;
-
-        // instance.ball.physicsImpostor!.registerOnPhysicsCollide(instance.rightPaddle.physicsImpostor!, () => {
-        //     if (!canHitRight) return;
-
-        //     const paddlePos = instance.rightPaddle.position;
-        //     const ballPos = instance.ball.position;
-        //     const yOffset = (ballPos.y - paddlePos.y) * 2;
-        //     const impulse = new Vector3(-60, yOffset, 0);
-        //     const contactPoint = instance.ball.getAbsolutePosition();
-
-        //     instance.ball.physicsImpostor!.applyImpulse(impulse, contactPoint);
-        //     canHitRight = false; 
-        // });
-
-        // instance.ball.physicsImpostor!.registerOnPhysicsCollide(instance.leftPaddle.physicsImpostor!, () => {
-        //     if (!canHitLeft) return;
-
-        //     const paddlePos = instance.leftPaddle.position;
-        //     const ballPos = instance.ball.position;
-        //     const yOffset = (ballPos.y - paddlePos.y) * 2;
-        //     const impulse = new Vector3(60, yOffset, 0);
-        //     const contactPoint = instance.ball.getAbsolutePosition();
-
-        //     instance.ball.physicsImpostor!.applyImpulse(impulse, contactPoint);
-        //     canHitLeft = false; 
-        // });
-
         return instance;
     }
 
@@ -154,9 +110,7 @@ export class GameScene {
     }
 
     moovePaddle(playerId: string, direction: string, player1: Player, player2: Player) {
-        // Déplacement simple : uniquement la position du mesh, aucune physique
         switch (direction) {
-            // paddle moove
             case "o":
                 this.leftPaddle.position.z += 0.1;
                 break;
@@ -170,7 +124,6 @@ export class GameScene {
                 this.rightPaddle.position.z -= 0.1;
                 break;
 
-            // paddle shoot
             case "p":
                 if (!this.leftAnimating) {
                     this.leftAnimating = true;
@@ -217,7 +170,6 @@ export class GameScene {
             return;
         }
 
-        // Ajout dynamique de l'imposteur physique
         this.leftPaddle.physicsImpostor = new PhysicsImpostor(
             this.leftPaddle,
             PhysicsImpostor.BoxImpostor,
@@ -249,7 +201,6 @@ export class GameScene {
         });
         anim.onAnimationEnd = () => {
             this.scene.onBeforeRenderObservable.remove(observable);
-            // Suppression de l'imposteur physique après l'animation
             if (this.leftPaddle.physicsImpostor) {
                 this.leftPaddle.physicsImpostor.dispose();
                 this.leftPaddle.physicsImpostor = null;
@@ -298,7 +249,6 @@ export class GameScene {
         });
         anim.onAnimationEnd = () => {
             this.scene.onBeforeRenderObservable.remove(observable);
-            // Suppression de l'imposteur physique après l'animation
             if (this.rightPaddle.physicsImpostor) {
                 this.rightPaddle.physicsImpostor.dispose();
                 this.rightPaddle.physicsImpostor = null;
@@ -310,62 +260,34 @@ export class GameScene {
     private async initializePhysics(): Promise<void> {
         try {
             const ammo = (Ammo as any).default ? await (Ammo as any).default() : await (Ammo as any)();
-            const ammoPlugin = new AmmoJSPlugin(true, ammo); // Créer le plugin Ammo.js
-            this.scene.enablePhysics(new Vector3(0, -9.81, 0), ammoPlugin); // Activer la physique avec la gravité
-            console.log("Physics engine initialized successfully with Ammo.js");
+            const ammoPlugin = new AmmoJSPlugin(true, ammo);
+            this.scene.enablePhysics(new Vector3(0, -9.81, 0), ammoPlugin);
         } catch (error) {
-            console.error("Failed to initialize Ammo.js", error);
+            console.error("Failed to initialize Ammo.js: ", error);
             throw new Error("Physics initialization failed");
         }
     }
 
 
     public destroy(): void {
-    
-    try {
-        if (this.engine) {
-            this.engine.stopRenderLoop();
-        }
-        
-        if (this.scene) {
-            this.scene.onBeforeRenderObservable.clear();
-        }
-        
-        if (this.ball?.physicsImpostor) {
-            this.ball.physicsImpostor.dispose();
-        }
-        if (this.leftPaddle?.physicsImpostor) {
-            this.leftPaddle.physicsImpostor.dispose();
-        }
-        if (this.rightPaddle?.physicsImpostor) {
-            this.rightPaddle.physicsImpostor.dispose();
-        }
-        if (this.ground?.physicsImpostor) {
-            this.ground.physicsImpostor.dispose();
-        }
-        
-        // 4. Dispose la scène Babylon.js côté serveur
-        if (this.scene && !this.scene.isDisposed) {
-            this.scene.dispose();
-        }
-        
-        // 5. Dispose le NullEngine
-        if (this.engine) {
-            this.engine.dispose();
-        }
-        
-        // 6. Nettoyer les références
-        this.ball = null as any;
-        this.leftPaddle = null as any;
-        this.rightPaddle = null as any;
-        this.ground = null as any;
-        this.scene = null as any;
-        this.engine = null as any;
-        
-        
-    } catch (error) {
-        console.error('Erreur lors du nettoyage de GameScene:', error);
-    }
-}
+        try {
+            if (this.engine) this.engine.stopRenderLoop();
+            if (this.scene) this.scene.onBeforeRenderObservable.clear();
+            if (this.ball?.physicsImpostor) this.ball.physicsImpostor.dispose();
+            if (this.leftPaddle?.physicsImpostor) this.leftPaddle.physicsImpostor.dispose();
+            if (this.rightPaddle?.physicsImpostor) this.rightPaddle.physicsImpostor.dispose();
+            if (this.ground?.physicsImpostor) this.ground.physicsImpostor.dispose();
+            if (this.scene && !this.scene.isDisposed) this.scene.dispose();
+            if (this.engine) this.engine.dispose();
 
+            this.ball = null as any;
+            this.leftPaddle = null as any;
+            this.rightPaddle = null as any;
+            this.ground = null as any;
+            this.scene = null as any;
+            this.engine = null as any;
+        } catch (error) {
+            console.error('Erreur lors du nettoyage de GameScene:', error);
+        }
+    }
 }

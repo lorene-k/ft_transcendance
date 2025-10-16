@@ -34,11 +34,9 @@ export async function move_to(to: string, force = false, inviteInfo?: { mode: st
 	showLangSwitcher() //test
 	if (to.length == 0)
 		return
-	if (!force && current === to) {
-		console.log("navigation: current page same as destination")
+	if (!force && current === to)
 		return
-	} else if (!site_map.find((value, index, array) => { return to.startsWith(value) })) {
-		console.log(`navigation: invalid move to this destination => ${to}`)
+	else if (!site_map.find((value, index, array) => { return to.startsWith(value) })) {
 		return
 	}
 	try {
@@ -173,10 +171,7 @@ export async function footer() {
 
 	if (target) {
 		target.querySelector('footer')?.remove();
-
-		// Insert footer HTML at the end of body
 		target.insertAdjacentHTML("beforeend", footerHtml);
-
 		applyTranslations();
 		const langSwitcher = document.getElementById("langSwitcher") as HTMLSelectElement;
 		if (langSwitcher) {

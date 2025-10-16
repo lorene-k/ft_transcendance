@@ -14,14 +14,14 @@ export async function getAllConversations(fastify: FastifyInstance, socket: Sock
         const userId = socket.session.userId;
         const convInfo: Record<number, string> = {};
         const conversations = await fastify.database.fetch_all(
-        `SELECT id, 
-        CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId
-        FROM conversations WHERE user1_id = ? OR user2_id = ?`,
-        [userId, userId, userId]
+            `SELECT id, 
+            CASE WHEN user1_id = ? THEN user2_id ELSE user1_id END AS otherUserId
+            FROM conversations WHERE user1_id = ? OR user2_id = ?`,
+            [userId, userId, userId]
         );
         for (const conv of conversations) {
-          const username = await socketManager.getUsername(conv.otherUserId);
-          if (username) convInfo[conv.otherUserId] = username;
+            const username = await socketManager.getUsername(conv.otherUserId);
+            if (username) convInfo[conv.otherUserId] = username;
         }
         chatNamespace.to(userId.toString()).emit("allConversations", conversations, convInfo);
     } catch (err) {
@@ -34,8 +34,8 @@ async function getOrCreateConversation(fastify: FastifyInstance, senderId: numbe
     try {
         let [user1, user2] = [senderId!, targetId!].sort((a, b) => a - b);
         const conv = await fastify.database.fetch_one(
-          `SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`,
-          [user1, user2]
+            `SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?`,
+            [user1, user2]
         );
         if (conv) return (conv.id);
         const conversationId = await runInsertConversation(fastify, user1, user2);

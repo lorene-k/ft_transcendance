@@ -44,7 +44,7 @@ export default class InviteHandler {
         this.socket.emit("respondToGameInvite", this.inviter.id, accepted, (ack: { success: boolean, error?: string }) => {
             if (ack && ack.error) console.error("Failed to cancel invite:", ack.error);
         });
-        if (accepted) move_to("play", false, { mode: "invite", player1: this.inviter.id, player2: this.invitedId});
+        if (accepted) move_to("play", false, { mode: "invite", player1: this.inviter.id, player2: this.invitedId });
         this.showNextInvite();
     }
 
@@ -61,19 +61,19 @@ export default class InviteHandler {
     // Invited : cancellation - hide popup
     setCancelledInvite(inviterId?: string) {
         if (this.currentInvite?.inviterId === inviterId) {
-          animatePopup(this.invitedPopup!, false);
-          this.toggleInviteMsg(false, "Invitation received");
-          this.showNextInvite();
+            animatePopup(this.invitedPopup!, false);
+            this.toggleInviteMsg(false, "Invitation received");
+            this.showNextInvite();
         } else {
-          this.inviteQueue = this.inviteQueue.filter(inv => inv.inviterId !== inviterId);
+            this.inviteQueue = this.inviteQueue.filter(inv => inv.inviterId !== inviterId);
         }
-      }
+    }
 
     // Invited : show next invite in queue
     private showNextInvite() {
         if (this.inviteQueue.length === 0) {
-          this.currentInvite = null;
-          return;
+            this.currentInvite = null;
+            return;
         }
         this.currentInvite = this.inviteQueue.shift()!;
         this.inviterNameElem!.textContent = this.currentInvite.inviterUsername;
@@ -112,27 +112,26 @@ export default class InviteHandler {
             this.inviteRefusedMsg!.classList.add("hidden");
             this.displayInviterPopup(false);
         }, msTimeout);
-      }
+    }
 
     // Inviter : listen for response
     private initInviteResponseListener() {
         this.socket.on("respondToGameInvite", (invitedId: string, inviterId: string, accepted: boolean) => {
             this.invitedId = invitedId;
             this.inviter.id = inviterId;
-        if (accepted) move_to("play", false, { mode: "invite", player1: this.inviter.id, player2: this.invitedId});
-        else this.showInviteRefused(5000);
+            if (accepted) move_to("play", false, { mode: "invite", player1: this.inviter.id, player2: this.invitedId });
+            else this.showInviteRefused(5000);
         });
     }
 
     // Inviter : cancel invite
     private cancelInvite = () => {
         this.socket.emit("cancelGameInvite", this.invitedId, (ack: { success: boolean, error?: string }) => {
-            if (ack && ack.success) console.log("Invite cancelled successfully on server");
-            else if (ack && ack.error) console.error("Failed to cancel invite:", ack.error);
+            if (ack && ack.error) console.error("Failed to cancel invite:", ack.error);
         });
         this.displayInviterPopup(false);
     }
-    
+
     // Inviter : send invite
     inviteToGame() {
         const targetId = this.chatClient.getUserManager()!.getTargetId();
@@ -174,34 +173,32 @@ export default class InviteHandler {
         if (!btn) return;
         if (set) {
             const savedLang = localStorage.getItem("lang");
-            switch(savedLang) {
-                case 'es' :
+            switch (savedLang) {
+                case 'es':
                     btn.textContent = `Invitacion enviada`;
                     break;
                 case 'fr':
                     btn.textContent = `Invitation envoye`;
                     break;
-                default :
+                default:
                     btn.textContent = `Invitation sent`;
                     break;
             }
-            // btn.textContent = text;
             btn.classList.add("text-gray-500", "pointer-events-none");
             btn.classList.remove("text-gray-900", "pointer-events-auto");
         } else if (!set) {
             const savedLang = localStorage.getItem("lang");
-            switch(savedLang) {
-                case 'es' :
+            switch (savedLang) {
+                case 'es':
                     btn.textContent = `Invite a jouer`;
                     break;
                 case 'fr':
                     btn.textContent = `Invitación de juego`;
                     break;
-                default :
+                default:
                     btn.textContent = `Invite to game`;
                     break;
             }
-            // btn.textContent = "Invite to game";
             btn.classList.remove("text-gray-500", "pointer-events-none");
             btn.classList.add("hover:bg-blue-200", "text-gray-900", "pointer-events-auto");
         }

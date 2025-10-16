@@ -30,7 +30,6 @@ class friends {
 
     private init_socket() {
         this.namespace!.on('connection', (socket: Socket) => {
-            console.log(`${socket.handshake.auth.id} connected to friends`)
             this.users.push({
                 userId: socket.handshake.auth.id,
                 socketId: socket.id
@@ -38,7 +37,6 @@ class friends {
 
             socket.on("disconnect", (reason) => {
                 const index = this.users.findIndex((va) => {
-                    console.log(`${socket.handshake.auth.id} disconnected from friends`)
                     return (va.userId === socket.handshake.auth.id)
                 })
                 this.users.splice(index, 1);
@@ -70,9 +68,6 @@ class friends {
                 status: this.is_id_connected(value.friend)
             });
         })
-        console.log("listing friends db", request)
-        console.log("listing connected user", this.users)
-        console.log("match:", res)
         return res
     }
 }

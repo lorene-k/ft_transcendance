@@ -2,7 +2,6 @@
 /// <reference types="babylonjs" />
 /// <reference types="babylonjs-gui" />
 
-// TODO : Lever legerement la balle quand on tire (mettre un applyimpulse ?)
 export function animateLeftPaddle(paddle: BABYLON.Mesh, onComplete: any) {
     if (!paddle) {
         console.error("can't find left paddle.");
@@ -12,8 +11,8 @@ export function animateLeftPaddle(paddle: BABYLON.Mesh, onComplete: any) {
 
     paddle.animations = [];
 
-    const startPos = paddle.position.clone(); // Position actuelle
-    const forwardPos = startPos.add(new BABYLON.Vector3(3, 0, 1)); // Tire vers la droite et légèrement en avant
+    const startPos = paddle.position.clone();
+    const forwardPos = startPos.add(new BABYLON.Vector3(3, 0, 1));
 
     const animation = new BABYLON.Animation(
         "paddleHitAnimation",
@@ -53,8 +52,8 @@ export function animateRightPaddle(paddle: BABYLON.Mesh, onComplete: any) {
 
     paddle.animations = [];
 
-    const startPos = paddle.position.clone(); // Position actuelle
-    const forwardPos = startPos.add(new BABYLON.Vector3(-3, 0, 1)); // Tire vers la gauche et légèrement en avant
+    const startPos = paddle.position.clone();
+    const forwardPos = startPos.add(new BABYLON.Vector3(-3, 0, 1));
 
     const animation = new BABYLON.Animation(
         "paddleHitAnimation",
@@ -83,32 +82,3 @@ export function animateRightPaddle(paddle: BABYLON.Mesh, onComplete: any) {
         if (onComplete) onComplete();
     };
 }
-
-// //TODO : serveball
-// export function serveBall(pingPongBall: BABYLON.Mesh, scene: BABYLON.Scene, onComplete: any) {
-
-//     const velocityThreshold = 0.2;
-
-//     if (pingPongBall._physicImpostor) {
-//         pingPongBall.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
-//         pingPongBall.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
-//     }
-//     const forceDirection = new BABYLON.Vector3(0, 10, 0);
-//     const forceMagnitude = 0.5; 
-
-//     if (pingPongBall.physicsImpostor) {
-//         pingPongBall.physicsImpostor.applyImpulse(
-//             forceDirection.scale(forceMagnitude),
-//             pingPongBall.physicsImpostor.getObjectCenter()
-//         );
-//     } else {
-//         console.log("Physic impostor's ball don't find");
-//     }
-
-//     if (onComplete) {
-//         onComplete();
-//     }
-
-// }
-
-

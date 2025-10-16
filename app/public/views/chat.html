@@ -1,147 +1,166 @@
 <main id="main_content" class="flex flex-col gap-2 bg-gray-100 p-2 max-w-6xl mx-auto mt-8 h-[80vh]">
 
-  <!-- Left-aligned chat bubble (received) -->
-  <template id="received-bubble-template">
-    <div class="chat-date w-full"></div>
-    <div class="flex flex-col items-start w-fit">
-      <!-- Header -->
-      <div class="chat-bubble-header">
-         <span class="chat-time"></span>
-      </div>
-      <!-- Message -->
-      <div class="flex flex-col items-center gap-3 w-fit leading-1.5 p-2 m-1 ml-6 bg-white rounded-xl rounded-tl-none">
-         <p class="text-sm font-normal text-gray-900"></p>
-      </div>
-    </div>
-  </template>
+    <!-- Left-aligned chat bubble (received) -->
+    <template id="received-bubble-template">
+        <div class="chat-date w-full"></div>
+        <div class="flex flex-col items-start w-fit">
+            <!-- Header -->
+            <div class="chat-bubble-header">
+                <span class="chat-time"></span>
+            </div>
+            <!-- Message -->
+            <div
+                class="flex flex-col items-center gap-3 w-fit leading-1.5 p-2 m-1 ml-6 bg-white rounded-xl rounded-tl-none">
+                <p class="text-sm font-normal text-gray-900"></p>
+            </div>
+        </div>
+    </template>
 
-  <!-- Right-aligned chat bubble (sent) -->
-  <template id="sent-bubble-template">
-    <div class="chat-date w-full"></div>
-    <div class="flex justify-end w-full">
-      <div class="flex flex-col items-end w-fit">
-        <!-- Header -->
-        <div class="chat-bubble-header">
-          <span class="chat-time"></span>
+    <!-- Right-aligned chat bubble (sent) -->
+    <template id="sent-bubble-template">
+        <div class="chat-date w-full"></div>
+        <div class="flex justify-end w-full">
+            <div class="flex flex-col items-end w-fit">
+                <!-- Header -->
+                <div class="chat-bubble-header">
+                    <span class="chat-time"></span>
+                </div>
+                <!-- Message -->
+                <div
+                    class="flex flex-col items-center gap-3 w-fit leading-1.5 p-2 m-1 ml-6 mr-6 bg-blue-200 rounded-xl rounded-tr-none text-right">
+                    <p id="sent-content" class="text-sm font-normal text-gray-900"></p>
+                </div>
+            </div>
         </div>
-        <!-- Message -->
-        <div class="flex flex-col items-center gap-3 w-fit leading-1.5 p-2 m-1 ml-6 mr-6 bg-blue-200 rounded-xl rounded-tr-none text-right">
-           <p id="sent-content" class="text-sm font-normal text-gray-900"></p>
-        </div>
-      </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- Invited Popup -->
-  <div id="invited-popup" class="popup-style w-80 h-40 left-10 bottom-10 pointer-events-none">
-  	<div class="bg-blue-100 rounded-lg shadow-md py-2 px-4 flex flex-col gap-4">
-  	  <!-- Title div -->
-  	  <div class="flex flex-row justify-between items-center">
-  		<p class="flex title-style" data-i18n="chat.gInvite">Game Invite</p>
-  		<button id="close-invited-popup" class="close-popup-btn">&times;</button>
-  	  </div>
-  	  <!-- Text -->
-  	  <div class="flex flex-col">
-  		<p class="text-sm text-gray-700" data-i18n="chat.inviteMsg">You've been invited to join a game by</p>
-  		<p id="inviter-name" class="text-sm text-gray-700 font-bold text-center"></p>
-  	  </div>
-  	  <!-- Button(s) -->
-  	  <div class="flex justify-center">
-  		<button id="play-btn" class="button-style px-4 py-2 text-sm" data-i18n="chat.pGame">
-  		  Play Game
-  		</button>
-  	  </div>
-  	</div>
-  </div>
-
-  <!-- Inviter Popup -->
-  <div id="inviter-popup" class="popup-content popup-style w-100 h-45 left-10 bottom-10 min-w-100 pointer-events-none">
-    <div class="bg-blue-100 rounded-lg shadow-md py-2 px-4 flex flex-col gap-4">
-      <!-- Title div -->
-      <div class="flex flex-row justify-between items-center gap-2">
-      <p class="popup-content flex title-style" data-i18n="chat.inviteSent">Invitation sent</p>
-      <button id="close-inviter-popup" class="inviter-popup close-popup-btn">&times;</button>
-      </div>
-      <!-- Center div (ring + text) -->
-      <div id="pending-icon" class="relative flex flex-col items-center align-center gap-2">
-        <span class="popup-content block w-8 h-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></span>
-        <p class="popup-content text-sm text-gray-700" data-i18n="chat.wait">Waiting for response</p>
-        <!-- Overlay message -->
-        <div id="invite-refused-msg" class="mt-15 hidden absolute inset-0 flex items-center justify-center text-blue-700 font-semibold">
-          Invitation refused
+    <!-- Invited Popup -->
+    <div id="invited-popup" class="popup-style w-80 h-40 left-10 bottom-10 pointer-events-none">
+        <div class="bg-blue-100 rounded-lg shadow-md py-2 px-4 flex flex-col gap-4">
+            <!-- Title div -->
+            <div class="flex flex-row justify-between items-center">
+                <p class="flex title-style" data-i18n="chat.gInvite">Game Invite</p>
+                <button id="close-invited-popup" class="close-popup-btn">&times;</button>
+            </div>
+            <!-- Text -->
+            <div class="flex flex-col">
+                <p class="text-sm text-gray-700" data-i18n="chat.inviteMsg">You've been invited to join a game by</p>
+                <p id="inviter-name" class="text-sm text-gray-700 font-bold text-center"></p>
+            </div>
+            <!-- Button(s) -->
+            <div class="flex justify-center">
+                <button id="play-btn" class="button-style px-4 py-2 text-sm" data-i18n="chat.pGame">
+                    Play Game
+                </button>
+            </div>
         </div>
-      </div>
-      <!-- Button(s) -->
-      <div class="flex justify-center">
-      <button id="cancel-invite-btn" class="popup-content button-style px-4 py-2 text-sm" data-i18n="chat.cancelInv">
-        Cancel invitation
-      </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tournaments -->
-  <div id="tournament-section" class="flex flex-row gap-4 basis-[10%] opacity-0 transition-opacity duration-500">
-    <div class="flex flex-grow bg-white h-full w-full rounded-xl px-3 items-center shadow-sm">
-      <div class="title-style flex w-1/4" data-i18n="chat.tournament">Tournaments</div>
-      <div id="tournament-text" class="text-style flex w-3/4 items-start"></div>
-    </div>
-  </div>
-
-   <div class="flex flex-grow flex-row gap-2 bg-gray-100 overflow-hidden">
-    <!-- Left chat history -->
-      <div class="chat-card w-1/4 flex flex-col">
-        <div class="flex items-center gap-8 basis-[10%] title-style h-12" data-i18n="chat.chats">All chats</div>
-        <div id="all-messages" class="basis-[90%] flex-grow text-style gap-3"></div>
-      </div>
-  
-    <!-- Middle chat area -->
-    <div id="conversation-container" class="chat-card w-full">
-      <div id="conv-placeholder" class="flex justify-center items-center h-full">
-        <p class="title-style text-center" data-i18n="chat.selectConv">Select a conversation or user to start chatting.</p>
-      </div>
-      <!-- Chat window -->
-      <div id="chat-window" class="hidden pointer-events-none absolute z-10 flex flex-col relative flex-grow gap-3 min-h-0">
-        <!-- Header -->
-        <div class="flex flex-row flex-grow items-center gap-6 max-h-20">
-          <img id="chat-window-pic" class="p-1 shadow-md h-12 w-12 rounded-xl" alt="Profile Picture"/>
-          <button id="recipient-name" class="title-style hover:text-blue-500 hover-transition"></button>
-          <div id="blocked-msg" class="transition duration-200 text-white text-xs font-normal bg-gray-500 rounded-lg px-2 py-1 hidden">User blocked</div>
-          <svg id="options-icon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 ml-auto cursor-pointer hover:text-blue-500 hover-transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v.01M12 12v.01M12 18v.01" />
-          </svg>
-        </div>
-      
-        <!-- Dropdown menu -->
-        <div class="absolute z-10 right-0 top-12">
-          <div id="options-menu" class="chat-options-menu-style opacity-0 scale-20 pointer-events-none">
-            <button data-action="invite-game" class="dropdown-item-style rounded-t-sm rounded-b-none" data-i18n="chat.invite">Invite to game</button>
-            <button data-action="block-user" class="dropdown-item-style rounded-b-sm rounded-t-none" data-i18n="chat.block">Block user</button>
-          </div>
-        </div>
-      
-        <!-- Target account page container -->
-        <div id="account-container" class="rounded-xl max-h-0 overflow-auto custom-scrollbar w-full bg-white min-h-0 transition-all duration-200 mb-2"></div>
-        
-        <!-- Conversation container -->
-        <div id="conversation-box" class="box-style flex-grow overflow-auto gap-4 px-4 custom-scrollbar min-h-20"></div>
-      
-        <!-- Input section -->
-        <div class="h-12 flex flex-row rounded-md gap-2 items-center">
-          <textarea id="msg-input" rows="1" placeholder="..."
-          class="flex-grow text-sm box-style resize-none no-scrollbar focus:outline-none focus:border-none px-2"></textarea>
-          <button id="send-btn" class="button-style px-4 flex-shrink-0 h-full" data-i18n="chat.send">Send</button>
-        </div>
-      </div>
     </div>
 
-     <!-- Right active users -->
-    <div class="chat-card text-sm font-bold w-1/6 flex flex-col">
-      <div class="flex items-center gap-8 basis-[10%] title-style h-12" data-i18n="chat.online">Online</div>
-      <div class="basis-[90%] flex-grow gap-4 overflow-auto no-scrollbar">
-      <!-- List of active users -->
-        <ul id="user-list" class="text-sm font-normal text-gray-800"></ul>
-      </div>
+    <!-- Inviter Popup -->
+    <div id="inviter-popup"
+        class="popup-content popup-style w-100 h-45 left-10 bottom-10 min-w-100 pointer-events-none">
+        <div class="bg-blue-100 rounded-lg shadow-md py-2 px-4 flex flex-col gap-4">
+            <!-- Title div -->
+            <div class="flex flex-row justify-between items-center gap-2">
+                <p class="popup-content flex title-style" data-i18n="chat.inviteSent">Invitation sent</p>
+                <button id="close-inviter-popup" class="inviter-popup close-popup-btn">&times;</button>
+            </div>
+            <!-- Center div (ring + text) -->
+            <div id="pending-icon" class="relative flex flex-col items-center align-center gap-2">
+                <span
+                    class="popup-content block w-8 h-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></span>
+                <p class="popup-content text-sm text-gray-700" data-i18n="chat.wait">Waiting for response</p>
+                <!-- Overlay message -->
+                <div id="invite-refused-msg"
+                    class="mt-15 hidden absolute inset-0 flex items-center justify-center text-blue-700 font-semibold">
+                    Invitation refused
+                </div>
+            </div>
+            <!-- Button(s) -->
+            <div class="flex justify-center">
+                <button id="cancel-invite-btn" class="popup-content button-style px-4 py-2 text-sm"
+                    data-i18n="chat.cancelInv">
+                    Cancel invitation
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- Tournaments -->
+    <div id="tournament-section" class="flex flex-row gap-4 basis-[10%] opacity-0 transition-opacity duration-500">
+        <div class="flex flex-grow bg-white h-full w-full rounded-xl px-3 items-center shadow-sm">
+            <div class="title-style flex w-1/4" data-i18n="chat.tournament">Tournaments</div>
+            <div id="tournament-text" class="text-style flex w-3/4 items-start"></div>
+        </div>
+    </div>
+
+    <div class="flex flex-grow flex-row gap-2 bg-gray-100 overflow-hidden">
+        <!-- Left chat history -->
+        <div class="chat-card w-1/4 flex flex-col">
+            <div class="flex items-center gap-8 basis-[10%] title-style h-12" data-i18n="chat.chats">All chats</div>
+            <div id="all-messages" class="basis-[90%] flex-grow text-style gap-3"></div>
+        </div>
+
+        <!-- Middle chat area -->
+        <div id="conversation-container" class="chat-card w-full">
+            <div id="conv-placeholder" class="flex justify-center items-center h-full">
+                <p class="title-style text-center" data-i18n="chat.selectConv">Select a conversation or user to start
+                    chatting.</p>
+            </div>
+            <!-- Chat window -->
+            <div id="chat-window"
+                class="hidden pointer-events-none absolute z-10 flex flex-col relative flex-grow gap-3 min-h-0">
+                <!-- Header -->
+                <div class="flex flex-row flex-grow items-center gap-6 max-h-20">
+                    <img id="chat-window-pic" class="p-1 shadow-md h-12 w-12 rounded-xl" alt="Profile Picture" />
+                    <button id="recipient-name" class="title-style hover:text-blue-500 hover-transition"></button>
+                    <div id="blocked-msg"
+                        class="transition duration-200 text-white text-xs font-normal bg-gray-500 rounded-lg px-2 py-1 hidden">
+                        User blocked</div>
+                    <svg id="options-icon" xmlns="http://www.w3.org/2000/svg"
+                        class="h-12 w-12 text-gray-300 ml-auto cursor-pointer hover:text-blue-500 hover-transition"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M12 6v.01M12 12v.01M12 18v.01" />
+                    </svg>
+                </div>
+
+                <!-- Dropdown menu -->
+                <div class="absolute z-10 right-0 top-12">
+                    <div id="options-menu" class="chat-options-menu-style opacity-0 scale-20 pointer-events-none">
+                        <button data-action="invite-game" class="dropdown-item-style rounded-t-sm rounded-b-none"
+                            data-i18n="chat.invite">Invite to game</button>
+                        <button data-action="block-user" class="dropdown-item-style rounded-b-sm rounded-t-none"
+                            data-i18n="chat.block">Block user</button>
+                    </div>
+                </div>
+
+                <!-- Target account page container -->
+                <div id="account-container"
+                    class="rounded-xl max-h-0 overflow-auto custom-scrollbar w-full bg-white min-h-0 transition-all duration-200 mb-2">
+                </div>
+
+                <!-- Conversation container -->
+                <div id="conversation-box"
+                    class="box-style flex-grow overflow-auto gap-4 px-4 custom-scrollbar min-h-20"></div>
+
+                <!-- Input section -->
+                <div class="h-12 flex flex-row rounded-md gap-2 items-center">
+                    <textarea id="msg-input" rows="1" placeholder="..."
+                        class="flex-grow text-sm box-style resize-none no-scrollbar focus:outline-none focus:border-none px-2"></textarea>
+                    <button id="send-btn" class="button-style px-4 flex-shrink-0 h-full"
+                        data-i18n="chat.send">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right active users -->
+        <div class="chat-card text-sm font-bold w-1/6 flex flex-col">
+            <div class="flex items-center gap-8 basis-[10%] title-style h-12" data-i18n="chat.online">Online</div>
+            <div class="basis-[90%] flex-grow gap-4 overflow-auto no-scrollbar">
+                <!-- List of active users -->
+                <ul id="user-list" class="text-sm font-normal text-gray-800"></ul>
+            </div>
+        </div>
+    </div>
 </main>

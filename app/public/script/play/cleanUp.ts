@@ -1,13 +1,10 @@
 import GameModeManager  from "./GameModeManager.js";
 import { removeGameCanvas } from "./GameUI.js";
 
-
 export function setupCleanupHandler(gameModeManager: GameModeManager) {
-    //refresh / fermeture onglet
     window.addEventListener("beforeunload", () =>
         gameModeManager.handleQuitGame(true)
     );
-
 }
 
     
@@ -24,17 +21,14 @@ export function setupCleanupHandler(gameModeManager: GameModeManager) {
                             scene.dispose();
                         }
                     });
-
                     engine.dispose();
                 });
             }
-
             if (gameModeManager.socket) {
                 gameModeManager.socket.removeAllListeners();
             }
             removeGameCanvas();
             gameModeManager.destroy();
-
         } catch (error) {
             console.error('Erreur lors de la destruction:', error);
         }

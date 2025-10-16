@@ -51,7 +51,7 @@ export async function initGoogle() {
     fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // important to send and receive cookies (session)
+        credentials: 'include',
         body: JSON.stringify({ token: response.credential })
     })
         .then(res => res.json())
@@ -67,12 +67,11 @@ export async function initGoogle() {
 }
 
 export function resetGoogle() {
-    console.log("🔄 Force reset Google");
     googleInitialized = false;
     googleInitPromise = null;
 }
 
-export function hideLangSwitcher() { // not here in translate
+export function hideLangSwitcher() {
     const langSwitcher = document.getElementById("langSwitcher");
     if (langSwitcher) {
         langSwitcher.style.display = "none";
