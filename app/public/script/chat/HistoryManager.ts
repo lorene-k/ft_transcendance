@@ -65,7 +65,7 @@ export default class HistoryManager {
         this.openFirstConv();
         this.chatBox!.innerHTML = "";
         this.recipientName!.textContent = user.username;
-        this.chatWindowPic!.src = await this.chatUI!.loadImage(user.username);
+        this.chatWindowPic!.src = await this.chatUI!.loadImage(user.userId);
         this.displayMessageHistory(user.userId);
         const userManager = this.chatClient.getUserManager();
         if (userManager) userManager.getBlockManager()!.checkBlockedTarget();

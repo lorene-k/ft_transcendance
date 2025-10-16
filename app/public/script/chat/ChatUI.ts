@@ -9,7 +9,6 @@ export default class ChatUI {
     private targetName: HTMLElement | null = null;
     private input: HTMLTextAreaElement | null = null;
     private sendBtn: HTMLButtonElement | null = null;
-
     constructor(chatClient: ChatClient) {
         this.chatClient = chatClient;
         this.displayedPreviews = new Set();
