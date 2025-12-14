@@ -17,13 +17,11 @@ SPA built in Typescript with a Fastify backend and SQLite3 database.
 
 
 ## Tech Stack
-- Typescript
-- Tailwind CSS
-- Fastify/Node.js
-- SQLite3
-- Socket.IO
-- Chart.js
-- Babylon.js
+- Frontend: Typescript, Tailwind CSS, Chart.js
+- Backend: Fastify/Node.js
+- Database: SQLite3
+- 3D rendering: Babylon.js
+- Real-time communication: Socket.IO
 
 
 ## Usage
