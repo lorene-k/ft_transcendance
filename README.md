@@ -2,7 +2,9 @@
 
 A full-stack web application with an online Pong game.
 
-SPA built in Typescript with a Fastify backend and SQLite3 database.
+SPA built in vanilla Typescript with a Fastify backend and SQLite3 database.
+
+![Demo](media/demo.gif)
 
 ## Features
 - User Management: Authentication system, complete editable user account, friends list management
